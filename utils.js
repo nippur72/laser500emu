@@ -32,3 +32,63 @@ function debugKeyboard(key, state) {
    let s = `${state} key='${key}' matrix=[${m}]`;
    console.log(s);
 }
+
+
+async function loadFile(fileName) {
+   return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (theFile) => {
+         resolve(theFile.result);
+      };
+      
+      reader.readAsArrayBuffer(fileName);
+    });
+}
+
+async function load(fileName) {
+   console.log("loading file...");
+   const file = await loadFile(fileName);
+   console.log("loaded");
+}
+
+/**** drag prgrams **** */
+
+const dropZone = document.getElementById('canvas');
+
+// Optional.   Show the copy icon when dragging over.  Seems to only work for chrome.
+dropZone.addEventListener('dragover', function(e) {
+   e.stopPropagation();
+   e.preventDefault();
+   e.dataTransfer.dropEffect = 'copy';
+});
+
+// Get file data on drop
+dropZone.addEventListener('drop', e => {
+   e.stopPropagation();
+   e.preventDefault();
+   const files = e.dataTransfer.files; // Array of all files
+
+   for(let i=0, file; file=files[i]; i++) {                   
+      const reader = new FileReader();
+
+      reader.onload = e2 => {
+         // finished reading file data.
+         console.log(e2)
+         loadIntoRam(new Uint8Array(e2.target.result), 0x8995);
+         cpu.reset();
+      };
+
+      reader.readAsArrayBuffer(file); 
+   }
+});
+
+function loadIntoRam(prog, address) {
+   console.log(`loading ${prog.length} bytes at address ${hex(address,4)}`);
+   let z = address - 0x8000;
+   for(let t=0;t<prog.length;t++) {
+      if(t < 16384 ) ram1[t+z] = prog[t];
+      else           ram2[t%16384+z] = prog[t];
+   }
+   console.log("program loaded");
+}
