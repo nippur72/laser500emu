@@ -26,3 +26,9 @@ function hex(value, size) {
 function cpu_status(cpu) {
    return `A=${hex(cpu.a())} BC=${hex(cpu.b())}${hex(cpu.c())} DE=${hex(cpu.d())}${hex(cpu.e())} HL=${hex(cpu.h())}${hex(cpu.l())} IX=${hex(cpu.ix(),4)} IY=${hex(cpu.iy(),4)} SP=${hex(cpu.sp(),4)} PC=${hex(cpu.pc(),4)} S=${cpu.flags().S}, Z=${cpu.flags().Z}, Y=${cpu.flags().Y}, H=${cpu.flags().H}, X=${cpu.flags().X}, P=${cpu.flags().P}, N=${cpu.flags().N}, C=${cpu.flags().C}`;   
 }
+
+function debugKeyboard(key, state) {
+   const m = Array.from(keyboard_matrix).map(k=>`0x${hex(k)}`).join(",");   
+   let s = `${state} key='${key}' matrix=[${m}]`;
+   console.log(s);
+}

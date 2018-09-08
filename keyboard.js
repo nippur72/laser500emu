@@ -4,40 +4,51 @@ const keyboard_matrix = new Uint8Array(nrows);
 
 let browser_keys_state = { };
 
-function keyPress(row, col) {      
-   keyboard_matrix[row] |= col;
+function keyPress(row, col) {   
+   for(let t=0;t<15;t++) {
+      if(row & (1<<t)) { 
+         keyboard_matrix[t] |= col;
+      }
+   }            
 }
 
 function keyRelease(row, col) {
-   keyboard_matrix[row] &= (~col);
+   for(let t=0;t<15;t++) {
+      if(row & (1<<t)) { 
+         keyboard_matrix[t] &= (~col);
+      }
+   }   
 }
 
 const element = document; //.getElementById("canvas");
 
 element.onkeydown = function keyDown(e) {   
-   if(e.key=="Tab") e.preventDefault();
-   const k = translation[e.key];
+   const key = e.key;
+   if(key=="Tab") e.preventDefault(); // TOD fix browser keys
+   
+   const k = translation[key];
    if(k !== undefined) {
-      if(browser_keys_state[e.key] == 'down') return;
-      console.log("keydown", e);   
-      browser_keys_state[e.key] = 'down';
+      if(browser_keys_state[key] == 'down') return;      
+      browser_keys_state[key] = 'down';
       keyPress(k.row, k.col);
-      if(k.shift) keyPress(0, 0x40);
-      console.log(keyboard_matrix);
+      if(k.shift) keyPress(0b1, 0x40);      
       e.preventDefault();
+      debugKeyboard("press", key);
    }
+   else console.log(key);
 }
 
 element.onkeyup = function keyUp(e) {   
-   const k = translation[e.key];
-   console.log("keyup", e);
+   const key = e.key;
+   const k = translation[key];   
    if(k !== undefined) {      
-      browser_keys_state[e.key] = 'up';
+      browser_keys_state[key] = 'up';
       keyRelease(k.row, k.col);
-      if(k.shift) keyRelease(0, 0x40);
-      console.log(keyboard_matrix);
+      if(k.shift) keyRelease(0b1, 0x40);      
       e.preventDefault();
+      debugKeyboard("relea", key);
    }
+   else console.log(key);
 }
 
 const translation = { };
@@ -46,128 +57,100 @@ function mappa(key, row, col, shift) {
    translation[key] = { row, col, shift: shift?true:false };
 }
 
-mappa('ShifLeft', 0, 0x40);
-mappa('z', 0, 0x20);
-mappa('x', 0, 0x10);
-mappa('c', 0, 0x08);
-mappa('v', 0, 0x04);
-mappa('b', 0, 0x02);
-mappa('n', 0, 0x01);
+mappa('Shift', 0b1, 0x40);
+mappa('z'    , 0b1, 0x20); mappa('Z'    , 0b1, 0x20, true);
+mappa('x'    , 0b1, 0x10); mappa('X'    , 0b1, 0x10, true);
+mappa('c'    , 0b1, 0x08); mappa('C'    , 0b1, 0x08, true);
+mappa('v'    , 0b1, 0x04); mappa('V'    , 0b1, 0x04, true);
+mappa('b'    , 0b1, 0x02); mappa('B'    , 0b1, 0x02, true);
+mappa('n'    , 0b1, 0x01); mappa('N'    , 0b1, 0x01, true);
 
-mappa('Control', 1, 0x40);
-mappa('a', 1, 0x20);
-mappa('s', 1, 0x10);
-mappa('d', 1, 0x08);
-mappa('f', 1, 0x04);
-mappa('g', 1, 0x02);
-mappa('h', 1, 0x01);
+mappa('Control', 0b10, 0x40);
+mappa('a',       0b10, 0x20);   mappa('A',       0b10, 0x20, true); 
+mappa('s',       0b10, 0x10);   mappa('S',       0b10, 0x10, true); 
+mappa('d',       0b10, 0x08);   mappa('D',       0b10, 0x08, true); 
+mappa('f',       0b10, 0x04);   mappa('F',       0b10, 0x04, true); 
+mappa('g',       0b10, 0x02);   mappa('G',       0b10, 0x02, true); 
+mappa('h',       0b10, 0x01);   mappa('H',       0b10, 0x01, true); 
 
-mappa('Tab', 2, 0x40);
-mappa('q', 2, 0x20);
-mappa('w', 2, 0x10);
-mappa('e', 2, 0x08);
-mappa('r', 2, 0x04);
-mappa('t', 2, 0x02);
-mappa('y', 2, 0x01);
+mappa('Tab', 0b100, 0x40);
+mappa('q',   0b100, 0x20);      mappa('Q',   0b100, 0x20, true);
+mappa('w',   0b100, 0x10);      mappa('W',   0b100, 0x10, true);
+mappa('e',   0b100, 0x08);      mappa('E',   0b100, 0x08, true);
+mappa('r',   0b100, 0x04);      mappa('R',   0b100, 0x04, true);
+mappa('t',   0b100, 0x02);      mappa('T',   0b100, 0x02, true);
+mappa('y',   0b100, 0x01);      mappa('Y',   0b100, 0x01, true);
 
-mappa('Escape', 3, 0x40);
-mappa('1', 3, 0x20); mappa('!', 3, 0x20, true);
-mappa('2', 3, 0x10); mappa('@', 3, 0x10, true); 
-mappa('3', 3, 0x08); mappa('#', 3, 0x08, true); 
-mappa('4', 3, 0x04); mappa('$', 3, 0x04, true); 
-mappa('5', 3, 0x02); mappa('%', 3, 0x02, true); 
-mappa('6', 3, 0x01); mappa('^', 3, 0x01, true); 
+mappa('Escape', 0b1000, 0x40);
+mappa('1',      0b1000, 0x20); mappa('!', 0b1000, 0x20, true);
+mappa('2',      0b1000, 0x10); mappa('@', 0b1000, 0x10, true); 
+mappa('3',      0b1000, 0x08); mappa('#', 0b1000, 0x08, true); 
+mappa('4',      0b1000, 0x04); mappa('$', 0b1000, 0x04, true); 
+mappa('5',      0b1000, 0x02); mappa('%', 0b1000, 0x02, true); 
+mappa('6',      0b1000, 0x01); mappa('^', 0b1000, 0x01, true); 
 
 // mappa('', 4, 0x40); // apparently unused
-mappa('=', 4, 0x20); mappa('+', 4, 0x20, true);
-mappa('-', 4, 0x10); mappa('_', 4, 0x10, true);
-mappa('0', 4, 0x08); mappa(')', 4, 0x08, true);
-mappa('9', 4, 0x04); mappa('(', 4, 0x04, true);
-mappa('8', 4, 0x02); mappa('*', 4, 0x02, true);
-mappa('7', 4, 0x01); mappa('&', 4, 0x01, true);
+mappa('=', 0b10000, 0x20); mappa('+', 0b10000, 0x20, true);
+mappa('-', 0b10000, 0x10); mappa('_', 0b10000, 0x10, true);
+mappa('0', 0b10000, 0x08); mappa(')', 0b10000, 0x08, true);
+mappa('9', 0b10000, 0x04); mappa('(', 0b10000, 0x04, true);
+mappa('8', 0b10000, 0x02); mappa('*', 0b10000, 0x02, true);
+mappa('7', 0b10000, 0x01); mappa('&', 0b10000, 0x01, true);
 
-mappa('Backspace', 5, 0x40); 
+mappa('Backspace', 0b100000, 0x40); 
 // mappa('', 5, 0x20); apparently unused
 // mappa('', 5, 0x10); apparently unused
-mappa('p', 5, 0x08);
-mappa('o', 5, 0x04);
-mappa('i', 5, 0x02);
-mappa('u', 5, 0x01);
+mappa('p', 0b100000, 0x08);    mappa('P', 0b100000, 0x08, true);
+mappa('o', 0b100000, 0x04);    mappa('O', 0b100000, 0x04, true);
+mappa('i', 0b100000, 0x02);    mappa('I', 0b100000, 0x02, true);
+mappa('u', 0b100000, 0x01);    mappa('U', 0b100000, 0x01, true);
 
-mappa('Enter', 6, 0x40); 
+mappa('Enter', 0b1000000, 0x40);                        
 // mappa('', 6, 0x20); apparently unused
-mappa("'", 6, 0x10); mappa('"', 6, 0x10, true);
-mappa(';', 6, 0x08); mappa(':', 6, 0x08, true);  
-mappa('l', 6, 0x04);
-mappa('k', 6, 0x02);
-mappa('j', 6, 0x01);
+mappa("'", 0b1000000, 0x10); mappa('"', 0b1000000, 0x10, true);
+mappa(';', 0b1000000, 0x08); mappa(':', 0b1000000, 0x08, true);  
+mappa('l', 0b1000000, 0x04); mappa('l', 0b1000000, 0x04, true);
+mappa('k', 0b1000000, 0x02); mappa('k', 0b1000000, 0x02, true);
+mappa('j', 0b1000000, 0x01); mappa('j', 0b1000000, 0x01, true);
+                                                       
+mappa('§', 0b10000000, 0x40); // Graph key             
+mappa('`', 0b10000000, 0x20); mappa('~', 0b10000000, 0x20, true); /* alternates: */ mappa('°', 0b10000000, 0x20); mappa('ç', 0b10000000, 0x20, true); 
+mappa(' ', 0b10000000, 0x10);
+mappa('/', 0b10000000, 0x08); mappa('?', 0b10000000, 0x08, true);
+mappa('.', 0b10000000, 0x04); mappa('>', 0b10000000, 0x04, true);
+mappa(',', 0b10000000, 0x02); mappa('<', 0b10000000, 0x02, true);
+mappa('m', 0b10000000, 0x01); mappa('M', 0b10000000, 0x01, true);
 
-mappa('§', 7, 0x40); // Graph key
-mappa('`', 7, 0x20); mappa('~', 7, 0x20, true); /* alternates: */ mappa('°', 7, 0x20); mappa('ç', 7, 0x20, true); 
-mappa(' ', 7, 0x10);
-mappa('/', 7, 0x08); mappa('?', 7, 0x08, true);
-mappa('.', 7, 0x04); mappa('>', 7, 0x04, true);
-mappa(',', 7, 0x02); mappa('<', 7, 0x02, true);
-mappa('m', 7, 0x01);
+// 6bff
+mappa('\\'     , 0b10000000000, 0x40); mappa('|'      , 0b10000000000, 0x40, true); 
+mappa('['      , 0b10000000000, 0x20); mappa('{'      , 0b10000000000, 0x20, true); 
+mappa('['      , 0b10000000000, 0x10); mappa('{'      , 0b10000000000, 0x10, true); 
+mappa('ù'      , 0b10000000000, 0x08); mappa('£'      , 0b10000000000, 0x08, true); 
+mappa('Insert' , 0b10000000000, 0x04); 
+mappa('Delete' , 0b10000000000, 0x02); 
+mappa('Insert' , 0b10000000000, 0x01); 
 
-// mappa('', 8, 0x40); apparently unused
-mappa('End', 8, 0x20); // del line
-mappa('Home', 8, 0x10); 
-mappa('ArrowUp', 8, 0x08); 
-mappa('ArrowLeft', 8, 0x04); 
-mappa('ArrowRight', 8, 0x02); 
-mappa('ArrowDown' , 8, 0x01); 
+// 6aff
+// caps lock
+mappa('CapsLock'   , 0b10100000000, 0x40); 
+mappa('End'        , 0b10100000000, 0x20); // del line
+mappa('Home'       , 0b10100000000, 0x10); 
+mappa('ArrowUp'    , 0b10100000000, 0x08); 
+mappa('ArrowLeft'  , 0b10100000000, 0x04); 
+mappa('ArrowRight' , 0b10100000000, 0x02); 
+mappa('ArrowDown'  , 0b10100000000, 0x01); 
 
-// row 9,10 not connected
+// 69ff
+//mappa('\\' , 0b10100000000, 0x20); 
+mappa('F10', 0b11000000000, 0x10);   
+mappa('F9' , 0b11000000000, 0x08);   
+mappa('F8' , 0b11000000000, 0x04);   
+mappa('F7' , 0b11000000000, 0x01); 
+mappa('F6' , 0b11000000000, 0x02); 
+mappa('F5' , 0b11000000000, 0x01); 
 
-/*
-mappa('1', 15, 0x40); 
-mappa('2', 15, 0x20); 
-mappa('3', 15, 0x10); 
-mappa('4', 15, 0x08); 
-mappa('5', 15, 0x04); 
-mappa('6', 15, 0x02); 
-mappa('7', 15, 0x01); 
-*/
-
-/*
-mappa('[', 5, 0x20); mappa('{', 5, 0x20, true);
-mappa(']', 5, 0x10); mappa('}', 5, 0x10, true);
-*/
-/* 
-
-PORT_START("ROWB") /* KEY ROW B 
-PORT_BIT(0x80, IP_ACTIVE_LOW, IPT_UNUSED)
-PORT_BIT(0x40, IP_ACTIVE_LOW, IPT_UNUSED)
-PORT_BIT(0x20, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_F10)          PORT_CHAR(UCHAR_MAMEKEY(F10))
-PORT_BIT(0x10, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_F9)           PORT_CHAR(UCHAR_MAMEKEY(F9))
-PORT_BIT(0x08, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_F8)           PORT_CHAR(UCHAR_MAMEKEY(F8))
-PORT_BIT(0x04, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_F7)           PORT_CHAR(UCHAR_MAMEKEY(F7))
-PORT_BIT(0x02, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_F6)           PORT_CHAR(UCHAR_MAMEKEY(F6))
-PORT_BIT(0x01, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_F5)           PORT_CHAR(UCHAR_MAMEKEY(F5))
-
-PORT_START("ROWC") /* KEY ROW C 
-PORT_BIT(0x80, IP_ACTIVE_LOW, IPT_UNUSED)
-PORT_BIT(0x40, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_NAME("Cap Lock") PORT_CODE(KEYCODE_CAPSLOCK)   PORT_CHAR(UCHAR_MAMEKEY(CAPSLOCK))
-PORT_BIT(0x20, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_NAME("Del Line") PORT_CODE(KEYCODE_PGUP)       PORT_CHAR(UCHAR_MAMEKEY(F12))
-PORT_BIT(0x10, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_HOME)         PORT_CHAR(UCHAR_MAMEKEY(HOME))
-PORT_BIT(0x08, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_UP)           PORT_CHAR(UCHAR_MAMEKEY(UP))
-PORT_BIT(0x04, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_LEFT)         PORT_CHAR(UCHAR_MAMEKEY(LEFT))
-PORT_BIT(0x02, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_RIGHT)        PORT_CHAR(UCHAR_MAMEKEY(RIGHT))
-PORT_BIT(0x01, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_DOWN)         PORT_CHAR(UCHAR_MAMEKEY(DOWN))
-
-PORT_START("ROWD") /* KEY ROW D 
-PORT_BIT(0x80, IP_ACTIVE_LOW, IPT_UNUSED)
-PORT_BIT(0x40, IP_ACTIVE_LOW, IPT_UNUSED)
-PORT_BIT(0x20, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_BACKSLASH2)   PORT_CHAR('\\') PORT_CHAR('|')
-PORT_BIT(0x10, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_CLOSEBRACE)   PORT_CHAR(']') PORT_CHAR('}')
-PORT_BIT(0x08, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_CODE(KEYCODE_OPENBRACE)    PORT_CHAR('[') PORT_CHAR('{')
-PORT_BIT(0x04, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_NAME("Mu  \xC2\xA3") PORT_CODE(KEYCODE_TILDE) PORT_CHAR(0xA3)
-PORT_BIT(0x02, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_NAME("Del") PORT_CODE(KEYCODE_DEL)             PORT_CHAR(UCHAR_MAMEKEY(DEL))
-PORT_BIT(0x01, IP_ACTIVE_LOW, IPT_KEYBOARD) PORT_NAME("Ins") PORT_CODE(KEYCODE_INSERT)          PORT_CHAR(UCHAR_MAMEKEY(INSERT))
-
-*/
-// 2fff = niente
-// 2ffe = row0
-// 2ffd = row1
-// 2ffb = row2
+// 68ff
+mappa('F4', 0b11100000000, 0x20); 
+mappa('F3', 0b11100000000, 0x10); 
+mappa('F2', 0b11100000000, 0x08); 
+mappa('F1', 0b11100000000, 0x04); 

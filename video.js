@@ -1,4 +1,4 @@
-const BORDER_V =  32*2;  // 1 carattere di bordo
+const BORDER_V =  32*2;    // 48 righe sopra e 48 sotto
 const BORDER_H =  16*2;    // 1 carattere di bordo
 const SCREEN_W = 640   + BORDER_H * 2;
 const SCREEN_H = 192*2 + BORDER_V * 2;
@@ -8,7 +8,7 @@ const halfpalette = new Uint32Array(16);
 
 function setPalette(i,r,g,b) { 
    palette[i] = 0xFF000000 | r | g << 8 | b << 16; 
-   halfpalette[i] = 0xFF000000 | ((r/1.5)|0) | ((g/1.5)|0) << 8 | ((b/1.5)|0) << 16; 
+   halfpalette[i] = 0xFF000000 | ((r/1.2)|0) | ((g/1.2)|0) << 8 | ((b/1.2)|0) << 16; 
 }
 
 setPalette( 0, 0x00, 0x00, 0x00);  /* black */
