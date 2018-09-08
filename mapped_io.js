@@ -4,15 +4,23 @@ function mapped_io_read(address) {
    // TODO rewrite in negated logic?
 
    const base = (~address) & 0b1111111111111111;
-   let sum = 0;
-   for(let t=0;t<0x0F;t++) {
-      if((base & (1<<t)) > 0 ) sum |= keyboard_matrix[t];      
-   }
-   
-   const outp = cassette_bit | (~sum & 0b01111111);
 
-   // if(address == 0x2bff /*&& browser_keys_state['ì']==true*/) return 0x08;
-   // if(address == 0x2bff && outp!=127) console.log(outp);
+   let high_bits = (base & 0b00011100000000) >> 8;
+   let sum;
+   if(high_bits > 0) 
+   {
+           if(high_bits == 0b100) sum = keyboard_rows[9];
+      else if(high_bits == 0b101) sum = keyboard_rows[10]; // ok
+      else if(high_bits == 0b110) sum = keyboard_rows[12];
+      else if(high_bits == 0b111) sum = keyboard_rows[11];
+   }
+   else {
+      for(let t=0;t<8;t++) {
+         if((base & (1<<t)) > 0 ) sum |= keyboard_rows[t+1];      
+      }   
+   }
+
+   const outp = (cassette_bit_in << 7) | (~sum & 0b01111111);
    
    return outp;
 }
@@ -48,6 +56,6 @@ function mapped_io_write(address, value) {
       speaker_B = (value & (1 << 5)) >> 5;
       speaker_A = (value & (1 << 0)) >> 0;
       vdc_graphic_mode_enabled = (value & (1<<3)) >> 3;
-      cassette_bit = (value & (1<<2)) >> 2;  // LSB is ignored
+      cassette_bit_out = (value & (1<<2)) >> 2;  // LSB is ignored
    }
 }

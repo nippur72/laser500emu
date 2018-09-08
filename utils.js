@@ -28,7 +28,7 @@ function cpu_status(cpu) {
 }
 
 function debugKeyboard(key, state) {
-   const m = Array.from(keyboard_matrix).map(k=>`0x${hex(k)}`).join(",");   
+   const m = Array.from(keyboard_rows).map(k=>`0x${hex(k)}`).join(",");   
    let s = `${state} key='${key}' matrix=[${m}]`;
    console.log(s);
 }

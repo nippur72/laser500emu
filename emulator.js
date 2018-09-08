@@ -21,7 +21,8 @@ const ram2     = new Uint8Array(16384);
 const videoram = new Uint8Array(16384);
 const banks    = new Uint8Array([0,1,4,5]);
 
-let cassette_bit = 0; 
+let cassette_bit_in = 1; 
+let cassette_bit_out = 0; 
 let vdc_graphic_mode_enabled = 0;
 let vdc_graphic_mode_number = 0;
 let vdc_page_7 = 0;
