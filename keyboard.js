@@ -58,28 +58,28 @@ function mappa(key, row, col, shift) {
 }
 
 mappa('Shift', 0b1, 0x40);
-mappa('z'    , 0b1, 0x20); mappa('Z'    , 0b1, 0x20, true);
-mappa('x'    , 0b1, 0x10); mappa('X'    , 0b1, 0x10, true);
-mappa('c'    , 0b1, 0x08); mappa('C'    , 0b1, 0x08, true);
-mappa('v'    , 0b1, 0x04); mappa('V'    , 0b1, 0x04, true);
-mappa('b'    , 0b1, 0x02); mappa('B'    , 0b1, 0x02, true);
-mappa('n'    , 0b1, 0x01); mappa('N'    , 0b1, 0x01, true);
+mappa('z'    , 0b1, 0x20); //mappa('Z'    , 0b1, 0x20, true);
+mappa('x'    , 0b1, 0x10); //mappa('X'    , 0b1, 0x10, true);
+mappa('c'    , 0b1, 0x08); //mappa('C'    , 0b1, 0x08, true);
+mappa('v'    , 0b1, 0x04); //mappa('V'    , 0b1, 0x04, true);
+mappa('b'    , 0b1, 0x02); //mappa('B'    , 0b1, 0x02, true);
+mappa('n'    , 0b1, 0x01); //mappa('N'    , 0b1, 0x01, true);
 
 mappa('Control', 0b10, 0x40);
-mappa('a',       0b10, 0x20);   mappa('A',       0b10, 0x20, true); 
-mappa('s',       0b10, 0x10);   mappa('S',       0b10, 0x10, true); 
-mappa('d',       0b10, 0x08);   mappa('D',       0b10, 0x08, true); 
-mappa('f',       0b10, 0x04);   mappa('F',       0b10, 0x04, true); 
-mappa('g',       0b10, 0x02);   mappa('G',       0b10, 0x02, true); 
-mappa('h',       0b10, 0x01);   mappa('H',       0b10, 0x01, true); 
+mappa('a',       0b10, 0x20);   //mappa('A',       0b10, 0x20, true); 
+mappa('s',       0b10, 0x10);   //mappa('S',       0b10, 0x10, true); 
+mappa('d',       0b10, 0x08);   //mappa('D',       0b10, 0x08, true); 
+mappa('f',       0b10, 0x04);   //mappa('F',       0b10, 0x04, true); 
+mappa('g',       0b10, 0x02);   //mappa('G',       0b10, 0x02, true); 
+mappa('h',       0b10, 0x01);   //mappa('H',       0b10, 0x01, true); 
 
 mappa('Tab', 0b100, 0x40);
-mappa('q',   0b100, 0x20);      mappa('Q',   0b100, 0x20, true);
-mappa('w',   0b100, 0x10);      mappa('W',   0b100, 0x10, true);
-mappa('e',   0b100, 0x08);      mappa('E',   0b100, 0x08, true);
-mappa('r',   0b100, 0x04);      mappa('R',   0b100, 0x04, true);
-mappa('t',   0b100, 0x02);      mappa('T',   0b100, 0x02, true);
-mappa('y',   0b100, 0x01);      mappa('Y',   0b100, 0x01, true);
+mappa('q',   0b100, 0x20);      //mappa('Q',   0b100, 0x20, true);
+mappa('w',   0b100, 0x10);      //mappa('W',   0b100, 0x10, true);
+mappa('e',   0b100, 0x08);      //mappa('E',   0b100, 0x08, true);
+mappa('r',   0b100, 0x04);      //mappa('R',   0b100, 0x04, true);
+mappa('t',   0b100, 0x02);      //mappa('T',   0b100, 0x02, true);
+mappa('y',   0b100, 0x01);      //mappa('Y',   0b100, 0x01, true);
 
 mappa('Escape', 0b1000, 0x40);
 mappa('1',      0b1000, 0x20); mappa('!', 0b1000, 0x20, true);
@@ -100,18 +100,18 @@ mappa('7', 0b10000, 0x01); mappa('&', 0b10000, 0x01, true);
 mappa('Backspace', 0b100000, 0x40); 
 // mappa('', 5, 0x20); apparently unused
 // mappa('', 5, 0x10); apparently unused
-mappa('p', 0b100000, 0x08);    mappa('P', 0b100000, 0x08, true);
-mappa('o', 0b100000, 0x04);    mappa('O', 0b100000, 0x04, true);
-mappa('i', 0b100000, 0x02);    mappa('I', 0b100000, 0x02, true);
-mappa('u', 0b100000, 0x01);    mappa('U', 0b100000, 0x01, true);
+mappa('p', 0b100000, 0x08);    //mappa('P', 0b100000, 0x08, true);
+mappa('o', 0b100000, 0x04);    //mappa('O', 0b100000, 0x04, true);
+mappa('i', 0b100000, 0x02);    //mappa('I', 0b100000, 0x02, true);
+mappa('u', 0b100000, 0x01);    //mappa('U', 0b100000, 0x01, true);
 
 mappa('Enter', 0b1000000, 0x40);                        
 // mappa('', 6, 0x20); apparently unused
 mappa("'", 0b1000000, 0x10); mappa('"', 0b1000000, 0x10, true);
 mappa(';', 0b1000000, 0x08); mappa(':', 0b1000000, 0x08, true);  
-mappa('l', 0b1000000, 0x04); mappa('l', 0b1000000, 0x04, true);
-mappa('k', 0b1000000, 0x02); mappa('k', 0b1000000, 0x02, true);
-mappa('j', 0b1000000, 0x01); mappa('j', 0b1000000, 0x01, true);
+mappa('l', 0b1000000, 0x04); //mappa('l', 0b1000000, 0x04, true);
+mappa('k', 0b1000000, 0x02); //mappa('k', 0b1000000, 0x02, true);
+mappa('j', 0b1000000, 0x01); //mappa('j', 0b1000000, 0x01, true);
                                                        
 mappa('§', 0b10000000, 0x40); // Graph key             
 mappa('`', 0b10000000, 0x20); mappa('~', 0b10000000, 0x20, true); /* alternates: */ mappa('°', 0b10000000, 0x20); mappa('ç', 0b10000000, 0x20, true); 
@@ -119,7 +119,7 @@ mappa(' ', 0b10000000, 0x10);
 mappa('/', 0b10000000, 0x08); mappa('?', 0b10000000, 0x08, true);
 mappa('.', 0b10000000, 0x04); mappa('>', 0b10000000, 0x04, true);
 mappa(',', 0b10000000, 0x02); mappa('<', 0b10000000, 0x02, true);
-mappa('m', 0b10000000, 0x01); mappa('M', 0b10000000, 0x01, true);
+mappa('m', 0b10000000, 0x01); //mappa('M', 0b10000000, 0x01, true);
 
 // 6bff
 mappa('\\'     , 0b10000000000, 0x40); mappa('|'      , 0b10000000000, 0x40, true); 
