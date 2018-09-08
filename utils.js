@@ -85,10 +85,17 @@ dropZone.addEventListener('drop', e => {
 
 function loadIntoRam(prog, address) {
    console.log(`loading ${prog.length} bytes at address ${hex(address,4)}`);
-   let z = address - 0x8000;
+   
    for(let t=0;t<prog.length;t++) {
-      if(t < 16384 ) ram1[t+z] = prog[t];
-      else           ram2[t%16384+z] = prog[t];
+      mem_write(address + t, prog[t]);
    }
+   // modify end of basic program pointer
+   const endaddress = address + prog.length;
+   mem_write_word(0x83E9, endaddress);   
    console.log("program loaded");
+}
+
+function mem_write_word(address, word) {
+   mem_write(address + 0, word & 0xFF);
+   mem_write(address + 1, (word & 0xFF00) >> 8);
 }
