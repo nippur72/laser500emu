@@ -43,7 +43,7 @@ console.log("emulator started");
 const frameRate = 50; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
 const cpuSpeed = 3694700; // Z80 speed 3.6947 MHz (NEC D780c)
-const cyclesPerFrame = cpuSpeed / frameDuration; // 184735 but it's just an estimation
+const cyclesPerFrame = (cpuSpeed / frameDuration) / 3.08; // 
 
 // PAL Standard: 720 x 576
 
