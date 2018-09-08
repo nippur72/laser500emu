@@ -25,6 +25,12 @@ const element = document; //.getElementById("canvas");
 element.onkeydown = function keyDown(e) {   
    const key = e.key;
    if(key=="Tab") e.preventDefault(); // TOD fix browser keys
+
+   if(key=="Cancel") {
+      cpu.reset();
+      e.preventDefault(); // TOD fix browser keys
+      return;
+   }
    
    const k = translation[key];
    if(k !== undefined) {
