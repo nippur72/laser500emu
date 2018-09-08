@@ -32,14 +32,9 @@ let vdc_border_color = 0;
 let speaker_A = 0;
 let speaker_B = 0;
 
-
 let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
 console.log("emulator started");
-
-let DEBUG = false;
-let maxdebug = 2000;
-DEBUG = false;
 
 //console.log(hexDump(videoram, 0x3800, 0x3FFF, 16));
 

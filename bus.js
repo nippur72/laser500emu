@@ -1,5 +1,4 @@
 function mem_read(address) {
-   //if(DEBUG) console.log(`reading mem ${hex(address,4)}`);
    const bank = banks[(address & 0xF000) >> 14];
    const base = address & 0x3FFF;
    switch(bank) {
@@ -14,10 +13,6 @@ function mem_read(address) {
 }
 
 function mem_write(address, value) {
-   if(DEBUG) {
-      console.log(`writing mem ${hex(address,4)}`);
-      console.log(banks);
-   }
    const bank = banks[(address & 0xF000) >> 14];   
    const base = address & 0x3FFF;
    switch(bank) {
@@ -28,8 +23,7 @@ function mem_write(address, value) {
    }
 }
 
-function io_read(port) { 
-   if(DEBUG) console.log(`read i/o port ${hex(port)}`);
+function io_read(port) {    
    switch(port & 0xFF) {
       case 0x40: return banks[0];
       case 0x41: return banks[1];
@@ -39,11 +33,7 @@ function io_read(port) {
    return 0x00;
 }
 
-function io_write(port, value) {
-   if(DEBUG) {
-      console.warn(`write i/o port ${hex(port)} value ${hex(value)}`);
-      console.log(banks);
-   }
+function io_write(port, value) {   
    switch(port & 0xFF) {
       case 0x40: banks[0] = value; break;
       case 0x41: banks[1] = value; break;
@@ -63,8 +53,5 @@ function io_write(port, value) {
          vdc_text80_foreground = value & 0xF0 >> 4;
          vdc_text80_background = value & 0x0F;
          break;
-   }
-   if(DEBUG) {      
-      console.log(banks);
-   }
+   }   
 }

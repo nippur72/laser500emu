@@ -1,12 +1,6 @@
-let re = [], wr = [];
-let v = 100;
-
 // TODO joystick, caps lock, port 13 OUT(13),AA ?
 
-function mapped_io_read(address) {
-   if(!re[address]) console.log(`reading mapped i/o ${hex(address+0x4000,4)},${hex(address,4)} ${address.toString(2)}`);
-   re[address] = true;
-   
+function mapped_io_read(address) {   
    // TODO rewrite in negated logic?
 
    const base = (~address) & 0b1111111111111111;
@@ -50,12 +44,6 @@ emulator.js:37 reading mapped i/o 6ffe,2ffe 10111111111110
 * 0    speaker A
 */
 function mapped_io_write(address, value) {
-   if(!wr[address]) console.log(`writing mapped i/o ${hex(address,4)} v=${hex(value)} ${address.toString(2)}`);
-   wr[address] = true;
-
-   //console.log(`writing mapped i/o ${hex(address,4)} v=${hex(value)} ${address.toString(2)}`);
-
-   if(DEBUG) console.log(`writing mapped i/o ${hex(address,4)} value=${value}`);
    if(address>=0x2800 && address<=0x2FFF) {
       speaker_B = (value & (1 << 5)) >> 5;
       speaker_A = (value & (1 << 0)) >> 0;
