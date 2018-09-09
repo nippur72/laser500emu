@@ -78,15 +78,13 @@ dropZone.addEventListener('drop', e => {
 
          const saveObject = {
             name: outName,
-            bytes: Array.from(e2.target.result),
+            bytes: Array.from(new Uint8Array(e2.target.result)),
             start: 0x8995,
             type: "bin"
          };
-
-         console.log(e2,saveObject);
-      
-         window.localStorage.setItem(outName, JSON.stringify(saveObject));
-
+                  
+         window.localStorage.setItem(`laser500/${outName}`, JSON.stringify(saveObject));
+               
          cload(outName);         
       };
 
@@ -121,7 +119,11 @@ function mem_read_word(address, word) {
 
 function cload(filename) {
    const stored = window.localStorage.getItem(`laser500/${filename}`);
-   if(stored === undefined || stored === null) return;
+
+   if(stored === undefined || stored === null) {         
+      console.log(`file "${filename}" not found`);            
+      return;
+   }
 
    const program = JSON.parse(stored);
 
@@ -215,3 +217,4 @@ function evkey(pcKey) {
    };
    return ev;
 }
+*/
