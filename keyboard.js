@@ -38,7 +38,7 @@ function assignKey(pckey, laserkey, lasershift) {
 const element = document; //.getElementById("canvas");
 
 function keyDown(e) {   
-   const key = e.key;
+   let key = e.key;
    if(key=="Tab") e.preventDefault(); // TOD fix browser keys
 
    if(key=="Cancel") {
@@ -47,6 +47,9 @@ function keyDown(e) {
       return;
    }
    
+   // remap shift+home into Cls
+   if(key==="Home" && e.shiftKey === true) key = "Cls";
+
    const k = pckey_to_laserkey(key);   
    if(k !== undefined) {
       if(browser_keys_state[key] == 'down') return;      
@@ -56,7 +59,7 @@ function keyDown(e) {
            if(shift === true)  keyPress(1, 0x40);      
       else if(shift === false) keyRelease(1, 0x40);
       e.preventDefault();
-      debugKeyboard("press", key);
+      // debugKeyboard("press", key);
    }
    else {
       if(key !== "Shift" && key !== "AltGraph" && key !== "Alt") {
@@ -66,7 +69,11 @@ function keyDown(e) {
 }
 
 function keyUp(e) {   
-   const key = e.key;
+   let key = e.key;
+
+   // remap shift+home into Cls
+   if(key==="Home" && e.shiftKey === true) key = "Cls";
+
    const k = pckey_to_laserkey(key);
    if(k !== undefined) {      
       browser_keys_state[key] = 'up';
@@ -75,7 +82,7 @@ function keyUp(e) {
            if(shift === true) keyRelease(1, 0x40);   
       else if(shift === false) keyRelease(1, 0x40);   
       e.preventDefault();
-      debugKeyboard("relea", key);
+      // debugKeyboard("relea", key);
    }   
 }
 
@@ -235,17 +242,17 @@ map(KEY_LEFT       , 10, 0x04);
 map(KEY_RIGHT      , 10, 0x02); 
 map(KEY_DOWN       , 10, 0x01); 
 
-map(KEY_F10, 11, 0x10);   
-map(KEY_F9 , 11, 0x08);   
-map(KEY_F8 , 11, 0x04);   
-map(KEY_F7 , 11, 0x01); 
-map(KEY_F6 , 11, 0x02); 
-map(KEY_F5 , 11, 0x01); 
+map(KEY_F4, 11, 0b000100); 
+map(KEY_F3, 11, 0b001000); 
+map(KEY_F2, 11, 0b010000); 
+map(KEY_F1, 11, 0b100000); 
 
-map(KEY_F4, 12, 0x20); 
-map(KEY_F3, 12, 0x10); 
-map(KEY_F2, 12, 0x08); 
-map(KEY_F1, 12, 0x04); 
+map(KEY_F10, 12, 0x10);   
+map(KEY_F9 , 12, 0x08);   
+map(KEY_F8 , 12, 0x04);   
+map(KEY_F7 , 12, 0x01); 
+map(KEY_F6 , 12, 0x02); 
+map(KEY_F5 , 12, 0x01);
 
 // do not map shift because shift is simulated in each key
 // assignKey('Shift', KEY_SHIFT);
@@ -320,7 +327,7 @@ assignKey('Delete' , KEY_DEL);
 
 assignKey('CapsLock'   , KEY_CAP_LOCK); 
 assignKey('End'        , KEY_DEL_LINE); 
-assignKey('Home'       , KEY_CLS_HOME); 
+assignKey('Home'       , KEY_CLS_HOME); assignKey('Cls'       , KEY_CLS_HOME, true);
 assignKey('ArrowUp'    , KEY_UP); 
 assignKey('ArrowLeft'  , KEY_LEFT); 
 assignKey('ArrowRight' , KEY_RIGHT); 

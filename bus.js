@@ -23,13 +23,16 @@ function mem_write(address, value) {
    }
 }
 
-function io_read(port) {    
+function io_read(port) {  
+   
    switch(port & 0xFF) {
       case 0x40: return banks[0];
       case 0x41: return banks[1];
       case 0x42: return banks[2];
       case 0x43: return banks[3];
+      case 0x00: return printerReady;      
    }
+   console.log(`unknown port read ${hex(port)}`);
    return 0x00;
 }
 
@@ -53,5 +56,12 @@ function io_write(port, value) {
          vdc_text80_foreground = value & 0xF0 >> 4;
          vdc_text80_background = value & 0x0F;
          break;
+      case 0x0d:
+         printerWrite(value);
+      case 0x0e:
+         // printer port duplicated here
+         return;         
+      default:
+         console.log(`unknown port write ${hex(port)} = ${hex(value)}`);
    }   
 }

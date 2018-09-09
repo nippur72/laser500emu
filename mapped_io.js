@@ -1,18 +1,41 @@
 // TODO joystick, caps lock, port 13 OUT(13),AA ?
 
+let re = {};
+let wr = {};
+
 function mapped_io_read(address) {   
    // TODO rewrite in negated logic?
 
-   const base = (~address) & 0b1111111111111111;
+   /*
+   if(re[address] !== true) {
+      console.log(`${hex(0x4000+address,4)}`);
+      if(address == 0) {
+         console.log(`pc=${hex(cpu.pc(),4)}`);
+         console.log(banks);
+      }
+   }
+   re[address] = true;
+   */
+   
+   const base = (~address) & 0xFFFF;
 
-   let high_bits = (base & 0b00011100000000) >> 8;
+   let high_bits = (base & 0b00111100000000) >> 8;
    let sum;
    if(high_bits > 0) 
    {
-           if(high_bits == 0b100) sum = keyboard_rows[9];
-      else if(high_bits == 0b101) sum = keyboard_rows[10]; // ok
-      else if(high_bits == 0b110) sum = keyboard_rows[12];
-      else if(high_bits == 0b111) sum = keyboard_rows[11];
+           if(high_bits == 0b0100) sum = keyboard_rows[9];
+      else if(high_bits == 0b0101) sum = keyboard_rows[10]; // ok
+      else if(high_bits == 0b0110) sum = keyboard_rows[12];
+      else if(high_bits == 0b0111) sum = keyboard_rows[11]; 
+      /*
+      if(sum==undefined)
+      {
+         console.log(`${hex(address,4)} = ?`);
+      }
+      else if(sum!=0) {
+         console.log(`${hex(address,4)} = ${hex(sum)}`);
+      }
+      */
    }
    else {
       for(let t=0;t<8;t++) {
@@ -52,6 +75,13 @@ emulator.js:37 reading mapped i/o 6ffe,2ffe 10111111111110
 * 0    speaker A
 */
 function mapped_io_write(address, value) {
+   /*
+   if(wr[address] !== true) {
+      console.log(`write address ${hex(0x4000+address,4)} value = ${hex(value)}`);
+   }
+   wr[address] = true;
+   */
+
    if(address>=0x2800 && address<=0x2FFF) {
       speaker_B = (value & (1 << 5)) >> 5;
       speaker_A = (value & (1 << 0)) >> 0;
