@@ -242,15 +242,15 @@ map(KEY_LEFT       , 10, 0x04);
 map(KEY_RIGHT      , 10, 0x02); 
 map(KEY_DOWN       , 10, 0x01); 
 
-map(KEY_F4, 11, 0b000100); 
-map(KEY_F3, 11, 0b001000); 
-map(KEY_F2, 11, 0b010000); 
-map(KEY_F1, 11, 0b100000); 
-
-map(KEY_F10, 12, 0x10);   
-map(KEY_F9 , 12, 0x08);   
-map(KEY_F8 , 12, 0x04);   
-map(KEY_F7 , 12, 0x01); 
+map(KEY_F1, 11, 0x20); 
+map(KEY_F2, 11, 0x10); 
+map(KEY_F3, 11, 0x08); 
+map(KEY_F4, 11, 0x04); 
+   
+map(KEY_F10, 12, 0x20);   
+map(KEY_F9 , 12, 0x10);   
+map(KEY_F8 , 12, 0x08);   
+map(KEY_F7 , 12, 0x04); 
 map(KEY_F6 , 12, 0x02); 
 map(KEY_F5 , 12, 0x01);
 

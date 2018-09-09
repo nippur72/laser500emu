@@ -4,7 +4,7 @@ function mem_read(address) {
    switch(bank) {
       case 0: return rom1[base];
       case 1: return rom2[base];
-      case 2: return mapped_io_read(base);
+      case 2: return mapped_io_read(base);      
       case 4: return ram1[base];
       case 5: return ram2[base];
       case 7: return videoram[base];
@@ -30,13 +30,14 @@ function io_read(port) {
       case 0x41: return banks[1];
       case 0x42: return banks[2];
       case 0x43: return banks[3];
-      case 0x00: return printerReady;      
+      case 0x00: return printerReady;            
    }
    console.log(`unknown port read ${hex(port)}`);
    return 0x00;
 }
 
-function io_write(port, value) {   
+function io_write(port, value) { 
+   // console.log(`io write ${hex(port)} ${hex(value)}`)  
    switch(port & 0xFF) {
       case 0x40: banks[0] = value; break;
       case 0x41: banks[1] = value; break;
