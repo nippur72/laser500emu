@@ -190,17 +190,23 @@ function cdel(fname) {
    }
 }
 
+/*
+async function print_string(str) {
+   for(let t=0;t<str.length;t++) {
+      let c = str.charAt(t).toLowerCase();
+      if(c=='\n') c = "Enter";
+      await simulateKey(c);
+   }
+}
+
 async function pause() {
    return new Promise((resolve,reject)=> {
-      setTimeout(()=>resolve(), 50);
+      setTimeout(()=>resolve(), 20);
    });
 }
 
 async function simulateKey(pckey) {
-   await singleKey("c");
-   await singleKey("i");
-   await singleKey("a");
-   await singleKey("o");
+   await singleKey(pckey);
 }
 
 async function singleKey(pckey) {
