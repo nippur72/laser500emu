@@ -1,8 +1,8 @@
 "use strict";
 
 // TODO caplock key / led ?
-// TODO non maskeable interrupt
-// TODO reset key=
+// TODO reset key bug report in MAME
+// TODO lprint
 
 /*
 interface Z80 
@@ -34,8 +34,6 @@ let speaker_A = 0;
 let speaker_B = 0;
 
 let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
-
-console.log("emulator started");
 
 //console.log(hexDump(videoram, 0x3800, 0x3FFF, 16));
 
@@ -89,4 +87,21 @@ function oneFrame() {
 
 // starts drawing frames
 oneFrame();
+
+console.info("Welcome to the Video Technology Laser 500 emulator");
+console.info("To load files into the emulator, drag & drop a file over the screen");
+console.info("From the console you can use the following functions:");
+console.info("");
+console.info("    csave(name[,start,end])");
+console.info("    cload(name)");
+console.info("    cdir()");
+console.info("    cdel(name)");
+console.info("");
+console.info("Loaded and saved files are also stored permanently on the browser memory");
+console.info("Printer is emulated by printing on the JavaScript console (here)");
+console.info("Reset key is Ctrl+Break");
+console.info("");
+console.info("Emulation is still in development");
+console.info("");
+console.info("");
 
