@@ -44,6 +44,8 @@ const frameDuration = 1000/frameRate; // duration of 1 frame in msec
 const cpuSpeed = 3694700; // Z80 speed 3.6947 MHz (NEC D780c)
 const cyclesPerFrame = (cpuSpeed / frameDuration) / 3.08; // 
 
+let stopped = false; // allows to stop/resume the emulation
+
 // PAL Standard: 720 x 576
 
 // 192 righe video + 96 bordo (48 sopra e 48 sotto) = 192+96 = 288 ; x2 = 576
@@ -82,7 +84,7 @@ function oneFrame() {
       nextFrameTime += frameDuration;
    }
 
-   setTimeout(()=>oneFrame(), timeWaitUntilNextFrame);   
+   if(!stopped) setTimeout(()=>oneFrame(), timeWaitUntilNextFrame);   
 }
 
 // starts drawing frames
