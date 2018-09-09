@@ -19,7 +19,7 @@ interface Z80
 const ram1     = new Uint8Array(16384);
 const ram2     = new Uint8Array(16384);
 const videoram = new Uint8Array(16384);
-const banks    = new Uint8Array([0,1,4,5]);
+const banks    = new Uint8Array(4);
 
 let cassette_bit_in = 1; 
 let cassette_bit_out = 0; 
