@@ -224,3 +224,10 @@ function evkey(pcKey) {
    return ev;
 }
 */
+
+function power() {
+   ram1.forEach((e,i)=>ram1[i]=i % 4 === 0 ? 0 : 0xFF);
+   ram2.forEach((e,i)=>ram2[i]=i % 4 === 0 ? 0 : 0xFF);
+   videoram.forEach((e,i)=>videoram[i]=i % 4 === 0 ? 0 : 0xFF);
+   cpu.reset();
+}
