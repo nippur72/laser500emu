@@ -14,6 +14,12 @@ function keyRelease(row, col) {
    keyboard_rows[row] &= (~col);
 }
 
+function needsShift(pckey) {
+   const keyinfo = assign_table[pckey];
+   if(keyinfo === undefined) return undefined;
+   return keyinfo.shift;
+}
+
 function pckey_to_laserkey(pckey) {
    const keyinfo = assign_table[pckey];
    if(keyinfo === undefined) return undefined;
@@ -41,17 +47,22 @@ function keyDown(e) {
       return;
    }
    
-   const k = pckey_to_laserkey(key);
+   const k = pckey_to_laserkey(key);   
    if(k !== undefined) {
       if(browser_keys_state[key] == 'down') return;      
       browser_keys_state[key] = 'down';
+      const shift = needsShift(key);
       keyPress(k.row, k.col);
-           if(k.shift === true)  keyPress(0b1, 0x40);      
-      else if(k.shift === false) keyRelease(0b1, 0x40);      
+           if(shift === true)  keyPress(1, 0x40);      
+      else if(shift === false) keyRelease(1, 0x40);
       e.preventDefault();
       debugKeyboard("press", key);
    }
-   else console.log(key);
+   else {
+      if(key !== "Shift" && key !== "AltGraph" && key !== "Alt") {
+         console.log(`unknown key ${key}`);
+      }
+   }
 }
 
 function keyUp(e) {   
@@ -59,12 +70,13 @@ function keyUp(e) {
    const k = pckey_to_laserkey(key);
    if(k !== undefined) {      
       browser_keys_state[key] = 'up';
+      const shift = needsShift(key);
       keyRelease(k.row, k.col);
-      if(k.shift === true) keyRelease(0b1, 0x40);      
+           if(shift === true) keyRelease(1, 0x40);   
+      else if(shift === false) keyRelease(1, 0x40);   
       e.preventDefault();
       debugKeyboard("relea", key);
-   }
-   else console.log(key);
+   }   
 }
 
 element.onkeydown = keyDown;
@@ -207,13 +219,13 @@ map(KEY_DOT       , 8, 0x04);
 map(KEY_COMMA     , 8, 0x02); 
 map(KEY_M         , 8, 0x01); 
 
-map(KEY_BACKSLASH    , 9, 0x40);
-map(KEY_OPEN_BRACKET , 9, 0x20); 
+//map(KEY_INS          , 9, 0x40);
+map(KEY_BACKSLASH    , 9, 0x20); 
 map(KEY_CLOSE_BRACKET, 9, 0x10); 
-map(KEY_MU           , 9, 0x08); 
-map(KEY_INS          , 9, 0x04); 
+map(KEY_OPEN_BRACKET , 9, 0x08); 
+map(KEY_MU           , 9, 0x04); 
 map(KEY_DEL          , 9, 0x02); 
-map(KEY_RESET        , 9, 0x01);  // TODO fix what's there?
+map(KEY_INS          , 9, 0x01);  
 
 map(KEY_CAP_LOCK   , 10, 0x40); 
 map(KEY_DEL_LINE   , 10, 0x20); 
