@@ -74,15 +74,27 @@ dropZone.addEventListener('drop', e => {
 
       reader.onload = e2 => {
          // finished reading file data.
-         console.log(e2)
-         loadIntoRam(new Uint8Array(e2.target.result), 0x8995);
-         cpu.reset();
+         const outName = file.name;         
+
+         const saveObject = {
+            name: outName,
+            bytes: Array.from(e2.target.result),
+            start: 0x8995,
+            type: "bin"
+         };
+
+         console.log(e2,saveObject);
+      
+         window.localStorage.setItem(outName, JSON.stringify(saveObject));
+
+         cload(outName);         
       };
 
       reader.readAsArrayBuffer(file); 
    }
 });
 
+/*
 function loadIntoRam(prog, address) {
    console.log(`loading ${prog.length} bytes at address ${hex(address,4)}`);
    
@@ -94,8 +106,112 @@ function loadIntoRam(prog, address) {
    mem_write_word(0x83E9, endaddress);   
    console.log("program loaded");
 }
+*/
 
 function mem_write_word(address, word) {
    mem_write(address + 0, word & 0xFF);
    mem_write(address + 1, (word & 0xFF00) >> 8);
+}
+
+function mem_read_word(address, word) {
+   const lo = mem_read(address + 0);
+   const hi = mem_read(address + 1);
+   return lo+hi*256;
+}
+
+function cload(filename) {
+   const stored = window.localStorage.getItem(`laser500/${filename}`);
+   if(stored === undefined || stored === null) return;
+
+   const program = JSON.parse(stored);
+
+   const { bytes, start, type } = program;
+   const end = start + bytes.length;
+
+   for(let i=0,t=start;t<=end;i++,t++) {
+      mem_write(t, bytes[i]);
+   }
+
+   // modify end of basic program pointer   
+   mem_write_word(0x83E9, end+1);   
+
+   console.log(`cloaded "${filename}" ${bytes.length} bytes from ${hex(start,4)} to ${hex(end,4)}`);
+   cpu.reset();
+}
+
+function csave(filename, start, end) {
+   const basType = (start === undefined && end === undefined);
+
+   if(start === undefined) start = mem_read_word(0x8041);
+   if(end === undefined) end = mem_read_word(0x83E9)-1;
+
+   const prg = [];
+   for(let i=0,t=start; t<=end; i++,t++) {
+      prg.push(mem_read(t));
+   }
+
+   const bytes = new Uint8Array(prg);
+
+   let blob = new Blob([bytes], {type: "application/octet-stream"});
+   const ext = basType ? "bas" : "bin";   
+   saveAs(blob, filename);
+
+   console.log(`csaved "${filename}" ${bytes.length} bytes from ${hex(start,4)} to ${hex(end,4)}`);
+
+   const saveObject = {
+      name: filename,
+      bytes: Array.from(bytes),
+      start: start,
+      type: ext
+   };
+
+   window.localStorage.setItem(`laser500/${filename}`, JSON.stringify(saveObject));
+   cpu.reset();
+}
+
+function cdir() {
+   const keys = Object.keys(window.localStorage);
+   const laser500 = keys.filter(f => f.startsWith("laser500/"));   
+   laser500.forEach(fn=>console.log(fn.substr("laser500/".length)));
+}
+
+function cdel(fname) {
+   const key = `laser500/${fname}`;
+   const exist = window.localStorage.getItem(key) !== null;
+
+   if(exist) {
+      window.localStorage.removeItem(key);
+      console.log(`removed "${fname}"`);
+   }
+   else {
+      console.log(`file "${fname}" not found`);
+   }
+}
+
+async function pause() {
+   return new Promise((resolve,reject)=> {
+      setTimeout(()=>resolve(), 50);
+   });
+}
+
+async function simulateKey(pckey) {
+   await singleKey("c");
+   await singleKey("i");
+   await singleKey("a");
+   await singleKey("o");
+}
+
+async function singleKey(pckey) {
+   keyDown(evkey(pckey)); 
+   await pause(); 
+   keyUp(evkey(pckey));
+   await pause(); 
+}
+
+function evkey(pcKey) {
+   const ev = {
+      key: pcKey,
+      preventDefault: ()=>{}
+   };
+   return ev;
 }

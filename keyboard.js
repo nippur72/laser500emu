@@ -31,7 +31,7 @@ function assignKey(pckey, laserkey, lasershift) {
 
 const element = document; //.getElementById("canvas");
 
-element.onkeydown = function keyDown(e) {   
+function keyDown(e) {   
    const key = e.key;
    if(key=="Tab") e.preventDefault(); // TOD fix browser keys
 
@@ -54,7 +54,7 @@ element.onkeydown = function keyDown(e) {
    else console.log(key);
 }
 
-element.onkeyup = function keyUp(e) {   
+function keyUp(e) {   
    const key = e.key;
    const k = pckey_to_laserkey(key);
    if(k !== undefined) {      
@@ -66,6 +66,9 @@ element.onkeyup = function keyUp(e) {
    }
    else console.log(key);
 }
+
+element.onkeydown = keyDown;
+element.onkeyup = keyUp;
 
 const KEY_RESET = 0; // not mapped on I/O but directly on /RES CPU
 const KEY_F1  = 1;

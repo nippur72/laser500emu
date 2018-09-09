@@ -1,0 +1,27 @@
+{
+  "name": "laser500emu",
+  "version": "0.0.1",
+  "description": "Laser 350/500/700 emulator",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nippur72/laser500emu.git"
+  },
+  "keywords": [
+    "laser500",
+    "vtech",
+    "videotechnology"
+  ],
+  "author": "Antonino Porcino <nino.porcino@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nippur72/laser500emu/issues"
+  },
+  "homepage": "https://github.com/nippur72/laser500emu#readme",
+  "dependencies": {
+    "file-saver": "^1.3.8"
+  }
+}
