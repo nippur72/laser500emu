@@ -5,11 +5,16 @@
 		<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />					
 	</head>
 
-<body style="padding:0; margin:0; background: black;">
-   <canvas id="canvas" style="display: block; margin-left: auto; margin-right: auto; height: 1000px; width: 1280px;">&nbsp;</canvas>
+<body style="padding:0; margin:0; background: black; color: green;">
+   
+   <canvas id="canvas" style="height: 768px; width: 960px;">&nbsp;</canvas>
 
    <div>FrameTime: <span id="frameTime"></span></div>
 
+   <!-- allows to "Save As..." programs from the emulator -->
+   <script type="text/javascript" src="FileSaver.js"></script>
+
+   <!-- core emulator files -->
    <script type="text/javascript" src="roms.js"></script>
    <script type="text/javascript" src="Z80.js"></script>
    <script type="text/javascript" src="keyboard.js"></script>

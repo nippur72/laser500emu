@@ -30,14 +30,14 @@ setPalette(15, 0xff, 0xff, 0xff);  /* white */
 
 // canvas is the outer canvas where the aspect ratio is corrected
 const canvas = document.getElementById("canvas");
-canvas.width = SCREEN_W * 2.0;
-canvas.height = SCREEN_H * 2.0;
+canvas.width = SCREEN_W;
+canvas.height = SCREEN_H;
 const canvasContext = canvas.getContext('2d');
 
 // screen is the inner canvas that contains the emulated PAL screen
 const screenCanvas = document.createElement("canvas");
-//screenCanvas.width = SCREEN_W;
-//screenCanvas.height = SCREEN_H;
+screenCanvas.width = SCREEN_W;
+screenCanvas.height = SCREEN_H;
 const screenContext = screenCanvas.getContext('2d');
 
 const imageData = screenContext.getImageData(0, 0, SCREEN_W, SCREEN_H);
