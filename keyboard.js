@@ -63,7 +63,7 @@ function keyDown(e) {
    }
    else {
       if(key !== "Shift" && key !== "AltGraph" && key !== "Alt") {
-         console.log(`unknown key ${key}`);
+         console.warn(`unhandled key '${key}'`);
       }
    }
 }

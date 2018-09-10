@@ -10,6 +10,8 @@
 // TODO wrap in electron app
 // TODO Z80 and video in WebAssembly
 // TODO save to cloud / fetch()
+// TODO verificare range indirizzi di cassette_bit 
+// TODO keyboard A-Z uppercase
 
 /*
 interface Z80 
@@ -43,8 +45,6 @@ let speaker_B = 0;
 
 let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
-//console.log(hexDump(videoram, 0x3800, 0x3FFF, 16));
-
 /******************/
 
 const frameRate = 50; // 50 Hz PAL standard
@@ -59,8 +59,9 @@ let stopped = false; // allows to stop/resume the emulation
 // 192 righe video + 96 bordo (48 sopra e 48 sotto) = 192+96 = 288 ; x2 = 576
 
 let frames = 0;
-let nextFrameTime = 0;
 let oneFrameTimeSum = 0;
+let nextFrameTime = 0;
+
 function oneFrame() {
    const startTime = new Date().getTime();
    
@@ -71,19 +72,6 @@ function oneFrame() {
    frames++;
 
    cpu.interrupt(false, 0);
-
-   /*
-   this.oneFrameTimeSum += new Date().getTime()-startTime;
-   if(this.timeloop--==0) {
-         if(Config.updateFrame!==undefined) {
-            Config.updateFrame((this.oneFrameTimeSum/100) + " ms");
-         }
-
-         this.oneFrameTimeSum = 0;
-         this.timeloop = 100;
-      }
-   }
-   */
 
    // Wait until next frame
    const now = new Date().getTime();

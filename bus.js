@@ -11,13 +11,10 @@ function mem_read(address) {
       case 6: return ram3[base];      
       case 7: return videoram[base];
       default: 
-         console.log(`reading from unknown bank ${hex(bank)} address ${hex(address)}`);
-         case 6: return ke[base];
+         console.warn(`reading from unknown memory page ${hex(bank)}h address ${hex(address)}h`);         
          return 0x00;
    }
 }
-
-const ke = [ 0x41, 0x0d, 0x0a ];
 
 function mem_write(address, value) {
    const bank = banks[(address & 0xF000) >> 14];   
@@ -41,7 +38,7 @@ function io_read(port) {
       case 0x43: return banks[3];
       case 0x00: return printerReady;            
    }
-   console.log(`unknown port read ${hex(port)}`);
+   console.warn(`read from unknown port ${hex(port)}h`);
    return 0x00;
 }
 
@@ -72,6 +69,6 @@ function io_write(port, value) {
          // printer port duplicated here
          return;         
       default:
-         console.log(`unknown port write ${hex(port)} = ${hex(value)}`);
+         console.warn(`write on unknown port ${hex(port)}h value ${hex(value)}h`);
    }   
 }

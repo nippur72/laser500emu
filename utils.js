@@ -27,32 +27,7 @@ function cpu_status(cpu) {
    return `A=${hex(cpu.a())} BC=${hex(cpu.b())}${hex(cpu.c())} DE=${hex(cpu.d())}${hex(cpu.e())} HL=${hex(cpu.h())}${hex(cpu.l())} IX=${hex(cpu.ix(),4)} IY=${hex(cpu.iy(),4)} SP=${hex(cpu.sp(),4)} PC=${hex(cpu.pc(),4)} S=${cpu.flags().S}, Z=${cpu.flags().Z}, Y=${cpu.flags().Y}, H=${cpu.flags().H}, X=${cpu.flags().X}, P=${cpu.flags().P}, N=${cpu.flags().N}, C=${cpu.flags().C}`;   
 }
 
-function debugKeyboard(key, state) {
-   const m = Array.from(keyboard_rows).map(k=>`0x${hex(k)}`).join(",");   
-   let s = `${state} key='${key}' matrix=[${m}]`;
-   console.log(s);
-}
-
-
-async function loadFile(fileName) {
-   return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      reader.onload = (theFile) => {
-         resolve(theFile.result);
-      };
-      
-      reader.readAsArrayBuffer(fileName);
-    });
-}
-
-async function load(fileName) {
-   console.log("loading file...");
-   const file = await loadFile(fileName);
-   console.log("loaded");
-}
-
-/**** drag prgrams **** */
+/**** drag programs **** */
 
 const dropZone = document.getElementById('canvas');
 
@@ -92,20 +67,6 @@ dropZone.addEventListener('drop', e => {
    }
 });
 
-/*
-function loadIntoRam(prog, address) {
-   console.log(`loading ${prog.length} bytes at address ${hex(address,4)}`);
-   
-   for(let t=0;t<prog.length;t++) {
-      mem_write(address + t, prog[t]);
-   }
-   // modify end of basic program pointer
-   const endaddress = address + prog.length;
-   mem_write_word(0x83E9, endaddress);   
-   console.log("program loaded");
-}
-*/
-
 function mem_write_word(address, word) {
    mem_write(address + 0, word & 0xFF);
    mem_write(address + 1, (word & 0xFF00) >> 8);
@@ -137,7 +98,7 @@ function cload(filename) {
    // modify end of basic program pointer   
    mem_write_word(0x83E9, end+1);   
 
-   console.log(`cloaded "${filename}" ${bytes.length} bytes from ${hex(start,4)} to ${hex(end,4)}`);
+   console.log(`loaded "${filename}" ${bytes.length} bytes from ${hex(start,4)}h to ${hex(end,4)}h`);
    cpu.reset();
 }
 
@@ -158,7 +119,7 @@ function csave(filename, start, end) {
    const ext = basType ? "bas" : "bin";   
    saveAs(blob, filename);
 
-   console.log(`csaved "${filename}" ${bytes.length} bytes from ${hex(start,4)} to ${hex(end,4)}`);
+   console.log(`saved "${filename}" ${bytes.length} bytes from ${hex(start,4)}h to ${hex(end,4)}h`);
 
    const saveObject = {
       name: filename,
@@ -222,7 +183,6 @@ function evkey(pcKey) {
    };
    return ev;
 }
-
 
 function power() {
    ram1.forEach((e,i)=>ram1[i]=i % 4 === 0 ? 0 : 0xFF);
