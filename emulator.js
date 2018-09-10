@@ -25,10 +25,10 @@ interface Z80
 // *** laser 500 hardware ***
 
 // rom1,rom2 are defined in roms.js
-const ram1     = new Uint8Array(16384);
-const ram2     = new Uint8Array(16384);
-const ram3     = new Uint8Array(16384);
-const videoram = new Uint8Array(16384);
+const ram1     = new Uint8Array(16384); // page 4
+const ram2     = new Uint8Array(16384); // page 5
+const ram3     = new Uint8Array(16384); // page 6
+const videoram = new Uint8Array(16384); // page 7
 const banks    = new Uint8Array(4);
 
 let cassette_bit_in = 1; 
