@@ -227,6 +227,7 @@ function evkey(pcKey) {
 function power() {
    ram1.forEach((e,i)=>ram1[i]=i % 4 === 0 ? 0 : 0xFF);
    ram2.forEach((e,i)=>ram2[i]=i % 4 === 0 ? 0 : 0xFF);
+   ram3.forEach((e,i)=>ram2[i]=i % 4 === 0 ? 0 : 0xFF);
    videoram.forEach((e,i)=>videoram[i]=i % 4 === 0 ? 0 : 0xFF);
    cpu.reset();
 }
@@ -240,4 +241,9 @@ function go() {
    stopped = false;
    oneFrame();
    console.log("emulation resumed");
+}
+
+function info() { 
+   const average = oneFrameTimeSum/frames;  
+   console.log(`frame rendering: ${Math.round(average*100,3)/100} ms, load=${Math.round(average/frameDuration*100*100,3)/100} %`);   
 }

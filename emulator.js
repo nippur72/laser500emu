@@ -1,8 +1,15 @@
 "use strict";
 
 // TODO caplock key / led ?
-// TODO reset key bug report in MAME
-// TODO lprint
+// TODO keyboard keys locked
+// TODO video modes,
+// TODO sound
+// TODO cassette
+// TODO floppy?
+// TODO visual display of activity
+// TODO wrap in electron app
+// TODO Z80 and video in WebAssembly
+// TODO save to cloud / fetch()
 
 /*
 interface Z80 
@@ -18,6 +25,7 @@ interface Z80
 // rom1,rom2 are defined in roms.js
 const ram1     = new Uint8Array(16384);
 const ram2     = new Uint8Array(16384);
+const ram3     = new Uint8Array(16384);
 const videoram = new Uint8Array(16384);
 const banks    = new Uint8Array(4);
 
@@ -50,7 +58,9 @@ let stopped = false; // allows to stop/resume the emulation
 
 // 192 righe video + 96 bordo (48 sopra e 48 sotto) = 192+96 = 288 ; x2 = 576
 
+let frames = 0;
 let nextFrameTime = 0;
+let oneFrameTimeSum = 0;
 function oneFrame() {
    const startTime = new Date().getTime();
    
@@ -58,6 +68,7 @@ function oneFrame() {
    for(let cycle=0; cycle<cyclesPerFrame; cycle += cpu.run_instruction());         
    
    drawFrame();
+   frames++;
 
    cpu.interrupt(false, 0);
 
@@ -83,6 +94,8 @@ function oneFrame() {
    } else {
       nextFrameTime += frameDuration;
    }
+   
+   oneFrameTimeSum += now - startTime;
 
    if(!stopped) setTimeout(()=>oneFrame(), timeWaitUntilNextFrame);   
 }
@@ -98,6 +111,9 @@ console.info("    csave(name[,start,end])");
 console.info("    cload(name)");
 console.info("    cdir()");
 console.info("    cdel(name)");
+console.info("    info(name)");
+console.info("    stop(name)");
+console.info("    start(name)");
 console.info("");
 console.info("Loaded and saved files are also stored permanently on the browser memory");
 console.info("Printer is emulated by printing on the JavaScript console (here)");
