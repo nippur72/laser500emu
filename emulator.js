@@ -12,6 +12,7 @@
 // TODO verificare range indirizzi di cassette_bit 
 // TODO rename ram1, ram2 to page
 // TODO emulate page3/page7 video
+// TODO some way of pasting text
 
 /*
 interface Z80 
@@ -65,11 +66,24 @@ let frames = 0;
 let oneFrameTimeSum = 0;
 let nextFrameTime = 0;
 
+let soundCycle = 0;
+
 function oneFrame() {
    const startTime = new Date().getTime();
    
    // execute cpu for all video frames
-   for(let cycle=0; cycle<cyclesPerFrame; cycle += cpu.run_instruction());         
+   for(let cycle=0; cycle<cyclesPerFrame;)
+   {
+      const elapsed = cpu.run_instruction();
+      cycle += elapsed;
+      /*
+      soundCycle += elapsed;
+      if(soundCycle>80) {
+         writeAudio(cassette_bit_out-0.5);
+         soundCycle-=80;
+      }
+      */
+   }
    
    drawFrame();
    frames++;
@@ -91,8 +105,6 @@ function oneFrame() {
    if(!stopped) setTimeout(()=>oneFrame(), timeWaitUntilNextFrame);   
 }
 
-// starts drawing frames
-oneFrame();
 
 console.info("Welcome to the Video Technology Laser 500 emulator");
 console.info("To load files into the emulator, drag & drop a file over the screen");
@@ -116,3 +128,69 @@ console.info("Emulation is still in development");
 console.info("");
 console.info("");
 
+/*
+// Offset into sndData for next sound sample. 
+var sndCount = 0;
+var sndReadCount = 0;
+var cs = 0;
+
+// Buffer for sound event messages.
+var renderingBufferSize = 8192;
+var mask = renderingBufferSize-1;
+var renderingBuffer;
+var vicSoundRenderRate = 80000;
+
+var sampleRate;
+sampleRate = this.audioContext.sampleRate;
+cs += sampleRate;
+if (cs>=vicSoundRenderRate) {
+   cs-=vicSoundRenderRate;
+   var plus1 = (sndCount+1)&mask;
+   if (plus1!=sndReadCount) {
+      renderingBuffer[sndCount] = sound;
+      sndCount=plus1;
+   }
+}
+*/
+
+/*
+const renderingBufferSize = 2048;
+const mask = renderingBufferSize - 1;
+const renderingBuffer = new Float32Array(renderingBufferSize);
+let renderingPtr = 0;
+
+function writeAudio(sample) {
+   renderingBuffer[renderingPtr] = sample;
+   renderingPtr = (renderingPtr + 1) & mask;   
+} 
+
+for(let t=0;t<renderingBufferSize;t++) writeAudio(Math.sin(t/20));
+
+//
+
+let bufferSize = 2048;
+var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+var speakerSound = audioContext.createScriptProcessor(bufferSize, 1, 1);
+
+speakerSound.onaudioprocess = function(e) {
+    var output = e.outputBuffer.getChannelData(0);
+    for(let i=0,j=renderingPtr; i<bufferSize; i++, j=((j+1) & mask)) {
+        output[i] = renderingBuffer[j];                
+        renderingBuffer[j] = 0;
+    }
+}
+
+speakerSound.connect(audioContext.destination);
+
+function ss() {
+   speakerSound.disconnect(audioContext.destination);
+}
+
+
+//
+
+*/
+
+
+// starts drawing frames
+oneFrame();
