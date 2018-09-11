@@ -46,7 +46,10 @@ function keyDown(e) {
       e.preventDefault(); // TOD fix browser keys
       return;
    }
-   
+
+   // numpad + 0 emulates joystick   
+   handleJoyStick(e.code, true);
+      
    // remap shift+home into Cls
    if(key==="Home" && e.shiftKey === true) key = "Cls";
 
@@ -70,6 +73,9 @@ function keyDown(e) {
 
 function keyUp(e) {   
    let key = e.key;
+
+   // numpad + 0 emulates joystick   
+   handleJoyStick(e.code, false);
 
    // remap shift+home into Cls
    if(key==="Home" && e.shiftKey === true) key = "Cls";

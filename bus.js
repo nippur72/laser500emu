@@ -36,6 +36,8 @@ function io_read(port) {
       case 0x41: return banks[1];
       case 0x42: return banks[2];
       case 0x43: return banks[3];
+      case 0x2b: return joy0;  // joystick 8 directions
+      case 0x27: return joy1;  // joystick fire buttons
       case 0x00: return printerReady;            
    }
    console.warn(`read from unknown port ${hex(port)}h`);

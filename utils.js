@@ -207,3 +207,22 @@ function info() {
    const average = oneFrameTimeSum/frames;  
    console.log(`frame rendering: ${Math.round(average*100,3)/100} ms, load=${Math.round(average/frameDuration*100*100,3)/100} %`);   
 }
+
+function set(value, bitmask) {
+   return value | bitmask; 
+}
+
+function reset(value, bitmask) {
+   return value & (0xFF ^ bitmask);
+}
+
+function testjoy() {
+   for(let e=0; e<255; e++) {
+      setTimeout((x)=>{
+         joy0=e;
+         joy1=e;
+         console.log(e);
+      }, 200*e);
+   }
+}
+
