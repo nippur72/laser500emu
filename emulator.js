@@ -1,7 +1,7 @@
 "use strict";
 
 // TODO caplock key / led ?
-// TODO video modes, exact cyles
+// TODO exact cyles
 // TODO sound
 // TODO cassette
 // TODO floppy?
@@ -10,7 +10,8 @@
 // TODO Z80 and video in WebAssembly
 // TODO save to cloud / fetch()
 // TODO verificare range indirizzi di cassette_bit 
-// TODO keyboard A-Z uppercase
+// TODO rename ram1, ram2 to page
+// TODO emulate page3/page7 video
 
 /*
 interface Z80 

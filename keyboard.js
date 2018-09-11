@@ -278,28 +278,28 @@ map(KEY_F5 , 12, 0x01);
 
 // do not map shift because shift is simulated in each key
 // assignKey('Shift', KEY_SHIFT);
-assignKey('z'    , KEY_Z);   //assignKey('Z'    , 0b1, 0x20, true);
-assignKey('x'    , KEY_X); //assignKey('X'    , 0b1, 0x10, true);
-assignKey('c'    , KEY_C); //assignKey('C'    , 0b1, 0x08, true);
-assignKey('v'    , KEY_V); //assignKey('V'    , 0b1, 0x04, true);
-assignKey('b'    , KEY_B); //assignKey('B'    , 0b1, 0x02, true);
-assignKey('n'    , KEY_N); //assignKey('N'    , 0b1, 0x01, true);
+assignKey('z'    , KEY_Z);  assignKey('Z'    , KEY_Z, true); 
+assignKey('x'    , KEY_X);  assignKey('X'    , KEY_X, true); 
+assignKey('c'    , KEY_C);  assignKey('C'    , KEY_C, true); 
+assignKey('v'    , KEY_V);  assignKey('V'    , KEY_V, true); 
+assignKey('b'    , KEY_B);  assignKey('B'    , KEY_B, true); 
+assignKey('n'    , KEY_N);  assignKey('N'    , KEY_N, true); 
 
 assignKey('Control', KEY_CONTROL);
-assignKey('a',       KEY_A);   //assignKey('A',       0b10, 0x20, true); 
-assignKey('s',       KEY_S);   //assignKey('S',       0b10, 0x10, true); 
-assignKey('d',       KEY_D);   //assignKey('D',       0b10, 0x08, true); 
-assignKey('f',       KEY_F);   //assignKey('F',       0b10, 0x04, true); 
-assignKey('g',       KEY_G);   //assignKey('G',       0b10, 0x02, true); 
-assignKey('h',       KEY_H);   //assignKey('H',       0b10, 0x01, true); 
+assignKey('a',       KEY_A);   assignKey('A',       KEY_A, true); 
+assignKey('s',       KEY_S);   assignKey('S',       KEY_S, true); 
+assignKey('d',       KEY_D);   assignKey('D',       KEY_D, true); 
+assignKey('f',       KEY_F);   assignKey('F',       KEY_F, true); 
+assignKey('g',       KEY_G);   assignKey('G',       KEY_G, true); 
+assignKey('h',       KEY_H);   assignKey('H',       KEY_H, true); 
 
 assignKey('Tab', KEY_TAB);
-assignKey('q',   KEY_Q);      //assignKey('Q',   0b100, 0x20, true);
-assignKey('w',   KEY_W);      //assignKey('W',   0b100, 0x10, true);
-assignKey('e',   KEY_E);      //assignKey('E',   0b100, 0x08, true);
-assignKey('r',   KEY_R);      //assignKey('R',   0b100, 0x04, true);
-assignKey('t',   KEY_T);      //assignKey('T',   0b100, 0x02, true);
-assignKey('y',   KEY_Y);      //assignKey('Y',   0b100, 0x01, true);
+assignKey('q',   KEY_Q);      assignKey('Q',   KEY_Q, true);
+assignKey('w',   KEY_W);      assignKey('W',   KEY_W, true);
+assignKey('e',   KEY_E);      assignKey('E',   KEY_E, true);
+assignKey('r',   KEY_R);      assignKey('R',   KEY_R, true);
+assignKey('t',   KEY_T);      assignKey('T',   KEY_T, true);
+assignKey('y',   KEY_Y);      assignKey('Y',   KEY_Y, true);
 
 assignKey('Escape', KEY_ESC);
 assignKey('1',      KEY_1); assignKey('!', KEY_1, true);
@@ -317,17 +317,17 @@ assignKey('8', KEY_8);     assignKey('*', KEY_8    , true);
 assignKey('7', KEY_7);     assignKey('&', KEY_7    , true);
 
 assignKey('Backspace', KEY_BS); 
-assignKey('p', KEY_P);    //assignKey('P', 0b100000, 0x08, true);
-assignKey('o', KEY_O);    //assignKey('O', 0b100000, 0x04, true);
-assignKey('i', KEY_I);    //assignKey('I', 0b100000, 0x02, true);
-assignKey('u', KEY_U);    //assignKey('U', 0b100000, 0x01, true);
+assignKey('p', KEY_P);    assignKey('P', KEY_P, true);
+assignKey('o', KEY_O);    assignKey('O', KEY_O, true);
+assignKey('i', KEY_I);    assignKey('I', KEY_I, true);
+assignKey('u', KEY_U);    assignKey('U', KEY_U, true);
 
 assignKey('Enter', KEY_RETURN);                        
 assignKey("'"    , KEY_QUOTE);     assignKey('"', KEY_QUOTE, true);
 assignKey(';'    , KEY_SEMICOLON); assignKey(':', KEY_SEMICOLON, true);  
-assignKey('l'    , KEY_L); //assignKey('l', 0b1000000, 0x04, true);
-assignKey('k'    , KEY_K); //assignKey('k', 0b1000000, 0x02, true);
-assignKey('j'    , KEY_J); //assignKey('j', 0b1000000, 0x01, true);
+assignKey('l'    , KEY_L); assignKey('L'    , KEY_L, true);
+assignKey('k'    , KEY_K); assignKey('K'    , KEY_K, true);
+assignKey('j'    , KEY_J); assignKey('J'    , KEY_J, true);
                                                        
 assignKey('§', KEY_GRAPH); 
 assignKey('`', KEY_BACK_QUOTE); 
@@ -338,7 +338,7 @@ assignKey(' ', KEY_SPACE);
 assignKey('/', KEY_SLASH); assignKey('?', KEY_SLASH, true);
 assignKey('.', KEY_DOT);   assignKey('>', KEY_DOT  , true);
 assignKey(',', KEY_COMMA); assignKey('<', KEY_COMMA, true);
-assignKey('m', KEY_M); //assignKey('M', 0b10000000, 0x01, true);
+assignKey('m', KEY_M); assignKey('M', KEY_M, true);
 
 assignKey('\\'     , KEY_BACKSLASH);     assignKey('|'      , KEY_BACKSLASH, true); 
 assignKey('['      , KEY_OPEN_BRACKET);  assignKey('{'      , KEY_OPEN_BRACKET, true); 
