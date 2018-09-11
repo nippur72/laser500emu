@@ -6,6 +6,17 @@ const assign_table = { };   // conversion table from PC key to Laser key
 
 let browser_keys_state = { }; // holds track of press state to avoid key repeat, as repeat is handled in Laser
 
+function clearKeyboardMatrix() {
+   // temporary hack attemping to solve the shift + key problem when 
+   // shift is released before the key
+   //console.log(keyboard_rows);
+   keyboard_rows.forEach((e,i)=>keyboard_rows[i]=0);   
+   console.log("keyboard cleared");
+}
+
+function isPressed(row, col) {
+   return ((keyboard_rows[row] ) & col) === col;
+}
 function keyPress(row, col) {   
    keyboard_rows[row] |= col;
 }
@@ -54,13 +65,15 @@ function keyDown(e) {
    if(key==="Home" && e.shiftKey === true) key = "Cls";
 
    const k = pckey_to_laserkey(key);   
-   if(k !== undefined) {
+   if(k !== undefined) {      
       if(browser_keys_state[key] == 'down') return;      
+      //console.log("down",e);
       browser_keys_state[key] = 'down';
       const shift = needsShift(key);
       keyPress(k.row, k.col);
            if(shift === true)  keyPress(1, 0x40);      
       else if(shift === false) keyRelease(1, 0x40);
+      //console.log(keyboard_rows);
       e.preventDefault();
       // debugKeyboard("press", key);
    }
@@ -81,12 +94,15 @@ function keyUp(e) {
    if(key==="Home" && e.shiftKey === true) key = "Cls";
 
    const k = pckey_to_laserkey(key);
-   if(k !== undefined) {      
+   if(k !== undefined) {    
+      //console.log("up",e);  
       browser_keys_state[key] = 'up';
       const shift = needsShift(key);
-      keyRelease(k.row, k.col);
+      if(isPressed(k.row, k.col)) keyRelease(k.row, k.col); 
+      else clearKeyboardMatrix(); // TOD hack           
            if(shift === true) keyRelease(1, 0x40);   
-      else if(shift === false) keyRelease(1, 0x40);   
+      else if(shift === false) keyRelease(1, 0x40);         
+      //console.log(keyboard_rows);
       e.preventDefault();
       // debugKeyboard("relea", key);
    }   
