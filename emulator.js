@@ -109,6 +109,7 @@ console.info("");
 console.info("Loaded and saved files are also stored permanently on the browser memory");
 console.info("Printer is emulated by printing on the JavaScript console (here)");
 console.info("Reset key is Ctrl+Break");
+console.info("Currently only italian keyboard is mapped.");
 console.info("");
 console.info("Emulation is still in development");
 console.info("");
