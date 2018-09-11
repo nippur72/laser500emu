@@ -1,8 +1,7 @@
 "use strict";
 
 // TODO caplock key / led ?
-// TODO keyboard keys locked
-// TODO video modes,
+// TODO video modes, exact cyles
 // TODO sound
 // TODO cassette
 // TODO floppy?
