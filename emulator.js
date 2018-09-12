@@ -1,6 +1,5 @@
 "use strict";
 
-// TODO page3/page7 OUT 44, 3 verificare real hardware
 // TODO save state does not save Z80 state
 
 // TODO caplock key / led ?
@@ -16,6 +15,9 @@
 // TODO rename ram1, ram2 to page
 // TODO some way of pasting text
 // TODO drag & drop autorun
+// TODO interrupt routine test
+// TODO check colors with real hardware
+// TODO ALT+R reset
 
 /*
 interface Z80 
@@ -62,8 +64,8 @@ let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 const frameRate = 50; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
 const cpuSpeed = 3694700; // Z80 speed 3.6947 MHz (NEC D780c)
-const cyclesPerFrame = (cpuSpeed / frameDuration) / 3.08; // 
-const cyclesPerLine = cyclesPerFrame / SCREEN_H;  
+const cyclesPerFrame = (cpuSpeed / frameDuration) / 3.5; // 
+const cyclesPerLine = 190; 
 
 let stopped = false; // allows to stop/resume the emulation
 
@@ -97,6 +99,22 @@ function oneFrame() {
       } 
    }
 
+   cpu.interrupt(false, 0);
+
+   // do another 24 lines
+   for(let t=0;t<24;t++) {
+      // run cpu
+      while(true) {
+         const elapsed = cpu.run_instruction();
+         cycle += elapsed;
+         if(cycle>=cyclesPerLine)
+         {
+            cycle-=cyclesPerLine;
+            break;            
+         }
+      } 
+   }
+
    /*
    // execute cpu for all video frames
    for(let cycle=0; cycle<cyclesPerFrame;)
@@ -114,9 +132,7 @@ function oneFrame() {
    drawFrame();
    */
 
-   frames++;
-
-   cpu.interrupt(false, 0);
+   frames++;   
 
    // Wait until next frame
    const now = new Date().getTime();

@@ -1,11 +1,14 @@
-const BORDER_V =  32;    // 48 righe sopra e 48 sotto
-const BORDER_H =  16;    // 1 carattere di bordo
+// PAL Standard: 720 x 576
+// 192 righe video + 96 bordo (48 sopra e 48 sotto) = 192+96 = 288 ; x2 = 576
+
+const BORDER_V =  48-8;    // 48 righe sopra e 48 sotto
+const BORDER_H =  40;    // 1 carattere di bordo
 
 const TEXT_W = 640; 
 const TEXT_H = 192;
 
 const SCREEN_W = BORDER_H + TEXT_W + BORDER_H;
-const SCREEN_H = BORDER_V + TEXT_H + BORDER_V;
+const SCREEN_H = BORDER_V + TEXT_H + 48+8;
 
 const palette = new Uint32Array(16);
 const halfpalette = new Uint32Array(16);
