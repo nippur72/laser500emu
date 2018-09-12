@@ -17,7 +17,6 @@
 // TODO some way of pasting text
 // TODO drag & drop autorun
 
-
 /*
 interface Z80 
 {
@@ -58,6 +57,7 @@ const frameRate = 50; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
 const cpuSpeed = 3694700; // Z80 speed 3.6947 MHz (NEC D780c)
 const cyclesPerFrame = (cpuSpeed / frameDuration) / 3.08; // 
+const cyclesPerLine = cyclesPerFrame / SCREEN_H;  
 
 let stopped = false; // allows to stop/resume the emulation
 
@@ -70,25 +70,44 @@ let oneFrameTimeSum = 0;
 let nextFrameTime = 0;
 
 let soundCycle = 0;
+let cycle = 0;
 
 function oneFrame() {
    const startTime = new Date().getTime();
-   
+
+   for(let t=0;t<SCREEN_H;t++) {
+      // draw video
+      drawFrame_y();
+
+      // run cpu
+      while(true) {
+         const elapsed = cpu.run_instruction();
+         cycle += elapsed;
+         if(cycle>=cyclesPerLine)
+         {
+            cycle-=cyclesPerLine;
+            break;            
+         }
+      } 
+   }
+
+   /*
    // execute cpu for all video frames
    for(let cycle=0; cycle<cyclesPerFrame;)
    {
       const elapsed = cpu.run_instruction();
       cycle += elapsed;
-      /*
-      soundCycle += elapsed;
-      if(soundCycle>80) {
-         writeAudio(cassette_bit_out-0.5);
-         soundCycle-=80;
-      }
-      */
-   }
-   
+      
+      //soundCycle += elapsed;
+      //if(soundCycle>80) {
+      //   writeAudio(cassette_bit_out-0.5);
+      //   soundCycle-=80;
+      //}
+      
+   }      
    drawFrame();
+   */
+
    frames++;
 
    cpu.interrupt(false, 0);
