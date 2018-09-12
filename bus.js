@@ -5,7 +5,7 @@ function mem_read(address) {
       case 0: return rom1[base];
       case 1: return rom2[base];
       case 2: return mapped_io_read(base);      
-      //case 3: return videoram[base];
+      case 3: return page3[base]; // page 3 is video for Laser 350 only
       case 4: return ram1[base];
       case 5: return ram2[base];      
       case 6: return ram3[base];      
@@ -21,7 +21,7 @@ function mem_write(address, value) {
    const base = address & 0x3FFF;
    switch(bank) {
       case 2: mapped_io_write(base, value); break;
-      //case 3: videoram[base] = value;       break;
+      case 3: break; // page 3 is disabled as works only in Laser 350
       case 4: ram1[base] = value;           break;
       case 5: ram2[base] = value;           break;
       case 6: ram3[base] = value;           break;
