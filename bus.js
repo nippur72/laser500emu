@@ -11,7 +11,7 @@ function mem_read(address) {
       case 6: return ram3[base];      
       case 7: return videoram[base];
       default: 
-         console.warn(`reading from unknown memory page ${hex(bank)}h address ${hex(address)}h`);         
+         // console.warn(`reading from unknown memory page ${hex(bank)}h address ${hex(address)}h`);         
          return 0x00;
    }
 }
@@ -51,8 +51,8 @@ function io_write(port, value) {
       case 0x41: banks[1] = value; break;
       case 0x42: banks[2] = value; break;
       case 0x43: banks[3] = value; break;
-      case 0x44: 
-         vdc_page_7 = (value & 0b1000) >> 3;
+      case 0x44:          
+         vdc_page_7 = ((value & 0b1000) >> 3) === 0;
          vdc_text80_enabled = value & 1; 
          vdc_border_color = (value & 0xF0) >> 4
               if((value & 0b110) === 0b000) vdc_graphic_mode_number = 5;              

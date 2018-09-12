@@ -1,10 +1,3 @@
-/*
-const BORDER_V =  32*2;    // 48 righe sopra e 48 sotto
-const BORDER_H =  16*2;    // 1 carattere di bordo
-const SCREEN_W = 640   + BORDER_H * 2;
-const SCREEN_H = 192*2 + BORDER_V * 2;
-*/
-
 const BORDER_V =  32;    // 48 righe sopra e 48 sotto
 const BORDER_H =  16;    // 1 carattere di bordo
 
@@ -56,150 +49,145 @@ const imageData = screenContext.getImageData(0, 0, SCREEN_W, SCREEN_H);
 const bmp2 = imageData.data.buffer;
 const bmp = new Uint32Array(bmp2);
 
-/*
-let ptr = 0;
-for(let y=0;y<SCREEN_H;y++) {
-   for(let x=0;x<SCREEN_W/2;x++) {
-      setPixel(x, y, 9);
-   }
-}
-*/
 
 function drawFrame() 
 {  
-   if(vdc_graphic_mode_enabled) 
+   if(vdc_page_7) 
    {
-      switch(vdc_graphic_mode_number) 
+      if(vdc_graphic_mode_enabled) 
       {
-         case 5: // GR 5 640x192 1bpp
-            for(let y=0; y<192; y++) {
-               offs = offs_2[y];
-               for(let x=0; x<80; x++, offs++) {
-                  const row = videoram[offs]; 
-                  for(let xx=0;xx<8;xx++) {                     
-                     const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
-                     setPixel640(x*8+xx, y, pixel_color);
-                  }
-               }
-            }
-            break;
-         case 4: // GR 4 320x192 2 colors per 8 pixels
-            for(let y=0; y<192; y++) {
-               offs = offs_2[y];
-               for(let x=0; x<40; x++, offs += 2) {
-                  const row = videoram[offs];
-                  const fg = (videoram[offs+1] & 0xF0) >> 4;
-                  const bg = (videoram[offs+1] & 0x0F);
-                  for(let xx=0;xx<8;xx++) {                     
-                     const pixel_color = (row & (1<<xx)) > 0 ? fg : bg;                                                   
-                     setPixel320(x*8+xx, y, pixel_color);
-                  }
-               }
-            }
-            break;
-         case 3: // GR 3 160x192 4bpp			
-            for(let y=0; y<192; y++) {
-               let offs = offs_2[y];
-               for(let x=0; x<80; x++, offs++) {
-                  const code = videoram[offs];
-                  const left_pixel_color = (code & 0x0F);
-                  const right_pixel_color = (code & 0xF0) >> 4;
-                  setPixel160(x*2+0, y, left_pixel_color);
-                  setPixel160(x*2+1, y, right_pixel_color);
-               }
-            }
-            break;      
-         case 2: // GR 2 320x192 1bpp
-            for(let y=0; y<192; y++) {
-               offs = offs_1[y];
-               for(let x=0; x<40; x++, offs++) {                  
-                  const row = videoram[offs];
-                  for(let xx=0;xx<8;xx++) {                     
-                     const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
-                     setPixel320(x*8+xx, y, pixel_color);
-                  }
-               }
-            }
-            break;
-         case 1: // GR 1 160x192 1bpp with two colors per 8 pixels			
-            for(let y=0; y<192; y++) {
-               offs = offs_1[y];
-               for(let x=0; x<20; x++, offs += 2) {
-                  const code = videoram[offs];
-                  const color = videoram[offs+1];
-                  const fg = (color & 0xF0) >> 4;
-                  const bg = (color & 0x0F);
-                  for(let xx=0;xx<8;xx++) {                     
-                     const pixel_color = (code & (1<<xx)) > 0 ? fg : bg;                                                   
-                     setPixel160(x*8+xx, y, pixel_color);
-                  }                  
-               }
-            }
-            break;
-         case 0: // GR 0 160x96 4bpp 
-            for(let y=0; y<96; y++) {            
-               let offs = offs_0[y];
-               for(let x=0; x<80; x++, offs++) {                  
-                  const code = videoram[offs];
-                  const left_pixel_color = (code & 0x0F);
-                  const right_pixel_color = (code & 0xF0) >> 4;
-                  setPixel96(x*2+0, y, left_pixel_color);
-                  setPixel96(x*2+1, y, right_pixel_color);
-               }
-            }
-            break;
-      }
-   }
-   // text modes 
-   else if(vdc_text80_enabled)
-   {      
-      // 80 columns text mode 
-      for(let y=0; y<24; y++)
-      {
-         let offs = ((y & 7) << 8) + ((y >> 3) * 80);
-         for(let x=0; x<80; x++, offs++)
+         switch(vdc_graphic_mode_number) 
          {
-            const code = videoram[0x3800+offs];  
-            
-            const startchar = code*8;
-            
-            for(let yy=0;yy<8;yy++) {
-               const row  = charset[startchar+yy];
-               for(let xx=0;xx<8;xx++) {
-                  const bb = 7-xx;
-                  const pixel_color = (row & (1<<bb)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
-                  setPixel640(x*8+xx, y*8+yy, pixel_color);
+            case 5: // GR 5 640x192 1bpp
+               for(let y=0; y<192; y++) {
+                  offs = offs_2[y];
+                  for(let x=0; x<80; x++, offs++) {
+                     const row = videoram[offs]; 
+                     for(let xx=0;xx<8;xx++) {                     
+                        const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
+                        setPixel640(x*8+xx, y, pixel_color);
+                     }
+                  }
                }
-            }                        
+               break;
+            case 4: // GR 4 320x192 2 colors per 8 pixels
+               for(let y=0; y<192; y++) {
+                  offs = offs_2[y];
+                  for(let x=0; x<40; x++, offs += 2) {
+                     const row = videoram[offs];
+                     const fg = (videoram[offs+1] & 0xF0) >> 4;
+                     const bg = (videoram[offs+1] & 0x0F);
+                     for(let xx=0;xx<8;xx++) {                     
+                        const pixel_color = (row & (1<<xx)) > 0 ? fg : bg;                                                   
+                        setPixel320(x*8+xx, y, pixel_color);
+                     }
+                  }
+               }
+               break;
+            case 3: // GR 3 160x192 4bpp			
+               for(let y=0; y<192; y++) {
+                  let offs = offs_2[y];
+                  for(let x=0; x<80; x++, offs++) {
+                     const code = videoram[offs];
+                     const left_pixel_color = (code & 0x0F);
+                     const right_pixel_color = (code & 0xF0) >> 4;
+                     setPixel160(x*2+0, y, left_pixel_color);
+                     setPixel160(x*2+1, y, right_pixel_color);
+                  }
+               }
+               break;      
+            case 2: // GR 2 320x192 1bpp
+               for(let y=0; y<192; y++) {
+                  offs = offs_1[y];
+                  for(let x=0; x<40; x++, offs++) {                  
+                     const row = videoram[offs];
+                     for(let xx=0;xx<8;xx++) {                     
+                        const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
+                        setPixel320(x*8+xx, y, pixel_color);
+                     }
+                  }
+               }
+               break;
+            case 1: // GR 1 160x192 1bpp with two colors per 8 pixels			
+               for(let y=0; y<192; y++) {
+                  offs = offs_1[y];
+                  for(let x=0; x<20; x++, offs += 2) {
+                     const code = videoram[offs];
+                     const color = videoram[offs+1];
+                     const fg = (color & 0xF0) >> 4;
+                     const bg = (color & 0x0F);
+                     for(let xx=0;xx<8;xx++) {                     
+                        const pixel_color = (code & (1<<xx)) > 0 ? fg : bg;                                                   
+                        setPixel160(x*8+xx, y, pixel_color);
+                     }                  
+                  }
+               }
+               break;
+            case 0: // GR 0 160x96 4bpp 
+               for(let y=0; y<96; y++) {            
+                  let offs = offs_0[y];
+                  for(let x=0; x<80; x++, offs++) {                  
+                     const code = videoram[offs];
+                     const left_pixel_color = (code & 0x0F);
+                     const right_pixel_color = (code & 0xF0) >> 4;
+                     setPixel96(x*2+0, y, left_pixel_color);
+                     setPixel96(x*2+1, y, right_pixel_color);
+                  }
+               }
+               break;
          }
-      }      
-   }
-   else
-   {
-      // 40 columns text mode 
-      for(let y=0; y<24; y++)
-      {
-         let offs = ((y & 7) << 8) + ((y >> 3) * 80);
-         for(let x=0; x<40; x++, offs+=2)
+      }
+      // text modes 
+      else if(vdc_text80_enabled)
+      {      
+         // 80 columns text mode 
+         for(let y=0; y<24; y++)
          {
-            const code = videoram[0x3800+offs];
-            const color = videoram[0x3801+offs];
-            
-            const bg = color & 0xF;
-            const fg = color >> 4;
-  
-            const startchar = code*8;
-            
-            for(let yy=0;yy<8;yy++) {
-               const row  = charset[startchar+yy];
-               for(let xx=0;xx<8;xx++) {
-                  const bb = 7-xx;
-                  const pixel_color = (row & (1<<bb)) > 0 ? fg : bg;                  
-                  const c = palette[pixel_color]; 
-                  const c1 = halfpalette[pixel_color];                   
-                  setPixel320(x*8+xx, y*8+yy, pixel_color);
-               }
-            }                        
+            let offs = ((y & 7) << 8) + ((y >> 3) * 80);
+            for(let x=0; x<80; x++, offs++)
+            {
+               const code = videoram[0x3800+offs];  
+               
+               const startchar = code*8;
+               
+               for(let yy=0;yy<8;yy++) {
+                  const row  = charset[startchar+yy];
+                  for(let xx=0;xx<8;xx++) {
+                     const bb = 7-xx;
+                     const pixel_color = (row & (1<<bb)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
+                     setPixel640(x*8+xx, y*8+yy, pixel_color);
+                  }
+               }                        
+            }
+         }      
+      }
+      else
+      {
+         // 40 columns text mode 
+         for(let y=0; y<24; y++)
+         {
+            let offs = ((y & 7) << 8) + ((y >> 3) * 80);
+            for(let x=0; x<40; x++, offs+=2)
+            {
+               const code = videoram[0x3800+offs];
+               const color = videoram[0x3801+offs];
+               
+               const bg = color & 0xF;
+               const fg = color >> 4;
+   
+               const startchar = code*8;
+               
+               for(let yy=0;yy<8;yy++) {
+                  const row  = charset[startchar+yy];
+                  for(let xx=0;xx<8;xx++) {
+                     const bb = 7-xx;
+                     const pixel_color = (row & (1<<bb)) > 0 ? fg : bg;                  
+                     const c = palette[pixel_color]; 
+                     const c1 = halfpalette[pixel_color];                   
+                     setPixel320(x*8+xx, y*8+yy, pixel_color);
+                  }
+               }                        
+            }
          }
       }
    }
@@ -256,30 +244,7 @@ function setPixelBorder(x,y, color) {
    bmp[ ptr   ] = col;
 }
 
-// 2x2
-function _setPixel(x,y, color) {
-   bmp[ (y * 2 + 0) * SCREEN_W + (x*2)+0 ] = palette[color];
-   bmp[ (y * 2 + 0) * SCREEN_W + (x*2)+1 ] = palette[color];
-   bmp[ (y * 2 + 1) * SCREEN_W + (x*2)+0 ] = halfpalette[color];
-   bmp[ (y * 2 + 1) * SCREEN_W + (x*2)+1 ] = halfpalette[color];   
-}
-
-/*
-function setPixel640(x,y, color) {   
-   bmp[ (y * 2 + 0) * SCREEN_W + (x*1)+0 ] = palette[color];
-   //bmp[ (y * 2 + 0) * SCREEN_W + (x*2)+1 ] = palette[color];
-   bmp[ (y * 2 + 1) * SCREEN_W + (x*1)+0 ] = halfpalette[color];
-   //bmp[ (y * 2 + 1) * SCREEN_W + (x*2)+1 ] = halfpalette[color];   
-}
-*/
-
-// advances by 
-let raster_y;
-let raster_x;
-
-function video_chip_cycle() {
-
-}
+// Courtesy of MAME/MESS emulator
 
 const offs_2 = new Uint16Array([
 	0x0000,0x0800,0x1000,0x1800,0x2000,0x2800,0x3000,0x3800,

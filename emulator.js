@@ -1,18 +1,22 @@
 "use strict";
 
+// TODO page3/page7 OUT 44, 3 verificare real hardware
+// TODO save state does not save Z80 state
+
 // TODO caplock key / led ?
 // TODO exact cyles
 // TODO sound
 // TODO cassette
 // TODO floppy?
-// TODO visual display of activity
+// TODO visual/sound display of activity
 // TODO wrap in electron app
 // TODO Z80 and video in WebAssembly
 // TODO save to cloud / fetch()
 // TODO verificare range indirizzi di cassette_bit 
 // TODO rename ram1, ram2 to page
-// TODO emulate page3/page7 video
 // TODO some way of pasting text
+// TODO drag & drop autorun
+
 
 /*
 interface Z80 
@@ -43,7 +47,6 @@ let vdc_text80_background = 0;
 let vdc_border_color = 0;
 let speaker_A = 0;
 let speaker_B = 0;
-
 let joy0 = 255;
 let joy1 = 255;
 
@@ -191,6 +194,7 @@ function ss() {
 
 */
 
+restoreState();
 
 // starts drawing frames
 oneFrame();

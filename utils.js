@@ -99,7 +99,7 @@ function cload(filename) {
    mem_write_word(0x83E9, end+1);   
 
    console.log(`loaded "${filename}" ${bytes.length} bytes from ${hex(start,4)}h to ${hex(end,4)}h`);
-   cpu.reset();
+   cpu.reset();   
 }
 
 function csave(filename, start, end) {
@@ -216,13 +216,59 @@ function reset(value, bitmask) {
    return value & (0xFF ^ bitmask);
 }
 
-function testjoy() {
-   for(let e=0; e<255; e++) {
-      setTimeout((x)=>{
-         joy0=e;
-         joy1=e;
-         console.log(e);
-      }, 200*e);
-   }
+window.onbeforeunload = function(e) {
+   saveState();   
+ };
+
+function saveState() {
+   const saveObject = {
+      ram1: Array.from(ram1),
+      ram2: Array.from(ram2),
+      ram3: Array.from(ram3),
+      videoram: Array.from(videoram),
+      banks: Array.from(banks),
+      cassette_bit_in, 
+      cassette_bit_out, 
+      vdc_graphic_mode_enabled,
+      vdc_graphic_mode_number,
+      vdc_page_7,
+      vdc_text80_enabled,
+      vdc_text80_foreground,
+      vdc_text80_background,
+      vdc_border_color,
+      speaker_A,
+      speaker_B,
+      joy0,
+      joy1  
+   };   
+
+   window.localStorage.setItem(`laser500emu_state`, JSON.stringify(saveObject));
 }
 
+function restoreState() {
+   let s = window.localStorage.getItem(`laser500emu_state`);
+
+   if(s === null) return;   
+
+   s = JSON.parse(s);
+   
+       s.ram1.forEach((e,i)=>{ram1[i]=e;});
+       s.ram2.forEach((e,i)=>{ram2[i]=e;});
+       s.ram3.forEach((e,i)=>{ram3[i]=e;});
+   s.videoram.forEach((e,i)=>{videoram[i]=e;});
+      s.banks.forEach((e,i)=>{banks[i]=e;});
+
+   cassette_bit_in         = s.cassette_bit_in;
+   cassette_bit_out        = s.cassette_bit_out;
+   vdc_graphic_mode_enabled= s.vdc_graphic_mode_enabled;
+   vdc_graphic_mode_number = s.vdc_graphic_mode_number;
+   vdc_page_7              = s.vdc_page_7;
+   vdc_text80_enabled      = s.vdc_text80_enabled;
+   vdc_text80_foreground   = s.vdc_text80_foreground;
+   vdc_text80_background   = s.vdc_text80_background;
+   vdc_border_color        = s.vdc_border_color;
+   speaker_A               = s.speaker_A;
+   speaker_B               = s.speaker_B;
+   joy0                    = s.joy0;
+   joy1                    = s.joy1;                               
+}
