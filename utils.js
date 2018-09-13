@@ -46,26 +46,24 @@ dropZone.addEventListener('drop', e => {
 
    for(let i=0, file; file=files[i]; i++) {                   
       const reader = new FileReader();
-
-      reader.onload = e2 => {
-         // finished reading file data.
-         const outName = file.name;         
-
-         const saveObject = {
-            name: outName,
-            bytes: Array.from(new Uint8Array(e2.target.result)),
-            start: 0x8995,
-            type: "bin"
-         };
-                  
-         window.localStorage.setItem(`laser500/${outName}`, JSON.stringify(saveObject));
-               
-         cload(outName);         
-      };
-
+      reader.onload = e2 => droppedFile(file.name, e2.target.result);
       reader.readAsArrayBuffer(file); 
    }
 });
+
+function droppedFile(outName, bytes) {   
+
+   const saveObject = {
+      name: outName,
+      bytes: Array.from(new Uint8Array(bytes)),
+      start: 0x8995,
+      type: "bin"
+   };
+            
+   window.localStorage.setItem(`laser500/${outName}`, JSON.stringify(saveObject));
+         
+   crun(outName);         
+}
 
 function mem_write_word(address, word) {
    mem_write(address + 0, word & 0xFF);
@@ -76,6 +74,11 @@ function mem_read_word(address, word) {
    const lo = mem_read(address + 0);
    const hi = mem_read(address + 1);
    return lo+hi*256;
+}
+
+async function crun(filename) {
+   cload(filename);
+   await print_string("run:\n");
 }
 
 function cload(filename) {
@@ -161,7 +164,7 @@ async function print_string(str) {
 
 async function pause() {
    return new Promise((resolve,reject)=> {
-      setTimeout(()=>resolve(), 20);
+      setTimeout(()=>resolve(), 80);
    });
 }
 

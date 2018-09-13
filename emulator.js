@@ -1,9 +1,7 @@
 "use strict";
 
 // TODO save state does not save Z80 state
-
 // TODO caplock key / led ?
-// TODO exact cyles
 // TODO sound
 // TODO cassette
 // TODO floppy?
@@ -14,7 +12,6 @@
 // TODO verificare range indirizzi di cassette_bit 
 // TODO rename ram1, ram2 to page
 // TODO some way of pasting text
-// TODO drag & drop autorun
 // TODO interrupt routine test
 // TODO check colors with real hardware
 // TODO ALT+R reset
@@ -66,7 +63,13 @@ const frameRate = 50; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
 const cpuSpeed = 3694700; // Z80 speed 3.6947 MHz (NEC D780c)
 const cyclesPerFrame = (cpuSpeed / frameDuration) / 3.5; // 
-const cyclesPerLine = 190; 
+const cyclesPerLine = 190;
+
+/*
+const Z80SampleRate = cyclesPerLine * TOTAL_SCANLINES * frameRate;
+let Z80SoundPtr = 0;
+let audioSoundPtr = 0;
+*/
 
 let stopped = false; // allows to stop/resume the emulation
 
@@ -90,6 +93,7 @@ function oneFrame() {
       while(true) {
          const elapsed = cpu.run_instruction();
          cycle += elapsed;
+         //for(let j=0;j<elapsed;j++) depositAudio(0);
          if(cycle>=cyclesPerLine) {
             cycle-=cyclesPerLine;
             break;            
@@ -105,6 +109,7 @@ function oneFrame() {
       while(true) {
          const elapsed = cpu.run_instruction();
          cycle += elapsed;
+         //for(let j=0;j<elapsed;j++) depositAudio(0);
          if(cycle>=cyclesPerLine)
          {
             cycle-=cyclesPerLine;
@@ -119,6 +124,7 @@ function oneFrame() {
       while(true) {
          const elapsed = cpu.run_instruction();
          cycle += elapsed;
+         //for(let j=0;j<elapsed;j++) depositAudio(0);
          if(cycle>=cyclesPerLine) {
             cycle-=cyclesPerLine;
             break;            
@@ -135,6 +141,7 @@ function oneFrame() {
       while(true) {
          const elapsed = cpu.run_instruction();
          cycle += elapsed;
+         //for(let j=0;j<elapsed;j++) depositAudio(0);
          if(cycle>=cyclesPerLine) {
             cycle-=cyclesPerLine;
             break;            
@@ -182,6 +189,7 @@ console.info("To load files into the emulator, drag & drop a file over the scree
 console.info("From the console you can use the following functions:");
 console.info("");
 console.info("    csave(name[,start,end])");
+console.info("    crun(name)");
 console.info("    cload(name)");
 console.info("    cdir()");
 console.info("    cdel(name)");
@@ -239,17 +247,32 @@ function writeAudio(sample) {
 for(let t=0;t<renderingBufferSize;t++) writeAudio(Math.sin(t/20));
 
 //
+*/
 
-let bufferSize = 2048;
-var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+/*
+let depositPtr = 0;
+function depositAudio(sample) {
+   Z80SoundPtr++;
+   if(Z80SoundPtr > sampleRate) {
+      Z80SoundPtr -= sampleRate; 
+      audioSoundPtr++;      
+   }
+}
+
+let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const bufferSize = 16384;
+const sampleRate = audioContext.sampleRate;
 var speakerSound = audioContext.createScriptProcessor(bufferSize, 1, 1);
 
+let zzz = 0;
 speakerSound.onaudioprocess = function(e) {
     var output = e.outputBuffer.getChannelData(0);
-    for(let i=0,j=renderingPtr; i<bufferSize; i++, j=((j+1) & mask)) {
-        output[i] = renderingBuffer[j];                
-        renderingBuffer[j] = 0;
+    for(let i=0; i<bufferSize; i++) {
+        zzz++;        
+        output[i] = Math.sin(30*zzz*2*6.14/48000);                        
     }
+    audioSoundPtr += bufferSize;
+    console.log(Z80SoundPtr, audioSoundPtr, Z80SoundPtr-audioSoundPtr);
 }
 
 speakerSound.connect(audioContext.destination);
@@ -257,11 +280,8 @@ speakerSound.connect(audioContext.destination);
 function ss() {
    speakerSound.disconnect(audioContext.destination);
 }
-
-
-//
-
 */
+//
 
 restoreState();
 
