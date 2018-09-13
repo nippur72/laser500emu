@@ -1,21 +1,27 @@
 // PAL Standard: 720 x 576
 // 192 righe video + 96 bordo (48 sopra e 48 sotto) = 192+96 = 288 ; x2 = 576
 
-const BORDER_V =  48-8;    // 48 righe sopra e 48 sotto
+const HIDDEN_SCANLINES_TOP = 3*8;
+const HIDDEN_SCANLINES_BOTTOM = 4*8;
+const PAL_HIDDEN_LINES_VERY_BOTTOM = 24;
+
+const BORDER_V        = 5*8 - HIDDEN_SCANLINES_TOP;   // 5 chars above and 7 below
+const BORDER_V_BOTTOM = 7*8 - HIDDEN_SCANLINES_BOTTOM;   // 5 chars above and 7 below
 const BORDER_H =  40;    // 1 carattere di bordo
 
 const TEXT_W = 640; 
 const TEXT_H = 192;
 
 const SCREEN_W = BORDER_H + TEXT_W + BORDER_H;
-const SCREEN_H = BORDER_V + TEXT_H + 48+8;
+const SCREEN_H = BORDER_V + TEXT_H + BORDER_V_BOTTOM;
+const DOUBLE_SCANLINES = 2;
 
 const palette = new Uint32Array(16);
 const halfpalette = new Uint32Array(16);
 
 function setPalette(i,r,g,b) { 
    palette[i] = 0xFF000000 | r | g << 8 | b << 16; 
-   halfpalette[i] = 0xFF000000 | ((r/1.2)|0) | ((g/1.2)|0) << 8 | ((b/1.2)|0) << 16; 
+   halfpalette[i] = 0xFF000000 | ((r/1.1)|0) | ((g/1.1)|0) << 8 | ((b/1.1)|0) << 16; 
 }
 
 setPalette( 0, 0x00, 0x00, 0x00);  /* black */
@@ -38,16 +44,16 @@ setPalette(15, 0xff, 0xff, 0xff);  /* white */
 // canvas is the outer canvas where the aspect ratio is corrected
 const canvas = document.getElementById("canvas");
 canvas.width = SCREEN_W;
-canvas.height = SCREEN_H;
+canvas.height = SCREEN_H * DOUBLE_SCANLINES;
 const canvasContext = canvas.getContext('2d');
 
 // screen is the inner canvas that contains the emulated PAL screen
 const screenCanvas = document.createElement("canvas");
 screenCanvas.width = SCREEN_W;
-screenCanvas.height = SCREEN_H;
+screenCanvas.height = SCREEN_H * DOUBLE_SCANLINES;
 const screenContext = screenCanvas.getContext('2d');
 
-const imageData = screenContext.getImageData(0, 0, SCREEN_W, SCREEN_H);
+const imageData = screenContext.getImageData(0, 0, SCREEN_W, SCREEN_H * DOUBLE_SCANLINES);
 
 const bmp2 = imageData.data.buffer;
 const bmp = new Uint32Array(bmp2);
@@ -371,6 +377,8 @@ function _drawFrame()
 	canvasContext.drawImage(screenCanvas, 0, 0, canvas.width, canvas.height);
 }
 
+/*
+// #region single scanline drawing routines
 function setPixel640(x, y, color) {
    const xx = x + BORDER_H;
    const yy = y + BORDER_V;
@@ -378,12 +386,16 @@ function setPixel640(x, y, color) {
 }
 
 function setPixel320(x, y, color) {   
-   const yy = y + BORDER_V;
-
-   let ptr = yy * SCREEN_W + x*2 + BORDER_H;
+   const yy = (y + BORDER_V)*2;
    const col = palette[color];
-   bmp[ ptr++ ] = col;
-   bmp[ ptr   ] = col;
+
+   let ptr0 = yy * SCREEN_W + x*2 + BORDER_H;
+   let ptr1 = (yy+1) * SCREEN_W + x*2 + BORDER_H;
+   
+   bmp[ ptr0++ ] = col;
+   bmp[ ptr0   ] = col;
+   bmp[ ptr1++ ] = col;
+   bmp[ ptr1   ] = col;
 }
 
 function setPixel160(x, y, color) {   
@@ -401,11 +413,65 @@ function setPixel96(x, y, color) {
    setPixel160(x,y*2+0,color);
    setPixel160(x,y*2+1,color);
 }
+// #endregion single scanline drawing routines
+*/
 
-function setPixelBorder(x, y, color) {   
-   let ptr = y * SCREEN_W + x;
-   const col = palette[color];   
-   bmp[ ptr   ] = col;
+// double scanline drawing routines
+
+function setPixelBorder(x, y, color) {      
+   const c0 = palette[color];   
+   const c1 = halfpalette[color];   
+   const ptr0 = ((y*2)+0) * SCREEN_W + x;   
+   const ptr1 = ((y*2)+1) * SCREEN_W + x;      
+   bmp[ ptr0 ] = c0;      
+   bmp[ ptr1 ] = c1;      
+}
+
+function setPixel640(x, y, color) {
+   const c0 = palette[color];   
+   const c1 = halfpalette[color];   
+   const xx = x + BORDER_H;
+   const yy = (y + BORDER_V)*2;
+   const ptr0 = (yy+0) * SCREEN_W + xx;
+   const ptr1 = (yy+1) * SCREEN_W + xx;
+   bmp[ ptr0 ] = c0;
+   bmp[ ptr1 ] = c1;
+}
+
+function setPixel320(x, y, color) {   
+   const c0 = palette[color];   
+   const c1 = halfpalette[color];   
+   const yy = (y + BORDER_V) * 2;
+   let ptr0 = (yy+0) * SCREEN_W + x*2 + BORDER_H;
+   let ptr1 = (yy+1) * SCREEN_W + x*2 + BORDER_H;
+   bmp[ ptr0++ ] = c0;
+   bmp[ ptr0   ] = c0;
+   bmp[ ptr1++ ] = c1;
+   bmp[ ptr1   ] = c1;
+}
+
+function setPixel160(x, y, color) {   
+   const c0 = palette[color];   
+   const c1 = halfpalette[color];   
+   
+   const yy = (y + BORDER_V)*2;
+
+   let ptr0 = (yy+0) * SCREEN_W + x*4 + BORDER_H;
+   let ptr1 = (yy+1) * SCREEN_W + x*4 + BORDER_H;
+   
+   bmp[ ptr0++ ] = c0;
+   bmp[ ptr0++ ] = c0;
+   bmp[ ptr0++ ] = c0;
+   bmp[ ptr0   ] = c0;
+   bmp[ ptr1++ ] = c1;
+   bmp[ ptr1++ ] = c1;
+   bmp[ ptr1++ ] = c1;
+   bmp[ ptr1   ] = c1;
+}
+
+function setPixel96(x, y, color) {   
+   setPixel160(x,y*2+0,color);
+   setPixel160(x,y*2+1,color);
 }
 
 // Courtesy of MAME/MESS emulator

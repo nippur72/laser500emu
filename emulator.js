@@ -83,6 +83,19 @@ let cycle = 0;
 function oneFrame() {
    const startTime = new Date().getTime();
 
+   // hidden lines at top
+   for(let t=0;t<HIDDEN_SCANLINES_TOP;t++) {
+      // run cpu
+      while(true) {
+         const elapsed = cpu.run_instruction();
+         cycle += elapsed;
+         if(cycle>=cyclesPerLine) {
+            cycle-=cyclesPerLine;
+            break;            
+         }
+      } 
+   }
+
    for(let t=0;t<SCREEN_H;t++) {
       // draw video
       drawFrame_y();
@@ -99,16 +112,29 @@ function oneFrame() {
       } 
    }
 
-   cpu.interrupt(false, 0);
-
-   // do another 24 lines
-   for(let t=0;t<24;t++) {
+   // hidden lines at bottom
+   for(let t=0;t<=HIDDEN_SCANLINES_BOTTOM;t++) {
       // run cpu
       while(true) {
          const elapsed = cpu.run_instruction();
          cycle += elapsed;
-         if(cycle>=cyclesPerLine)
-         {
+         if(cycle>=cyclesPerLine) {
+            cycle-=cyclesPerLine;
+            break;            
+         }
+      } 
+   }
+
+   // generate VDC interrupt
+   cpu.interrupt(false, 0);
+
+   // draw the PAL hidden scanlines at the end of frame
+   for(let t=0;t<=PAL_HIDDEN_LINES_VERY_BOTTOM;t++) {
+      // run cpu
+      while(true) {
+         const elapsed = cpu.run_instruction();
+         cycle += elapsed;
+         if(cycle>=cyclesPerLine) {
             cycle-=cyclesPerLine;
             break;            
          }
@@ -165,7 +191,8 @@ console.info("    power()");
 console.info("");
 console.info("Loaded and saved files are also stored permanently on the browser memory");
 console.info("Printer is emulated by printing on the JavaScript console (here)");
-console.info("Reset key is Ctrl+Break");
+console.info("Reset key is Ctrl+Break or Alt+R");
+console.info("Power on/off Ctrl+Break or Alt+P");
 console.info("Currently only italian keyboard is mapped.");
 console.info("");
 console.info("Emulation is still in development");
