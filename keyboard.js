@@ -17,6 +17,7 @@ function clearKeyboardMatrix() {
 function isPressed(row, col) {
    return ((keyboard_rows[row] ) & col) === col;
 }
+
 function keyPress(row, col) {   
    keyboard_rows[row] |= col;
 }
@@ -52,11 +53,19 @@ function keyDown(e) {
    let key = e.key;
    if(key=="Tab") e.preventDefault(); // TOD fix browser keys
 
-   if(key=="Cancel") {
+   // reset key is ALT+R or CTRL+Break
+   if(key=="Cancel" || (e.code == "KeyR" && e.altKey)) {
       cpu.reset();
       e.preventDefault(); // TOD fix browser keys
       return;
    }
+
+   // ALT+P is power OFF/ON
+   if(e.code == "KeyP" && e.altKey) {
+      power();
+      e.preventDefault(); // TOD fix browser keys
+      return;
+   }   
 
    // numpad + 0 emulates joystick   
    handleJoyStick(e.code, true);
