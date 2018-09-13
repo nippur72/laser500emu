@@ -2,7 +2,7 @@
 // 192 righe video + 96 bordo (48 sopra e 48 sotto) = 192+96 = 288 ; x2 = 576
 
 const HIDDEN_SCANLINES_TOP = 3*8;
-const HIDDEN_SCANLINES_BOTTOM = 4*8;
+const HIDDEN_SCANLINES_BOTTOM = 5*8;
 const PAL_HIDDEN_LINES_VERY_BOTTOM = 24;
 
 const BORDER_V        = 5*8 - HIDDEN_SCANLINES_TOP;   // 5 chars above and 7 below

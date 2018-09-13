@@ -18,6 +18,7 @@
 // TODO interrupt routine test
 // TODO check colors with real hardware
 // TODO ALT+R reset
+// TODO options window (modal)
 
 /*
 interface Z80 
