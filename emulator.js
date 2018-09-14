@@ -1,24 +1,24 @@
 "use strict";
 
+// TODO javascript debugger, halt
 // TODO laser 350/700
+// TODO rename ram1, ram2 to page
 // TODO laser 200 family?
 // TODO Z80js, port in ES6 then webassembly
 // TODO draw in webassembly
+// TODO Z80 and video in WebAssembly
 // TODO save state does not save Z80 state
 // TODO caplock key / led ?
 // TODO sound
 // TODO cassette
-// TODO floppy?
+// TODO floppy? (CP/M) ?
 // TODO visual/sound display of activity
 // TODO wrap in electron app
-// TODO Z80 and video in WebAssembly
 // TODO save to cloud / fetch()
 // TODO verificare range indirizzi di cassette_bit 
-// TODO rename ram1, ram2 to page
 // TODO some way of pasting text
 // TODO interrupt routine test
 // TODO check colors with real hardware
-// TODO ALT+R reset
 // TODO options window (modal)
 
 /*
