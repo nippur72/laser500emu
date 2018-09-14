@@ -1,5 +1,9 @@
 "use strict";
 
+// TODO laser 350/700
+// TODO laser 200 family?
+// TODO Z80js, port in ES6 then webassembly
+// TODO draw in webassembly
 // TODO save state does not save Z80 state
 // TODO caplock key / led ?
 // TODO sound
@@ -282,6 +286,36 @@ function ss() {
 }
 */
 //
+
+window.addEventListener("resize", onResize);
+window.addEventListener("dblclick", goFullScreen);
+onResize();
+
+function onResize(e) {
+   const canvas = document.getElementById("canvas");
+   const aspect = 1.4;
+   if(window.innerWidth > (window.innerHeight*aspect))
+   {
+      canvas.style.width  = `${aspect*100}vmin`;
+      canvas.style.height = "100vmin";
+   }
+   else if(window.innerWidth > window.innerHeight)
+   {
+      canvas.style.width  = "100vmax";
+      canvas.style.height = `${(1/aspect)*100}vmax`;
+   }
+   else
+   {
+      canvas.style.width  = "100vmin";
+      canvas.style.height = `${(1/aspect)*100}vmin`;
+   }  
+   console.log(window.innerWidth,window.innerHeight);
+}
+
+function goFullScreen() {
+   canvas.webkitRequestFullscreen()	|| canvas.mozRequestFullScreen();   
+   onResize();
+}
 
 restoreState();
 
