@@ -20,6 +20,7 @@
 // TODO interrupt routine test
 // TODO check colors with real hardware
 // TODO options window (modal)
+// TODO investigate port 13h reads
 
 /*
 interface Z80 
@@ -308,8 +309,7 @@ function onResize(e) {
    {
       canvas.style.width  = "100vmin";
       canvas.style.height = `${(1/aspect)*100}vmin`;
-   }  
-   console.log(window.innerWidth,window.innerHeight);
+   }   
 }
 
 function goFullScreen() {
