@@ -30,7 +30,14 @@ function mem_write(address, value) {
 }
 
 function io_read(port) {  
-   
+   /*
+   const hi = (port & 0xFF00) >> 8;
+   const p = port & 0xFF;
+   if(hi>0 && (p>=0x10 && p<=0x1f)) {
+      console.log(`port read ${hex(port & 0xFF)} hi byte set to ${hex(hi)}`);
+   }
+   */
+
    switch(port & 0xFF) {
       case 0x40: return banks[0];
       case 0x41: return banks[1];
@@ -39,12 +46,27 @@ function io_read(port) {
       case 0x2b: return joy0;  // joystick 8 directions
       case 0x27: return joy1;  // joystick fire buttons
       case 0x00: return printerReady;            
+      /*
+      case 0x10:
+      case 0x11:
+      case 0x12:
+      case 0x13:
+         return laser_fdc_r((port &0xFF)- 0x10);
+      */
    }
    console.warn(`read from unknown port ${hex(port)}h`);
    return 0x00;
 }
 
 function io_write(port, value) { 
+   /*
+   const hi = (port & 0xFF00) >> 8;
+   const p = port & 0xFF;
+   if(hi>0 && (p>=0x10 && p<=0x1f)) {
+      console.log(`port write ${hex(port & 0xFF)} hi byte set to ${hex(hi)}, value=${hex(value)}`);
+   }
+   */
+
    // console.log(`io write ${hex(port)} ${hex(value)}`)  
    switch(port & 0xFF) {
       case 0x40: banks[0] = value; break;
@@ -70,7 +92,14 @@ function io_write(port, value) {
          printerWrite(value);
       case 0x0e:
          // printer port duplicated here
-         return;         
+         return;  
+      /*                      
+      case 0x10:
+      case 0x11:
+      case 0x12:
+      case 0x13:
+         return laser_fdc_w((port & 0xFF) - 0x10, value);
+      */   
       default:
          console.warn(`write on unknown port ${hex(port)}h value ${hex(value)}h`);
    }   

@@ -11,7 +11,6 @@
 // TODO caplock key / led ?
 // TODO sound
 // TODO cassette
-// TODO floppy? (CP/M) ?
 // TODO visual/sound display of activity
 // TODO wrap in electron app
 // TODO save to cloud / fetch()
@@ -20,7 +19,10 @@
 // TODO interrupt routine test
 // TODO check colors with real hardware
 // TODO options window (modal)
+// TODO options from URL &parameters
 // TODO investigate port 13h reads
+// TODO emulate floppy
+// TODO build of CP/M ?
 
 /*
 interface Z80 
@@ -316,6 +318,8 @@ function goFullScreen() {
    canvas.webkitRequestFullscreen()	|| canvas.mozRequestFullScreen();   
    onResize();
 }
+
+// laser_drive_init();
 
 restoreState();
 
