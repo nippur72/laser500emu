@@ -30,6 +30,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 function Z80(core)
 {
+   // The argument to this constructor should be an object containing 4 functions:
+   // mem_read(address) should return the byte at the given memory address,
+   // mem_write(address, value) should write the given value to the given memory address,
+   // io_read(port) should read a return a byte read from the given I/O port,
+   // io_write(port, value) should write the given byte to the given I/O port.
+   // If any of those functions is missing, this module cannot run.
+   if (!core || (typeof core.mem_read !== "function") || (typeof core.mem_write !== "function") ||
+                (typeof core.io_read !== "function")  || (typeof core.io_write !== "function"))
+      throw("Z80: Core object is missing required functions.");
+   
+   if (this === window)
+      throw("Z80: This function is a constructor; call it using operator new.");
+
    // Obviously we'll be needing the core object's functions again.
    this.core = core;
    
@@ -82,109 +95,22 @@ function Z80(core)
    //  including processing any prefixes and handling interrupts.
    this.cycle_counter = 0;
    
-   function getState() {
-      return {
-         b: this.b,
-         a: this.a,
-         c: this.c,
-         d: this.d,
-         e: this.e,
-         h: this.h,
-         l: this.l,
-         a_prime: this.a_prime,
-         b_prime: this.b_prime,
-         c_prime: this.c_prime,
-         d_prime: this.d_prime,
-         e_prime: this.e_prime,
-         h_prime: this.h_prime,
-         l_prime: this.l_prime,
-         ix  : this.ix,
-         iy  : this.iy,
-         i   : this.i,
-         r   : this.r,
-         sp  : this.sp,
-         pc  : this.pc,      
-         flags: { 
-            S: this.flags.S,
-            Z: this.flags.Z,
-            Y: this.flags.Y,
-            H: this.flags.H,
-            X: this.flags.X,
-            P: this.flags.P,
-            N: this.flags.N,
-            C: this.flags.C
-         },         
-         flags_prime: { 
-            S: this.flags_prime.S,
-            Z: this.flags_prime.Z,
-            Y: this.flags_prime.Y,
-            H: this.flags_prime.H,
-            X: this.flags_prime.X,
-            P: this.flags_prime.P,
-            N: this.flags_prime.N,
-            C: this.flags_prime.C
-         },         
-         imode         : this.imode,
-         iff1          : this.iff1,
-         iff2          : this.iff2,
-         halted        : this.halted,
-         do_delayed_di : this.do_delayed_di,
-         do_delayed_ei : this.do_delayed_ei,
-         cycle_counter : this.cycle_counter
-      };   
-   }
-
-   function setState(state) {
-      this.b = state.b;
-      this.a = state.a;
-      this.c = state.c;
-      this.d = state.d;
-      this.e = state.e;
-      this.h = state.h;
-      this.l = state.l;
-      this.a_prime = state.a_prime;
-      this.b_prime = state.b_prime;
-      this.c_prime = state.c_prime;
-      this.d_prime = state.d_prime;
-      this.e_prime = state.e_prime;
-      this.h_prime = state.h_prime;
-      this.l_prime = state.l_prime;
-      this.ix  = state.ix;
-      this.iy  = state.iy;
-      this.i   = state.i;
-      this.r   = state.r;
-      this.sp  = state.sp;
-      this.pc  = state.pc;      
-      this.flags.S = state.flags.S;
-      this.flags.Z = state.flags.Z;
-      this.flags.Y = state.flags.Y;
-      this.flags.H = state.flags.H;
-      this.flags.X = state.flags.X;
-      this.flags.P = state.flags.P;
-      this.flags.N = state.flags.N;
-      this.flags.C = state.flags.C;         
-      this.flags_prime.S = state.flags_prime.S;
-      this.flags_prime.Z = state.flags_prime.Z;
-      this.flags_prime.Y = state.flags_prime.Y;
-      this.flags_prime.H = state.flags_prime.H;
-      this.flags_prime.X = state.flags_prime.X;
-      this.flags_prime.P = state.flags_prime.P;
-      this.flags_prime.N = state.flags_prime.N;
-      this.flags_prime.C = state.flags_prime.C;               
-      this.imode = state.imode;
-      this.iff1 = state.iff1;
-      this.iff2 = state.iff2;
-      this.halted = state.halted;
-      this.do_delayed_di = state.do_delayed_di;
-      this.do_delayed_ei = state.do_delayed_ei;
-      this.cycle_counter = state.cycle_counter;
-   }
-
    // There's tons of stuff in this object,
    //  but only these three functions are the public API.
    return {      
-      getState: getState.bind(this),
-      setState: setState.bind(this),
+      a: () => this.a,
+      b: () => this.b,
+      c: () => this.c,
+      d: () => this.d,
+      e: () => this.e,
+      h: () => this.h,
+      l: () => this.l,
+      ix: () => this.ix,
+      iy: () => this.iy,
+      pc: () => this.pc,
+      sp: () => this.sp,
+      flags: () => this.flags,
+
       reset : this.reset.bind(this),
       run_instruction : this.run_instruction.bind(this),
       interrupt : this.interrupt.bind(this)

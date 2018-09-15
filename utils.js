@@ -23,8 +23,9 @@ function hex(value, size) {
    return s.substr(s.length - size);
 }
 
-function cpu_status(cpu) {
-   return `A=${hex(cpu.a())} BC=${hex(cpu.b())}${hex(cpu.c())} DE=${hex(cpu.d())}${hex(cpu.e())} HL=${hex(cpu.h())}${hex(cpu.l())} IX=${hex(cpu.ix(),4)} IY=${hex(cpu.iy(),4)} SP=${hex(cpu.sp(),4)} PC=${hex(cpu.pc(),4)} S=${cpu.flags().S}, Z=${cpu.flags().Z}, Y=${cpu.flags().Y}, H=${cpu.flags().H}, X=${cpu.flags().X}, P=${cpu.flags().P}, N=${cpu.flags().N}, C=${cpu.flags().C}`;   
+function cpu_status() {
+   const state = cpu.getState();
+   return `A=${hex(state.a)} BC=${hex(state.b)}${hex(state.c)} DE=${hex(state.d)}${hex(state.e)} HL=${hex(state.h)}${hex(state.l)} IX=${hex(state.ix,4)} IY=${hex(state.iy,4)} SP=${hex(state.sp,4)} PC=${hex(state.pc,4)} S=${state.flags.S}, Z=${state.flags.Z}, Y=${state.flags.Y}, H=${state.flags.H}, X=${state.flags.X}, P=${state.flags.P}, N=${state.flags.N}, C=${state.flags.C}`;   
 }
 
 function mem_write_word(address, word) {
@@ -200,36 +201,46 @@ function saveState() {
       speaker_A,
       speaker_B,
       joy0,
-      joy1  
+      joy1,
+      cpu: cpu.getState()  
    };   
 
    window.localStorage.setItem(`laser500emu_state`, JSON.stringify(saveObject));
 }
 
-function restoreState() {
-   let s = window.localStorage.getItem(`laser500emu_state`);
+function restoreState() {   
+   try
+   {
+      let s = window.localStorage.getItem(`laser500emu_state`);
 
-   if(s === null) return;   
+      if(s === null) return;   
 
-   s = JSON.parse(s);
-   
-       s.ram1.forEach((e,i)=>{ram1[i]=e;});
-       s.ram2.forEach((e,i)=>{ram2[i]=e;});
-       s.ram3.forEach((e,i)=>{ram3[i]=e;});
-   s.videoram.forEach((e,i)=>{videoram[i]=e;});
-      s.banks.forEach((e,i)=>{banks[i]=e;});
+      s = JSON.parse(s);      
+      
+         s.ram1.forEach((e,i)=>{ram1[i]=e;});
+         s.ram2.forEach((e,i)=>{ram2[i]=e;});
+         s.ram3.forEach((e,i)=>{ram3[i]=e;});
+      s.videoram.forEach((e,i)=>{videoram[i]=e;});
+         s.banks.forEach((e,i)=>{banks[i]=e;});
 
-   cassette_bit_in         = s.cassette_bit_in;
-   cassette_bit_out        = s.cassette_bit_out;
-   vdc_graphic_mode_enabled= s.vdc_graphic_mode_enabled;
-   vdc_graphic_mode_number = s.vdc_graphic_mode_number;
-   vdc_page_7              = s.vdc_page_7;
-   vdc_text80_enabled      = s.vdc_text80_enabled;
-   vdc_text80_foreground   = s.vdc_text80_foreground;
-   vdc_text80_background   = s.vdc_text80_background;
-   vdc_border_color        = s.vdc_border_color;
-   speaker_A               = s.speaker_A;
-   speaker_B               = s.speaker_B;
-   joy0                    = s.joy0;
-   joy1                    = s.joy1;                               
+      cassette_bit_in         = s.cassette_bit_in;
+      cassette_bit_out        = s.cassette_bit_out;
+      vdc_graphic_mode_enabled= s.vdc_graphic_mode_enabled;
+      vdc_graphic_mode_number = s.vdc_graphic_mode_number;
+      vdc_page_7              = s.vdc_page_7;
+      vdc_text80_enabled      = s.vdc_text80_enabled;
+      vdc_text80_foreground   = s.vdc_text80_foreground;
+      vdc_text80_background   = s.vdc_text80_background;
+      vdc_border_color        = s.vdc_border_color;
+      speaker_A               = s.speaker_A;
+      speaker_B               = s.speaker_B;
+      joy0                    = s.joy0;
+      joy1                    = s.joy1;   
+      console.log(s.cpu);
+      cpu.setState(s.cpu);
+   }
+   catch
+   {
+
+   }
 }
