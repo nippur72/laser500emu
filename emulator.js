@@ -91,87 +91,32 @@ let nextFrameTime = 0;
 let soundCycle = 0;
 let cycle = 0;
 
+function renderLines(nlines, hidden) {
+   for(let t=0; t<nlines; t++) {
+      // draw video
+      if(!hidden) drawFrame_y();
+
+      // run cpu
+      while(true) {
+         const elapsed = cpu.run_instruction();
+         cycle += elapsed;
+         
+         if(cycle>=cyclesPerLine) {
+            cycle-=cyclesPerLine;
+            break;            
+         }
+      } 
+   }
+}
+
 function oneFrame() {
    const startTime = new Date().getTime();
-
-   // hidden lines at top
-   for(let t=0;t<HIDDEN_SCANLINES_TOP;t++) {
-      // run cpu
-      while(true) {
-         const elapsed = cpu.run_instruction();
-         cycle += elapsed;
-         //for(let j=0;j<elapsed;j++) depositAudio(0);
-         if(cycle>=cyclesPerLine) {
-            cycle-=cyclesPerLine;
-            break;            
-         }
-      } 
-   }
-
-   for(let t=0;t<SCREEN_H;t++) {
-      // draw video
-      drawFrame_y();
-
-      // run cpu
-      while(true) {
-         const elapsed = cpu.run_instruction();
-         cycle += elapsed;
-         //for(let j=0;j<elapsed;j++) depositAudio(0);
-         if(cycle>=cyclesPerLine)
-         {
-            cycle-=cyclesPerLine;
-            break;            
-         }
-      } 
-   }
-
-   // hidden lines at bottom
-   for(let t=0;t<=HIDDEN_SCANLINES_BOTTOM;t++) {
-      // run cpu
-      while(true) {
-         const elapsed = cpu.run_instruction();
-         cycle += elapsed;
-         //for(let j=0;j<elapsed;j++) depositAudio(0);
-         if(cycle>=cyclesPerLine) {
-            cycle-=cyclesPerLine;
-            break;            
-         }
-      } 
-   }
-
-   // generate VDC interrupt
-   cpu.interrupt(false, 0);
-
-   // draw the PAL hidden scanlines at the end of frame
-   for(let t=0;t<=PAL_HIDDEN_LINES_VERY_BOTTOM;t++) {
-      // run cpu
-      while(true) {
-         const elapsed = cpu.run_instruction();
-         cycle += elapsed;
-         //for(let j=0;j<elapsed;j++) depositAudio(0);
-         if(cycle>=cyclesPerLine) {
-            cycle-=cyclesPerLine;
-            break;            
-         }
-      } 
-   }
-
-   /*
-   // execute cpu for all video frames
-   for(let cycle=0; cycle<cyclesPerFrame;)
-   {
-      const elapsed = cpu.run_instruction();
-      cycle += elapsed;
-      
-      //soundCycle += elapsed;
-      //if(soundCycle>80) {
-      //   writeAudio(cassette_bit_out-0.5);
-      //   soundCycle-=80;
-      //}
-      
-   }      
-   drawFrame();
-   */
+   
+   renderLines(HIDDEN_SCANLINES_TOP, true);         // hidden lines at top
+   renderLines(SCREEN_H, false);                    // screen
+   renderLines(HIDDEN_SCANLINES_BOTTOM, true);      // hidden lines at bottom   
+   cpu.interrupt(false, 0);                         // generate VDC interrupt
+   renderLines(PAL_HIDDEN_LINES_VERY_BOTTOM, true); // hidden lines at bottom
 
    frames++;   
 
@@ -189,31 +134,6 @@ function oneFrame() {
 
    if(!stopped) setTimeout(()=>oneFrame(), timeWaitUntilNextFrame);   
 }
-
-
-console.info("Welcome to the Video Technology Laser 500 emulator");
-console.info("To load files into the emulator, drag & drop a file over the screen");
-console.info("From the console you can use the following functions:");
-console.info("");
-console.info("    csave(name[,start,end])");
-console.info("    crun(name)");
-console.info("    cload(name)");
-console.info("    cdir()");
-console.info("    cdel(name)");
-console.info("    info()");
-console.info("    stop()");
-console.info("    go()");
-console.info("    power()");
-console.info("");
-console.info("Loaded and saved files are also stored permanently on the browser memory");
-console.info("Printer is emulated by printing on the JavaScript console (here)");
-console.info("Reset key is Ctrl+Break or Alt+R");
-console.info("Power on/off Ctrl+Break or Alt+P");
-console.info("Currently only italian keyboard is mapped.");
-console.info("");
-console.info("Emulation is still in development");
-console.info("");
-console.info("");
 
 /*
 // Offset into sndData for next sound sample. 
@@ -290,36 +210,10 @@ function ss() {
 */
 //
 
-window.addEventListener("resize", onResize);
-window.addEventListener("dblclick", goFullScreen);
-onResize();
-
-function onResize(e) {
-   const canvas = document.getElementById("canvas");
-   const aspect = 1.4;
-   if(window.innerWidth > (window.innerHeight*aspect))
-   {
-      canvas.style.width  = `${aspect*100}vmin`;
-      canvas.style.height = "100vmin";
-   }
-   else if(window.innerWidth > window.innerHeight)
-   {
-      canvas.style.width  = "100vmax";
-      canvas.style.height = `${(1/aspect)*100}vmax`;
-   }
-   else
-   {
-      canvas.style.width  = "100vmin";
-      canvas.style.height = `${(1/aspect)*100}vmin`;
-   }   
-}
-
-function goFullScreen() {
-   canvas.webkitRequestFullscreen()	|| canvas.mozRequestFullScreen();   
-   onResize();
-}
 
 // laser_drive_init();
+
+welcome();
 
 restoreState();
 

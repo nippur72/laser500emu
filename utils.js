@@ -27,44 +27,6 @@ function cpu_status(cpu) {
    return `A=${hex(cpu.a())} BC=${hex(cpu.b())}${hex(cpu.c())} DE=${hex(cpu.d())}${hex(cpu.e())} HL=${hex(cpu.h())}${hex(cpu.l())} IX=${hex(cpu.ix(),4)} IY=${hex(cpu.iy(),4)} SP=${hex(cpu.sp(),4)} PC=${hex(cpu.pc(),4)} S=${cpu.flags().S}, Z=${cpu.flags().Z}, Y=${cpu.flags().Y}, H=${cpu.flags().H}, X=${cpu.flags().X}, P=${cpu.flags().P}, N=${cpu.flags().N}, C=${cpu.flags().C}`;   
 }
 
-/**** drag programs **** */
-
-const dropZone = document.getElementById('canvas');
-
-// Optional.   Show the copy icon when dragging over.  Seems to only work for chrome.
-dropZone.addEventListener('dragover', function(e) {
-   e.stopPropagation();
-   e.preventDefault();
-   e.dataTransfer.dropEffect = 'copy';
-});
-
-// Get file data on drop
-dropZone.addEventListener('drop', e => {
-   e.stopPropagation();
-   e.preventDefault();
-   const files = e.dataTransfer.files; // Array of all files
-
-   for(let i=0, file; file=files[i]; i++) {                   
-      const reader = new FileReader();
-      reader.onload = e2 => droppedFile(file.name, e2.target.result);
-      reader.readAsArrayBuffer(file); 
-   }
-});
-
-function droppedFile(outName, bytes) {   
-
-   const saveObject = {
-      name: outName,
-      bytes: Array.from(new Uint8Array(bytes)),
-      start: 0x8995,
-      type: "bin"
-   };
-            
-   window.localStorage.setItem(`laser500/${outName}`, JSON.stringify(saveObject));
-         
-   crun(outName);         
-}
-
 function mem_write_word(address, word) {
    mem_write(address + 0, word & 0xFF);
    mem_write(address + 1, (word & 0xFF00) >> 8);
@@ -218,10 +180,6 @@ function set(value, bitmask) {
 function reset(value, bitmask) {
    return value & (0xFF ^ bitmask);
 }
-
-window.onbeforeunload = function(e) {
-   saveState();   
- };
 
 function saveState() {
    const saveObject = {
