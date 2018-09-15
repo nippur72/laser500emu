@@ -11,7 +11,7 @@ function clearKeyboardMatrix() {
    // shift is released before the key
    //console.log(keyboard_rows);
    keyboard_rows.forEach((e,i)=>keyboard_rows[i]=0);   
-   console.log("keyboard cleared");
+   //console.log("keyboard cleared");
 }
 
 function isPressed(row, col) {
