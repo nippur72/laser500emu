@@ -236,7 +236,6 @@ function restoreState() {
       speaker_B               = s.speaker_B;
       joy0                    = s.joy0;
       joy1                    = s.joy1;   
-      console.log(s.cpu);
       cpu.setState(s.cpu);
    }
    catch
