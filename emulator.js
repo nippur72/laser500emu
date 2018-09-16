@@ -7,9 +7,7 @@
 // TODO Z80js, port in ES6 then webassembly
 // TODO draw in webassembly
 // TODO Z80 and video in WebAssembly
-// TODO save state does not save Z80 state
 // TODO caplock key / led ?
-// TODO sound
 // TODO cassette
 // TODO visual/sound display of activity
 // TODO wrap in electron app
@@ -71,12 +69,7 @@ const frameDuration = 1000/frameRate; // duration of 1 frame in msec
 const cpuSpeed = 3694700; // Z80 speed 3.6947 MHz (NEC D780c)
 const cyclesPerFrame = (cpuSpeed / frameDuration) / 3.5; // 
 const cyclesPerLine = 190;
-
-/*
-const Z80SampleRate = cyclesPerLine * TOTAL_SCANLINES * frameRate;
-let Z80SoundPtr = 0;
-let audioSoundPtr = 0;
-*/
+const cpuSampleRate = cyclesPerLine * TOTAL_SCANLINES * frameRate;
 
 let stopped = false; // allows to stop/resume the emulation
 
@@ -88,7 +81,6 @@ let frames = 0;
 let oneFrameTimeSum = 0;
 let nextFrameTime = 0;
 
-let soundCycle = 0;
 let cycle = 0;
 
 function renderLines(nlines, hidden) {
@@ -100,6 +92,7 @@ function renderLines(nlines, hidden) {
       while(true) {
          const elapsed = cpu.run_instruction();
          cycle += elapsed;
+         writeAudioSample(elapsed);
          
          if(cycle>=cyclesPerLine) {
             cycle-=cyclesPerLine;
@@ -110,8 +103,8 @@ function renderLines(nlines, hidden) {
 }
 
 function oneFrame() {
-   const startTime = new Date().getTime();
-   
+   const startTime = new Date().getTime();      
+
    renderLines(HIDDEN_SCANLINES_TOP, true);         // hidden lines at top
    renderLines(SCREEN_H, false);                    // screen
    renderLines(HIDDEN_SCANLINES_BOTTOM, true);      // hidden lines at bottom   
@@ -135,71 +128,63 @@ function oneFrame() {
    if(!stopped) setTimeout(()=>oneFrame(), timeWaitUntilNextFrame);   
 }
 
-/*
-// Offset into sndData for next sound sample. 
-var sndCount = 0;
-var sndReadCount = 0;
-var cs = 0;
+/*********************************************************************************** */
 
-// Buffer for sound event messages.
-var renderingBufferSize = 8192;
-var mask = renderingBufferSize-1;
-var renderingBuffer;
-var vicSoundRenderRate = 80000;
+const audioBufferSize = 16384; // enough to hold more than one frame time
+const audioBuffer = new Uint8Array(audioBufferSize);
 
-var sampleRate;
-sampleRate = this.audioContext.sampleRate;
-cs += sampleRate;
-if (cs>=vicSoundRenderRate) {
-   cs-=vicSoundRenderRate;
-   var plus1 = (sndCount+1)&mask;
-   if (plus1!=sndReadCount) {
-      renderingBuffer[sndCount] = sound;
-      sndCount=plus1;
-   }
-}
-*/
+let samplePtr = 0; // high speed pointer used to downsample
+let audioPtr = 0;  // pointer at audio frequency
+let audioPlayPtr = 0;
+let audioPtr_unclipped = 0;
+let audioPlayPtr_unclipped = 0;
 
-/*
-const renderingBufferSize = 2048;
-const mask = renderingBufferSize - 1;
-const renderingBuffer = new Float32Array(renderingBufferSize);
-let renderingPtr = 0;
+let initialSync = false;
 
-function writeAudio(sample) {
-   renderingBuffer[renderingPtr] = sample;
-   renderingPtr = (renderingPtr + 1) & mask;   
-} 
-
-for(let t=0;t<renderingBufferSize;t++) writeAudio(Math.sin(t/20));
-
-//
-*/
-
-/*
-let depositPtr = 0;
-function depositAudio(sample) {
-   Z80SoundPtr++;
-   if(Z80SoundPtr > sampleRate) {
-      Z80SoundPtr -= sampleRate; 
-      audioSoundPtr++;      
-   }
+function writeAudioSample(n) {
+   samplePtr += (n * sampleRate);
+   if(samplePtr > cpuSampleRate) {
+      const s = (speaker_A ? 0.5 : -0.5) + (cassette_bit_out ? 0.5 : -0.5);
+      samplePtr -= cpuSampleRate;
+      audioBuffer[audioPtr++] = s;
+      audioPtr = audioPtr % audioBufferSize;
+      audioPtr_unclipped++;
+   }      
 }
 
 let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-const bufferSize = 16384;
+const bufferSize = 2048;
 const sampleRate = audioContext.sampleRate;
 var speakerSound = audioContext.createScriptProcessor(bufferSize, 1, 1);
 
-let zzz = 0;
+let maxBufferUnderruns = 15;
+
 speakerSound.onaudioprocess = function(e) {
-    var output = e.outputBuffer.getChannelData(0);
-    for(let i=0; i<bufferSize; i++) {
-        zzz++;        
-        output[i] = Math.sin(30*zzz*2*6.14/48000);                        
-    }
-    audioSoundPtr += bufferSize;
-    console.log(Z80SoundPtr, audioSoundPtr, Z80SoundPtr-audioSoundPtr);
+   if(initialSync === false) {      
+      if(audioPtr < (audioPlayPtr + bufferSize)) return; // buffer still not filled      
+      initialSync = true;
+   }
+
+   const output = e.outputBuffer.getChannelData(0);
+   for(let i=0; i<bufferSize; i++) {
+      const audio = audioBuffer[audioPlayPtr++];
+      audioPlayPtr = audioPlayPtr % audioBufferSize;
+      audioPlayPtr_unclipped++;
+      output[i] = audio;
+      if(audioPlayPtr_unclipped >= audioPtr_unclipped) {
+         //console.log(`audio buffer underrun ${maxBufferUnderruns}`);
+         initialSync = false;
+         audioPlayPtr = 0;
+         audioPlayPtr = 0;
+         maxBufferUnderruns--;
+         if(maxBufferUnderruns === 0) {
+            // if too many under runs disable audio altogether
+            console.warn("too many audio buffer underrun, audio will be disabled");
+            speakerSound.disconnect(audioContext.destination);
+         }
+         return;
+      }
+    }        
 }
 
 speakerSound.connect(audioContext.destination);
@@ -207,8 +192,8 @@ speakerSound.connect(audioContext.destination);
 function ss() {
    speakerSound.disconnect(audioContext.destination);
 }
-*/
-//
+
+/*********************************************************************************** */
 
 
 // laser_drive_init();
@@ -219,3 +204,4 @@ restoreState();
 
 // starts drawing frames
 oneFrame();
+
