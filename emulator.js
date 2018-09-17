@@ -2,7 +2,8 @@
 
 // TODO load WAV from cassette or mic
 // TODO javascript debugger, halt
-// TODO laser 350/700
+// TODO laser 350
+// TODO laser 700
 // TODO rename ram1, ram2 to page
 // TODO laser 200 family?
 // TODO Z80js, port in ES6 then webassembly
