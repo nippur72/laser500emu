@@ -20,9 +20,10 @@ function onResize(e) {
    }   
 }
 
-
-function goFullScreen() {
-   canvas.webkitRequestFullscreen()	|| canvas.mozRequestFullScreen();   
+function goFullScreen() 
+{
+        if(canvas.webkitRequestFullscreen !== undefined) canvas.webkitRequestFullscreen();
+   else if(canvas.mozRequestFullScreen !== undefined) canvas.mozRequestFullScreen();      
    onResize();
 }
 
