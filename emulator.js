@@ -1,5 +1,6 @@
 "use strict";
 
+// TODO load WAV from cassette or mic
 // TODO javascript debugger, halt
 // TODO laser 350/700
 // TODO rename ram1, ram2 to page
@@ -8,7 +9,6 @@
 // TODO draw in webassembly
 // TODO Z80 and video in WebAssembly
 // TODO caplock key / led ?
-// TODO cassette
 // TODO visual/sound display of activity
 // TODO wrap in electron app
 // TODO save to cloud / fetch()
