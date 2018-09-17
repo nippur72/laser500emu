@@ -238,7 +238,7 @@ function restoreState() {
       joy1                    = s.joy1;   
       cpu.setState(s.cpu);
    }
-   catch
+   catch(error)
    {
 
    }
