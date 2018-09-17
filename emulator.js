@@ -1,5 +1,6 @@
 "use strict";
 
+// TODO sound doesn't work in Mozilla
 // TODO load WAV from cassette or mic
 // TODO javascript debugger, halt
 // TODO laser 350
