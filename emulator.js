@@ -189,7 +189,7 @@ var speakerSound = audioContext.createScriptProcessor(bufferSize, 1, 1);
 
 speakerSound.onaudioprocess = function(e) {
    if(audioPtr_unclipped < (audioPlayPtr_unclipped + bufferSize)) {
-      console.warn(`audio buffer not filled: ${audioPtr_unclipped} < ${audioPlayPtr_unclipped + bufferSize}, behind ${audioPtr_unclipped - (audioPlayPtr_unclipped + bufferSize)}`);
+      // console.warn(`audio buffer not filled: ${audioPtr_unclipped} < ${audioPlayPtr_unclipped + bufferSize}, behind ${audioPtr_unclipped - (audioPlayPtr_unclipped + bufferSize)}`);
       return; 
    }   
 
