@@ -170,8 +170,8 @@ function go() {
 }
 
 function info() { 
-   const average = oneFrameTimeSum/frames;  
-   console.log(`frame rendering: ${Math.round(average*100,3)/100} ms, load=${Math.round(average/frameDuration*100*100,3)/100} %`);   
+   const average = averageFrameTime; /* oneFrameTimeSum/frames; */
+   console.log(`frame rendering: ${Math.round(average*10,2)/10} ms, load=${Math.round(average/frameDuration*100*10,2)/10} %`);   
 }
 
 function set(value, bitmask) {
