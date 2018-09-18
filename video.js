@@ -60,8 +60,187 @@ const imageData = screenContext.getImageData(0, 0, SCREEN_W, SCREEN_H * DOUBLE_S
 const bmp2 = imageData.data.buffer;
 const bmp = new Uint32Array(bmp2);
 
-let raster_y = 0;
+// #region rendeding at the cycle level
 
+let raster_y = 0;        // 0 to TOTAL SCANLINES (0-311)
+let raster_x = 0;        // 0 to SCREEN_W (720)
+let raster_y_text = 0;   // y relative to display area
+let raster_x_text = 0;   // x relative to display area
+
+// draws 8 pixel horizontally on the beam
+function drawEight() {
+   const inside = raster_y>=BORDER_V && raster_y<(BORDER_V+TEXT_H) && raster_x>=BORDER_H && raster_x<BORDER_H+TEXT_W;
+
+   if(!inside) 
+   {
+      for(let x=0; x<8; x++) setPixelBorder(raster_x++, raster_y, vdc_border_color);                        
+   }
+   else 
+   {
+      if(raster_x === BORDER_H) raster_x_text = 0;
+      if(raster_y === BORDER_V) raster_y_text = 0;
+      drawEight_text();
+   }
+
+   if(raster_x >= SCREEN_W) {
+      raster_x = 0;      
+      raster_y++;      
+      if(raster_y >= SCREEN_H) {         
+         canvasContext.putImageData(imageData, 0, 0);
+         canvasContext.drawImage(screenCanvas, 0, 0, canvas.width, canvas.height);
+      }
+   }
+}
+
+// draws 8 pixel horizontally on the display area and advances raster_x and raster_x_text
+function drawEight_text() 
+{  
+   let video = vdc_page_7 ? videoram : page3;
+
+   if(vdc_graphic_mode_enabled) 
+   {
+      let offs;
+      switch(vdc_graphic_mode_number) {            
+         case 5: // GR 5 640x192 1bpp            
+            offs = offs_2[y];
+            for(let x=0; x<80; x++, offs++) {
+               const row = video[offs]; 
+               for(let xx=0;xx<8;xx++) {                     
+                  const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
+                  setPixel640(x*8+xx, y, pixel_color);
+               }
+            }
+            break;
+         case 4: // GR 4 320x192 2 colors per 8 pixels
+            offs = offs_2[y];
+            for(let x=0; x<40; x++, offs += 2) {
+               const row = video[offs];
+               const color = video[offs+1];
+               const fg = (color & 0xF0) >> 4;
+               const bg = (color & 0x0F);
+               for(let xx=0;xx<8;xx++) {                     
+                  const pixel_color = (row & (1<<xx)) > 0 ? fg : bg;                                                   
+                  setPixel320(x*8+xx, y, pixel_color);
+               }
+            }
+            break;
+         case 3: // GR 3 160x192 4bpp			
+            offs = offs_2[y];
+            for(let x=0; x<80; x++, offs++) {
+               const code = video[offs];
+               const left_pixel_color = (code & 0x0F);
+               const right_pixel_color = (code & 0xF0) >> 4;
+               setPixel160(x*2+0, y, left_pixel_color);
+               setPixel160(x*2+1, y, right_pixel_color);
+            }               
+            break;      
+         case 2: // GR 2 320x192 1bpp
+            offs = offs_1[y];
+            for(let x=0; x<40; x++, offs++) {                  
+               const row = video[offs];
+               for(let xx=0;xx<8;xx++) {                     
+                  const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
+                  setPixel320(x*8+xx, y, pixel_color);
+               }
+            }
+            break;
+         case 1: // GR 1 160x192 1bpp with two colors per 8 pixels			
+            offs = offs_1[y];
+            for(let x=0; x<20; x++, offs += 2) {
+               const code = video[offs];
+               const color = video[offs+1];
+               const fg = (color & 0xF0) >> 4;
+               const bg = (color & 0x0F);
+               for(let xx=0;xx<8;xx++) {                     
+                  const pixel_color = (code & (1<<xx)) > 0 ? fg : bg;                                                   
+                  setPixel160(x*8+xx, y, pixel_color);
+               }                  
+            }
+            break;
+         case 0: // GR 0 160x96 4bpp 
+            if(y % 2 == 0) { 
+               let by = y>>1;
+               offs = offs_0[by];
+               for(let x=0; x<80; x++, offs++) {                  
+                  const code = video[offs];
+                  const left_pixel_color = (code & 0x0F);
+                  const right_pixel_color = (code & 0xF0) >> 4;
+                  setPixel96(x*2+0, by, left_pixel_color);
+                  setPixel96(x*2+1, by, right_pixel_color);
+               }
+            }
+            break;
+      }      
+   }
+   // text modes 
+   else if(vdc_text80_enabled)
+   {      
+      raster_x_text += 1;
+      raster_x += 8;
+
+      /*
+      // 80 columns text mode          
+      const by = y >> 3;
+      const oy = y & 0b111;
+
+      let offs = ((by & 7) << 8) + ((by >> 3) * 80);
+      for(let x=0; x<80; x++, offs++)
+      {
+         const code = video[0x3800+offs];  
+         
+         const startchar = code*8;
+         
+         const row  = charset[startchar+oy];
+         for(let xx=0;xx<8;xx++) {
+            const bb = 7-xx;
+            const pixel_color = (row & (1<<bb)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
+            setPixel640(x*8+xx, y, pixel_color);
+         }
+      }
+      */
+   }
+   else
+   {
+      // 40 columns text mode 
+      const by = y >> 3;
+      const oy = y & 0b111;
+
+      let offs = ((by & 7) << 8) + ((by >> 3) * 80);
+      offs += raster_x_text/2;
+      let x = raster_x_text;
+      let y = raster_y_text;
+
+      //for(let x=0; x<40; x++, offs+=2)
+      //{
+         const code = video[0x3800+offs];
+         const color = video[0x3801+offs];
+         
+         const bg = color & 0xF;
+         const fg = color >> 4;
+
+         const startchar = code*8;
+         
+         const row  = charset[startchar+oy];
+         for(let xx=0;xx<8;xx++) {
+            const bb = 7-xx;
+            const pixel_color = (row & (1<<bb)) > 0 ? fg : bg;                  
+            const c = palette[pixel_color]; 
+            const c1 = halfpalette[pixel_color];                   
+            setPixel320(x*8+xx, y, pixel_color);
+         }
+      //}
+      raster_x_text += 2;
+      raster_x += 8;
+   }
+   
+}
+
+
+// #endregion 
+
+// #region rendeding at scanline level
+
+// (not used) draws the whole frame 
 function drawFrame() {
    for(let t=0;t<SCREEN_H;t++) {
       drawFrame_y(raster_y);      
@@ -222,6 +401,10 @@ function drawFrame_y_text(y)
    }
 }
 
+// #endregion 
+
+// #region rendering at the page level
+
 function _drawFrame() 
 {  
    if(vdc_page_7) 
@@ -378,6 +561,8 @@ function _drawFrame()
    canvasContext.putImageData(imageData, 0, 0);
 	canvasContext.drawImage(screenCanvas, 0, 0, canvas.width, canvas.height);
 }
+
+// #endregion 
 
 /*
 // #region single scanline drawing routines

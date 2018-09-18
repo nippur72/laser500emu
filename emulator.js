@@ -1,5 +1,6 @@
 "use strict";
 
+// TODO almost exact cycles
 // TODO sound doesn't work in Mozilla
 // TODO load WAV from cassette or mic
 // TODO javascript debugger, halt
@@ -9,7 +10,6 @@
 // TODO laser 200 family?
 // TODO Z80js, port in ES6 then webassembly
 // TODO draw in webassembly
-// TODO Z80 and video in WebAssembly
 // TODO caplock key / led ?
 // TODO visual/sound display of activity
 // TODO wrap in electron app
@@ -23,15 +23,7 @@
 // TODO investigate port 13h reads
 // TODO emulate floppy
 // TODO build of CP/M ?
-
-/*
-interface Z80 
-{
-   reset();                       // Resets the processor. This need not be called at power-up, but it can be.
-   run_instruction(): number;     // Runs the instruction and return elapsed cycles 
-   interrupt(non_maskable, data); // Triggers an interrupt.
-}
-*/
+// TODO draw keyboard for mobile
 
 // *** laser 500 hardware ***
 
@@ -80,11 +72,12 @@ let stopped = false; // allows to stop/resume the emulation
 // 192 righe video + 96 bordo (48 sopra e 48 sotto) = 192+96 = 288 ; x2 = 576
 
 let frames = 0;
-let oneFrameTimeSum = 0;
 let nextFrameTime = 0;
+let averageFrameTime = 0;
 
 let cycle = 0;
 
+// scanline version
 function renderLines(nlines, hidden) {
    for(let t=0; t<nlines; t++) {
       // draw video
@@ -94,7 +87,7 @@ function renderLines(nlines, hidden) {
       while(true) {
          const elapsed = cpu.run_instruction();
          cycle += elapsed;
-         writeAudioSample(elapsed);
+         writeAudioSamples(elapsed);
          
          if(cycle>=cyclesPerLine) {
             cycle-=cyclesPerLine;
@@ -104,36 +97,71 @@ function renderLines(nlines, hidden) {
    }
 }
 
-function oneFrame() {
-   const startTime = new Date().getTime();      
+/*
+// versione cycle exact
+function renderAllLines() {   
+   while(raster_y < SCREEN_H) 
+   {
+      const elapsed = cpu.run_instruction();
+      writeAudioSamples(elapsed);
+      cycle += elapsed * 720;
+      while(cycle > 0) {
+         drawEight();
+         cycle -= 1520;
+      }
+      //console.log(raster_y, SCREEN_H)   ;
+      //if(zz++ % 30590 === 0) break;
+   }
+   
+   cpu.interrupt(false, 0);                  
 
+   
+   //cycle += PAL_HIDDEN_LINES_VERY_BOTTOM * cyclesPerLine;
+   ////while(cycle > 0) 
+   //{
+   //   const elapsed = cpu.run_instruction();
+   //   writeAudioSamples(elapsed);
+   //   cycle -= elapsed;
+   //}
+      
+   raster_y = 0;
+}
+*/
+
+function renderAllLines() {
    renderLines(HIDDEN_SCANLINES_TOP, true);         // hidden lines at top
    renderLines(SCREEN_H, false);                    // screen
    renderLines(HIDDEN_SCANLINES_BOTTOM, true);      // hidden lines at bottom   
    cpu.interrupt(false, 0);                         // generate VDC interrupt
    renderLines(PAL_HIDDEN_LINES_VERY_BOTTOM, true); // hidden lines at bottom
+}
 
-   frames++;   
+let nextFrame;
+function oneFrame() {   
+   const startTime = new Date().getTime();      
 
-   // Wait until next frame
+   if(nextFrame === undefined) nextFrame = startTime;
+
+   nextFrame = nextFrame + 20; // 20ms, 50Hz  
+
+   renderAllLines();   
+
    const now = new Date().getTime();
-   let timeWaitUntilNextFrame = nextFrameTime - now;
-   if (timeWaitUntilNextFrame < 0) {
-      timeWaitUntilNextFrame = 0;
-      nextFrameTime = now + frameDuration;
-   } else {
-      nextFrameTime += frameDuration;
-   }
-   
-   oneFrameTimeSum += now - startTime;
+   const elapsed = now - startTime;
+   averageFrameTime = averageFrameTime * 0.99 + elapsed * 0.01;
 
-   if(!stopped) setTimeout(()=>oneFrame(), timeWaitUntilNextFrame);   
+   let time_out = nextFrame - now;
+   if(time_out < 0) {
+      time_out = 0;
+      nextFrame = undefined;      
+   }
+   if(!stopped) setTimeout(()=>oneFrame(), time_out);   
 }
 
 /*********************************************************************************** */
 
 const audioBufferSize = 16384; // enough to hold more than one frame time
-const audioBuffer = new Uint8Array(audioBufferSize);
+const audioBuffer = new Float32Array(audioBufferSize);
 
 let samplePtr = 0; // high speed pointer used to downsample
 let audioPtr = 0;  // pointer at audio frequency
@@ -143,10 +171,10 @@ let audioPlayPtr_unclipped = 0;
 
 let initialSync = false;
 
-function writeAudioSample(n) {
+function writeAudioSamples(n) {
    samplePtr += (n * sampleRate);
-   if(samplePtr > cpuSampleRate) {
-      const s = (speaker_A ? 0.5 : -0.5) + (cassette_bit_out ? 0.5 : -0.5);
+   if(samplePtr > cpuSampleRate) {      
+      const s = (speaker_A ? -0.5 : 0.0) + (cassette_bit_out ? 0.5 : 0.0);
       samplePtr -= cpuSampleRate;
       audioBuffer[audioPtr++] = s;
       audioPtr = audioPtr % audioBufferSize;
@@ -159,13 +187,11 @@ const bufferSize = 2048;
 const sampleRate = audioContext.sampleRate;
 var speakerSound = audioContext.createScriptProcessor(bufferSize, 1, 1);
 
-let maxBufferUnderruns = 15;
-
 speakerSound.onaudioprocess = function(e) {
-   if(initialSync === false) {      
-      if(audioPtr < (audioPlayPtr + bufferSize)) return; // buffer still not filled      
-      initialSync = true;
-   }
+   if(audioPtr_unclipped < (audioPlayPtr_unclipped + bufferSize)) {
+      console.warn(`audio buffer not filled: ${audioPtr_unclipped} < ${audioPlayPtr_unclipped + bufferSize}, behind ${audioPtr_unclipped - (audioPlayPtr_unclipped + bufferSize)}`);
+      return; 
+   }   
 
    const output = e.outputBuffer.getChannelData(0);
    for(let i=0; i<bufferSize; i++) {
@@ -173,19 +199,6 @@ speakerSound.onaudioprocess = function(e) {
       audioPlayPtr = audioPlayPtr % audioBufferSize;
       audioPlayPtr_unclipped++;
       output[i] = audio;
-      if(audioPlayPtr_unclipped >= audioPtr_unclipped) {
-         //console.log(`audio buffer underrun ${maxBufferUnderruns}`);
-         initialSync = false;
-         audioPlayPtr = 0;
-         audioPlayPtr = 0;
-         maxBufferUnderruns--;
-         if(maxBufferUnderruns === 0) {
-            // if too many under runs disable audio altogether
-            console.warn("too many audio buffer underrun, audio will be disabled");
-            speakerSound.disconnect(audioContext.destination);
-         }
-         return;
-      }
     }        
 }
 
