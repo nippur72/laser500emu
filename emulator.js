@@ -7,7 +7,7 @@
 // TODO laser 350
 // TODO laser 700
 // TODO rename ram1, ram2 to page
-// TODO laser 200 family?
+// TODO laser 200 family? study vzem
 // TODO Z80js, port in ES6 then webassembly
 // TODO draw in webassembly
 // TODO caplock key / led ?
@@ -76,6 +76,7 @@ let nextFrameTime = 0;
 let averageFrameTime = 0;
 
 let cycle = 0;
+let cycles = 0;
 
 // scanline version
 function renderLines(nlines, hidden) {
@@ -87,6 +88,8 @@ function renderLines(nlines, hidden) {
       while(true) {
          const elapsed = cpu.run_instruction();
          cycle += elapsed;
+         cycles += elapsed;
+
          writeAudioSamples(elapsed);
          
          if(cycle>=cyclesPerLine) {
@@ -210,11 +213,10 @@ function ss() {
 
 /*********************************************************************************** */
 
-
-// laser_drive_init();
-
+// prints welcome message on the console
 welcome();
 
+// try to restore previous state, if any
 restoreState();
 
 // starts drawing frames
