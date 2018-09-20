@@ -150,12 +150,18 @@ function evkey(pcKey) {
    return ev;
 }
 
-function power() {
+function power() {      
    ram1.forEach((e,i)=>ram1[i]=i % 4 === 0 ? 0 : 0xFF);
    ram2.forEach((e,i)=>ram2[i]=i % 4 === 0 ? 0 : 0xFF);
    ram3.forEach((e,i)=>ram2[i]=i % 4 === 0 ? 0 : 0xFF);
-   videoram.forEach((e,i)=>videoram[i]=i % 4 === 0 ? 0 : 0xFF);
-   cpu.reset();
+   videoram.forEach((e,i)=>videoram[i]=i % 4 === 0 ? 0 : 0);
+   banks.forEach((e,i)=>banks[i]=0);
+   vdc_border_color = 0;
+   vdc_text80_background = 0;
+   let state = cpu.getState();
+   state.halted = true;
+   cpu.setState(state);
+   setTimeout(()=>cpu.reset(),200);
 }
 
 function stop() {   
