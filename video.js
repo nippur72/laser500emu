@@ -40,7 +40,7 @@ setPalette(10, 0x50, 0xdf, 0x30);  /* bright green */
 setPalette(11, 0x90, 0xdf, 0xff);  /* bright cyan */
 setPalette(12, 0xaf, 0x20, 0x20);  /* bright red */
 setPalette(13, 0xff, 0x90, 0xff);  /* bright magenta */
-setPalette(14, 0xc0, 0xef, 0x70);  /* bright yellow */
+setPalette(14, 0xdf, 0xdf, 0x60);  /* bright yellow */
 setPalette(15, 0xff, 0xff, 0xff);  /* white */
 
 // canvas is the outer canvas where the aspect ratio is corrected
