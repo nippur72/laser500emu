@@ -1,5 +1,6 @@
 LOW RAM MAP
 ===========
+```
 8030      ASCII code of last key pressed (TODO verify)
 803D      (pointer) Topmem
 803F      (pointer) system variables 
@@ -41,9 +42,11 @@ LOW RAM MAP
 866A      PORT_45_LATCH: port 45h latch (VDC foreground/background color)
 
 8995-     Start of BASIC program
+```
 
 KERNAL ROM ROUTINES
 ===================
+```
 66EF - RESET software reset
 62D3 - PRINTSTR print 0 terminated string in HL
 58F0 - GETC read char from keyboard and returns in A
@@ -55,37 +58,43 @@ KERNAL ROM ROUTINES
        B = 02
 064b - key scan routine?
 09d2 - lprint character 
+```
 
 I/O PORTS
 =========
+```
 40h-43h  BANK SWITCHING
 44h      DISPLAY MODE
 45h      COLOR FOR DISPLAY MODE   
-
+```
 BANK SWITCHING
 ==============
+```
 OUT &H40, n   ; 0000h - 3FFFh
 OUT &H41, n   ; 4000h - 7FFFh
 OUT &H42, n   ; 8000h - BFFFh
 OUT &H43, n   ; C000h - FFFFh
-
+```
 MEMORY PAGES
 ============
+```
 0,1 ROM KERNAL
 2 I/O
 3 VIDEO AND RAM IN LASER 350 ONLY
 4,5 RAM (available to BASIC)
 6 RAM
 7 VIDEO RAM
-     
+```  
 USER INTERRUPT ROUTINE
 ======================
+```
 The CPU will be interrupted for every 20 ms. The interrupt service routine will push all registers to stack, 
 and call an exit point at location 8012H. When power up this location is initialized to RET. 
 The user can modify this vector to jump to his service routine if he wish
-
+```
 VIDEO ACCESS
 ============
+```
 On the Laser 500, the 8 64Kb DRAM chips are shared between the CPU and the video hardware. 
 The CPU accesses RAM through the VLSI IC, which acts as a proxy and can insert wait states for the CPU 
 if the RAM is already in use by the video hardware.
@@ -104,9 +113,10 @@ GR3/4/5       0000-3FFF     None
 
 The offsets in the above table are given relative to the start of bank 7. The corresponding CPU address space 
 range depends on what window the bank 7 is assigned to (if at all).
-
+```
 DISPLAY MODES
 =============
+```
 I/O port 44H controls the display modes;
 
 In textmode:
@@ -154,9 +164,11 @@ The ports are write only and can not be read back if I understand things right!
 The difference between "2 of 16 colors" and "2 colors"(also of a 16 color palette) graphic modes is that in 
 "2 of 16 colors" you can change color after every 8 pixels (every odd byte holds the info of the two colors) 
 in the other case you can only change for the hole screen at once (write color info to port 45H)!
+```
 
 DISPLAY MODE FORMAT
 ===================
+```
 Display modes:
 Lowest memory location is in left upper screen corner, highest in the right lower corner, 
 All addresses are from the screen maps. 
@@ -211,17 +223,18 @@ C000-FFFF(FFA0H=beginning last line)
 GR3 160x192, 16 colors
 GR4  320x192, 2 of 16 colors(even byte=8 pixels(1=foreground color , 0=background color), odd byte=back and foreground color info for the 8 pixels)
 GR5 640x192, 2 colors, every bit is an pixel(80 bytes=80x8=640 pixels), back and foreground color info written to I/O port 45H   
-
+```
 TRICKS
 ======
 if you want a flashing cursor during INKEY$, you can issue the following commands:
-
+```
 POKE &H8013,64:POKE &H8014,10:REM PREPARE FLASHING CURSOR
 POKE &H8012,&HC3:REM ENABLE FLASHING CURSOR
 POKE &H8012,&HC9:REM DISABLE FLASHING CURSOR
-
+```
 INTERRUPT PART 2
 ================
+```
 The video chip triggers a maskable interrupt every start of frame.
 It is an INT and interrupt mode 1 set, takes takes 13 clock cycles to reach &H0038
 
@@ -252,10 +265,11 @@ M3 cycle: 3 ticks: write low byte onto the stack and to set PC to 0038H.
 0a2a f1        pop     af
 0a2b fb        ei      
 0a2c ed4d      reti    
+```
 
 MEMORY MAPPED I/O
 =================
-
+```
    READ (6800-6BFF when on bank 2)
       * bit  function
       * 7    cassette input
@@ -276,7 +290,7 @@ MEMORY MAPPED I/O
       * 2    cassette out (MSB)
       * 1    cassette out (LSB)
       * 0    speaker A
-
+```
 PRINTING CODES
 ==============
 - CHR(24) begin line
