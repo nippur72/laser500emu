@@ -1,6 +1,9 @@
 RESET_PTR = 861dh
 RESET_CHECKSUM_VALUE = e1h
 
+TOPMEM = 803Dh
+STACKPTR = 839dh
+
 LAST_KEY_PRESS = 85f0h
 
 PORT10_LATCH = 8612h
@@ -96,7 +99,7 @@ NMI_INTERRUPT:
 0088 320068    ld      (6800h),a
 008b c3d30a    jp      0ad3h
 008e f1        pop     af
-008f cdde0a    call    0adeh
+008f cdde0a    call    RESTORE_BANK1
 0092 f5        push    af
 0093 cdd004    call    04d0h
 0096 3a6986    ld      a,(8669h)
@@ -109,7 +112,7 @@ NMI_INTERRUPT:
 00a5 210078    ld      hl,7800h
 00a8 22e285    ld      (85e2h),hl
 00ab 1807      jr      00b4h
-00ad cdde0a    call    0adeh
+00ad cdde0a    call    RESTORE_BANK1
 00b0 f5        push    af
 00b1 cd7803    call    0378h
 00b4 eb        ex      de,hl
@@ -153,7 +156,8 @@ NMI_INTERRUPT:
 010b fe1b      cp      1bh
 010d c0        ret     nz
 010e cbc6      set     0,(hl)
-0110 c9        ret     
+0110 c9        ret    
+ 
 0111 fe80      cp      80h
 0113 303e      jr      nc,0153h
 0115 cb4e      bit     1,(hl)
@@ -1686,7 +1690,7 @@ NMI_INTERRUPT:
 0a44 c0        ret     nz
 0a45 3a0786    ld      a,(8607h)
 0a48 77        ld      (hl),a
-0a49 cdde0a    call    0adeh
+0a49 cdde0a    call    RESTORE_BANK1
 0a4c 2ae285    ld      hl,(85e2h)
 0a4f 7e        ld      a,(hl)
 0a50 ee80      xor     80h
@@ -1750,29 +1754,41 @@ NMI_INTERRUPT:
 0ace 78        ld      a,b
 0acf b1        or      c
 0ad0 20fb      jr      nz,0acdh
-0ad2 c9        ret     
-0ad3 e3        ex      (sp),hl
-0ad4 f5        push    af
-0ad5 7d        ld      a,l
-0ad6 326686    ld      (8666h),a
-0ad9 d341      out     (41h),a
-0adb f1        pop     af
-0adc e1        pop     hl
-0add c9        ret     
-0ade dd216486  ld      ix,8664h
-0ae2 dd4600    ld      b,(ix+00h)
-0ae5 dd2a6686  ld      ix,(8666h)
-0ae9 dde3      ex      (sp),ix
-0aeb f5        push    af
-0aec 78        ld      a,b
-0aed 326686    ld      (8666h),a
-0af0 d341      out     (41h),a
-0af2 f1        pop     af
-0af3 dde9      jp      (ix)
+0ad2 c9        ret    
+
+;0ad3
+LABEL_0ad3:
+   ex      (sp),hl             ; loads HL from (sp)
+   push    af                  ; and writes L in port 41h
+   ld      a,l
+   ld      (BANK1_LATCH),a
+   out     (41h),a
+   pop     af
+   pop     hl
+   ret     
+
+;0ade
+RESTORE_BANK1:
+   ld    ix,8664h
+   ld    b,(ix+00h)
+   cont  SETBANK1
+
+;0ae5
+SETBANK1:                     ; sets BANK1 = b (and returns old value in stack?)
+   ld    ix,(BANK1_LATCH)
+   ex    (sp),ix
+   push  af
+   ld    a,b
+   ld    (BANK1_LATCH),a
+   out   (41h),a
+   pop   af
+   jp    (ix)
 
 ; comes here from boot routine
-0af5 0602      ld      b,02h            ; ???
-0af7 cde50a    call    0ae5h            ;
+; 0af5
+SOME_KEY:
+   ld      b,02h            ; I/O in bank 1
+   call    SETBANK1         ;
 
    ld      a,(6fdfh)        ; read CAPS LOCK key
    ld      hl,CAPSLOCK
@@ -1828,9 +1844,11 @@ GETKEY:
    ld     (hl),d
    ret  
 
+; apparently unused bytes
 0b58 00        nop     
 0b59 00        nop     
-0b5a 00        nop     
+0b5a 00        nop    
+
 0b5b 0606      ld      b,06h
 0b5d cde50a    call    0ae5h
 0b60 0e03      ld      c,03h
@@ -1849,6 +1867,7 @@ GETKEY:
 0b75 0d        dec     c
 0b76 20ed      jr      nz,0b65h
 0b78 c3d30a    jp      0ad3h
+
 0b7b 1f        rra     
 0b7c 4c        ld      c,h
 0b7d 49        ld      c,c
@@ -2175,7 +2194,7 @@ GETKEY:
 0dcd cdd957    call    57d9h
 0dd0 c3280d    jp      0d28h
 0dd3 cd940e    call    0e94h
-0dd6 cdde0a    call    0adeh
+0dd6 cdde0a    call    RESTORE_BANK1
 0dd9 cd7803    call    0378h
 0ddc cdf804    call    04f8h
 0ddf 21e585    ld      hl,NROWS
@@ -2187,7 +2206,7 @@ GETKEY:
 0dec 37        scf     
 0ded c3890e    jp      0e89h
 0df0 cd940e    call    0e94h
-0df3 cdde0a    call    0adeh
+0df3 cdde0a    call    RESTORE_BANK1
 0df6 cd7803    call    0378h
 0df9 210286    ld      hl,8602h
 0dfc 46        ld      b,(hl)
@@ -2646,7 +2665,7 @@ GETKEY:
 112e 7e        ld      a,(hl)
 112f 320068    ld      (6800h),a
 1132 c3d30a    jp      0ad3h
-1135 cdde0a    call    0adeh
+1135 cdde0a    call    RESTORE_BANK1
 1138 3afe85    ld      a,(85feh)
 113b b7        or      a
 113c 2812      jr      z,1150h
@@ -2930,7 +2949,7 @@ GETKEY:
 1319 cdf913    call    13f9h
 131c cd6f3c    call    3c6fh
 131f 18e4      jr      1305h
-1321 cdde0a    call    0adeh
+1321 cdde0a    call    RESTORE_BANK1
 1324 cd2a13    call    132ah
 1327 c3d30a    jp      0ad3h
 132a 21fe85    ld      hl,85feh
@@ -3080,7 +3099,7 @@ GETKEY:
 13f4 7d        ld      a,l
 13f5 e6c0      and     0c0h
 13f7 18c4      jr      13bdh
-13f9 cdde0a    call    0adeh
+13f9 cdde0a    call    RESTORE_BANK1
 13fc 21d30a    ld      hl,0ad3h
 13ff e5        push    hl
 1400 21fe85    ld      hl,85feh
@@ -3154,7 +3173,7 @@ GETKEY:
 146b c8        ret     z
 146c 3e01      ld      a,01h
 146e c9        ret     
-146f cdde0a    call    0adeh
+146f cdde0a    call    RESTORE_BANK1
 1472 d5        push    de
 1473 f5        push    af
 1474 2a1486    ld      hl,(8614h)
@@ -3406,7 +3425,7 @@ GETKEY:
 1622 2e08      ld      l,08h
 1624 67        ld      h,a
 1625 cd9218    call    1892h
-1628 3a6686    ld      a,(8666h)
+1628 3a6686    ld      a,(BANK1_LATCH)
 162b f5        push    af
 162c 3e02      ld      a,02h
 162e d341      out     (41h),a
@@ -3686,7 +3705,7 @@ READKEY:
 1862 c3d30a    jp      0ad3h
 1865 c5        push    bc
 1866 d5        push    de
-1867 3a6686    ld      a,(8666h)
+1867 3a6686    ld      a,(BANK1_LATCH)
 186a f5        push    af
 186b 3e02      ld      a,02h
 186d d341      out     (41h),a
@@ -5734,7 +5753,7 @@ READKEY:
 2398 3a1a85    ld      a,(851ah)
 239b b7        or      a
 239c 2006      jr      nz,23a4h
-239e 2a9d83    ld      hl,(839dh)
+239e 2a9d83    ld      hl,(STACKPTR)
 23a1 22c283    ld      (83c2h),hl
 23a4 2ae983    ld      hl,(83e9h)
 23a7 e3        ex      (sp),hl
@@ -14466,7 +14485,7 @@ READKEY:
 5e9b 2b        dec     hl
 5e9c 18f6      jr      5e94h
 5e9e e5        push    hl
-5e9f 2a9d83    ld      hl,(839dh)
+5e9f 2a9d83    ld      hl,(STACKPTR)
 5ea2 0600      ld      b,00h
 5ea4 09        add     hl,bc
 5ea5 09        add     hl,bc
@@ -14480,7 +14499,7 @@ READKEY:
 5eb0 39        add     hl,sp
 5eb1 e1        pop     hl
 5eb2 d8        ret     c
-5eb3 2a3d80    ld      hl,(803dh)
+5eb3 2a3d80    ld      hl,(TOPMEM)
 5eb6 2b        dec     hl
 5eb7 2b        dec     hl
 5eb8 22d883    ld      (83d8h),hl
@@ -14562,7 +14581,7 @@ READKEY:
 5f45 67        ld      h,a
 5f46 22e083    ld      (83e0h),hl
 5f49 22e783    ld      (83e7h),hl
-5f4c 2a9d83    ld      hl,(839dh)
+5f4c 2a9d83    ld      hl,(STACKPTR)
 5f4f 3a1a85    ld      a,(851ah)
 5f52 b7        or      a
 5f53 2003      jr      nz,5f58h
@@ -14576,7 +14595,7 @@ READKEY:
 5f68 b7        or      a
 5f69 cc0653    call    z,5306h
 5f6c c1        pop     bc
-5f6d 2a3d80    ld      hl,(803dh)
+5f6d 2a3d80    ld      hl,(TOPMEM)
 5f70 2b        dec     hl
 5f71 2b        dec     hl
 5f72 22d883    ld      (83d8h),hl
@@ -14600,7 +14619,8 @@ READKEY:
 5f9c e5        push    hl
 5f9d c5        push    bc
 5f9e 2ace83    ld      hl,(83ceh)
-5fa1 c9        ret     
+5fa1 c9        ret   
+
 5fa2 7c        ld      a,h
 5fa3 92        sub     d
 5fa4 c0        ret     nz
@@ -14782,7 +14802,7 @@ READKEY:
 60e7 cda85f    call    5fa8h
 60ea 2c        inc     l
 60eb 28e8      jr      z,60d5h
-60ed ed5b3d80  ld      de,(803dh)
+60ed ed5b3d80  ld      de,(TOPMEM)
 60f1 fe2c      cp      2ch
 60f3 2803      jr      z,60f8h
 60f5 cd3861    call    6138h
@@ -14812,9 +14832,9 @@ READKEY:
 6127 cda25f    call    5fa2h
 612a 3015      jr      nc,6141h
 612c eb        ex      de,hl
-612d 229d83    ld      (839dh),hl
+612d 229d83    ld      (STACKPTR),hl
 6130 e1        pop     hl
-6131 223d80    ld      (803dh),hl
+6131 223d80    ld      (TOPMEM),hl
 6134 e1        pop     hl
 6135 c3d560    jp      60d5h
 6138 cd5037    call    3750h
@@ -14824,9 +14844,9 @@ READKEY:
 6140 c9        ret     
 6141 c3b35e    jp      5eb3h
 6144 e5        push    hl
-6145 2a3d80    ld      hl,(803dh)
+6145 2a3d80    ld      hl,(TOPMEM)
 6148 eb        ex      de,hl
-6149 2a9d83    ld      hl,(839dh)
+6149 2a9d83    ld      hl,(STACKPTR)
 614c 7b        ld      a,e
 614d 95        sub     l
 614e 5f        ld      e,a
@@ -15108,7 +15128,7 @@ READKEY:
 6310 f5        push    af
 6311 01ed62    ld      bc,62edh
 6314 c5        push    bc
-6315 2a9d83    ld      hl,(839dh)
+6315 2a9d83    ld      hl,(STACKPTR)
 6318 22c283    ld      (83c2h),hl
 631b 210000    ld      hl,0000h
 631e e5        push    hl
@@ -15699,6 +15719,7 @@ READKEY:
 66b7 ed56      im      1
 66b9 fb        ei      
 66ba c3dc22    jp      22dch
+
 66bd 02        ld      (bc),a
 66be 0c        inc     c
 66bf 0d        dec     c
@@ -15903,22 +15924,22 @@ BOOT_SEQUENCE_CONTINUE_2:
    ld      hl,9fffh     ; ??? calls this sub while saving HL
    ld      sp,hl        ; on the stack at bottom of first ram bank
    push    hl           ; (so it works on 350 too)
-   call    0af5h        ; 
+   call    SOME_KEY     ; 
    pop     hl           ;
 
 67e0 af        xor     a
 67e1 321385    ld      (8513h),a
-67e4 223d80    ld      (803dh),hl
-67e7 f9        ld      sp,hl
+67e4 223d80    ld      (TOPMEM),hl   ; resets stack pointer
+67e7 f9        ld      sp,hl         ;
 67e8 214981    ld      hl,8149h
 67eb 363a      ld      (hl),3ah
 67ed cd6c5f    call    5f6ch
 67f0 328c83    ld      (838ch),a
 67f3 22d883    ld      (83d8h),hl
 67f6 212122    ld      hl,2221h
-67f9 224781    ld      (8147h),hl
-67fc 21feff    ld      hl,0fffeh
-67ff 223f80    ld      (803fh),hl
+67f9 224781    ld      (8147h),hl  
+67fc 21feff    ld      hl,0fffeh     ; initializes SYSVARS
+67ff 223f80    ld      (SYSVARS),hl
 6802 af        xor     a
 6803 323a80    ld      (803ah),a
 6806 328b83    ld      (838bh),a
@@ -15934,19 +15955,21 @@ BOOT_SEQUENCE_CONTINUE_2:
 6824 210b84    ld      hl,840bh
 6827 227384    ld      (8473h),hl
 682a 21ffff    ld      hl,0ffffh
-682d 3a6786    ld      a,(BANK2_LATCH)
-6830 fe03      cp      03h
-6832 2003      jr      nz,6837h
-6834 21ff9f    ld      hl,9fffh
-6837 229d83    ld      (839dh),hl
+
+682d 3a6786    ld      a,(BANK2_LATCH)    ; if it's laser 350 lowers stack
+6830 fe03      cp      03h                ;
+6832 2003      jr      nz,6837h           ;
+6834 21ff9f    ld      hl,9fffh           ;
+6837 229d83    ld      (STACKPTR),hl      ; 
+
 683a 3e02      ld      a,02h
 683c 326b80    ld      (806bh),a
 683f 210000    ld      hl,0000h
 6842 22c683    ld      (83c6h),hl
 6845 2b        dec     hl
-6846 2a9d83    ld      hl,(839dh)
+6846 2a9d83    ld      hl,(STACKPTR)
 6849 2b        dec     hl
-684a 229d83    ld      (839dh),hl
+684a 229d83    ld      (STACKPTR),hl
 684d 2b        dec     hl
 684e e5        push    hl
 684f 3a6b80    ld      a,(806bh)
@@ -16003,9 +16026,9 @@ BOOT_SEQUENCE_CONTINUE_2:
 689f 9c        sbc     a,h
 68a0 67        ld      h,a
 68a1 dab35e    jp      c,5eb3h
-68a4 229d83    ld      (839dh),hl
+68a4 229d83    ld      (STACKPTR),hl
 68a7 eb        ex      de,hl
-68a8 223d80    ld      (803dh),hl
+68a8 223d80    ld      (TOPMEM),hl
 68ab 22c283    ld      (83c2h),hl
 68ae f9        ld      sp,hl
 68af 22d883    ld      (83d8h),hl
@@ -16019,24 +16042,25 @@ BOOT_SEQUENCE_CONTINUE_2:
 68c5 c39866    jp      6698h
 
 ;***************************************************************
+;68c8
 WARM_RESET:
-68c8 3e01      ld      a,01h
-68ca 326686    ld      (8666h),a
-68cd ed7b3d80  ld      sp,(803dh)
-68d1 21a183    ld      hl,83a1h
-68d4 229f83    ld      (839fh),hl
-68d7 21e783    ld      hl,83e7h
-68da af        xor     a
-68db 77        ld      (hl),a
-68dc 23        inc     hl
-68dd 77        ld      (hl),a
-68de 323a80    ld      (803ah),a
-68e1 cd4558    call    5845h
-68e4 cd216b    call    6b21h
-68e7 ed56      im      1
-68e9 c3dc22    jp      22dch
+   ld   a,01h
+   ld   (BANK1_LATCH),a
+   ld   sp,(TOPMEM)
+   ld   hl,83a1h
+   ld   (839fh),hl
+   ld   hl,83e7h
+   xor  a
+   ld   (hl),a
+   inc  hl
+   ld   (hl),a
+   ld   (803ah),a
+   call 5845h
+   call 6b21h
+   im   1
+   jp   22dch
 
-; unid pointers that are copied into 856A
+; unid code that is copied into 856A, part is BASIC INP/OUT
 L68ec:
    defw d600h    
    defw 6f7ch      

@@ -2,15 +2,24 @@ LOW RAM MAP
 ===========
 ```
 8030      KEYASCII: ASCII code of last key pressed (TODO verify)
-803D      (pointer) Topmem
-803F      (pointer) system variables 
+803A      ?? (initialized with 0)
+803D      (pointer) Topmem (? used to initialize bottom of stack)
+803F      (pointer) SYSVARS: system variables (initialized with fffeh)
 8041      (pointer) start of basic program (initialized with 8995h)
 8043      ?? unid pointer
+8147      (pointer) initialized with 2221h
+8149      ?? initialized with 3a
+838C      ??
+83D8      (pointer) ??
+83E7      ?? (initialized with 0)
+83E8      ?? (initialized with 0)
 83E9      (pointer) basic simple variables
 83EB      (pointer) basic array
 83ED      (pointer) free space
 83C2      (pointer) strings
-839D      (pointer) stack
+839D      (pointer) STACKPTR: stack
+839F      (pointer) ?? (initialized with 83a1h)
+8513      ?? initialized with 0
 856A-8577 ?? some substracting self-modifying code
 8578-857A INP routine helper, port to read is 8579
 857B-857D OUT routine helper, port to write is 857C
@@ -38,6 +47,7 @@ LOW RAM MAP
 8612      PORT_10_LATCH: port 10h latch (?)
 861D      (pointer) warm reset routine (reset key)
 861F      warm boot flag, if equal to (&H861D)+(&H816E)+&HE1 then is graceful reset, otherwise is boot
+8664      ?? port 41 latch old value
 8665      PORT_40_LATCH: SYSVAR_bank0
 8666      PORT_41_LATCH: SYSVAR_bank1
 8667      PORT_42_LATCH: SYSVAR_bank2
