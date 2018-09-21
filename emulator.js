@@ -3,6 +3,8 @@
 // TODO almost exact cycles
 // TODO sound doesn't work in Mozilla
 // TODO load WAV from cassette or mic
+// TODO CSAVE WAV
+// TODO CLOAD WAV
 // TODO javascript debugger, halt
 // TODO laser 350
 // TODO laser 700
