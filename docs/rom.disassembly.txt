@@ -10,6 +10,10 @@ BANK0_LATCH = 8665h
 BANK1_LATCH = 8666h
 BANK2_LATCH = 8667h
 
+NROWS = 85e5h
+NCOLS = 85e7h
+CAPSLOCK = 85fbh
+
 ; tagged labels
 RESET = 0h
 BOOT_SEQUENCE = 66C8h
@@ -76,7 +80,7 @@ NMI_INTERRUPT:
 0068 c30d0c    jp      0c0dh
 
 006b cdc785    call    85c7h
-006e 21fb85    ld      hl,85fbh
+006e 21fb85    ld      hl,CAPSLOCK
 0071 cbf6      set     6,(hl)
 0073 21f985    ld      hl,85f9h
 0076 cb5e      bit     3,(hl)
@@ -166,7 +170,7 @@ NMI_INTERRUPT:
 012a 13        inc     de
 012b 34        inc     (hl)
 012c 34        inc     (hl)
-012d 3ae785    ld      a,(85e7h)
+012d 3ae785    ld      a,(NCOLS)
 0130 47        ld      b,a
 0131 7e        ld      a,(hl)
 0132 eb        ex      de,hl
@@ -182,7 +186,7 @@ NMI_INTERRUPT:
 0144 22e285    ld      (85e2h),hl
 0147 7e        ld      a,(hl)
 0148 320486    ld      (8604h),a
-014b 21fb85    ld      hl,85fbh
+014b 21fb85    ld      hl,CAPSLOCK
 014e cbb6      res     6,(hl)
 0150 c3d30a    jp      0ad3h
 0153 fea0      cp      0a0h
@@ -199,7 +203,7 @@ NMI_INTERRUPT:
 016a 32e985    ld      (85e9h),a
 016d c9        ret     
 016e cd6203    call    0362h
-0171 21e585    ld      hl,85e5h
+0171 21e585    ld      hl,NROWS
 0174 3c        inc     a
 0175 be        cp      (hl)
 0176 3004      jr      nc,017ch
@@ -209,7 +213,7 @@ NMI_INTERRUPT:
 017f 3d        dec     a
 0180 32e885    ld      (85e8h),a
 0183 c9        ret     
-0184 3ae785    ld      a,(85e7h)
+0184 3ae785    ld      a,(NCOLS)
 0187 4f        ld      c,a
 0188 0600      ld      b,00h
 018a c5        push    bc
@@ -226,7 +230,7 @@ NMI_INTERRUPT:
 019e 56        ld      d,(hl)
 019f 2b        dec     hl
 01a0 72        ld      (hl),d
-01a1 21e585    ld      hl,85e5h
+01a1 21e585    ld      hl,NROWS
 01a4 56        ld      d,(hl)
 01a5 15        dec     d
 01a6 ba        cp      d
@@ -239,10 +243,10 @@ NMI_INTERRUPT:
 01b2 34        inc     (hl)
 01b3 1801      jr      01b6h
 01b5 af        xor     a
-01b6 21e585    ld      hl,85e5h
+01b6 21e585    ld      hl,NROWS
 01b9 5e        ld      e,(hl)
 01ba cd8003    call    0380h
-01bd 21e785    ld      hl,85e7h
+01bd 21e785    ld      hl,NCOLS
 01c0 46        ld      b,(hl)
 01c1 cd0c05    call    050ch
 01c4 71        ld      (hl),c
@@ -270,7 +274,7 @@ NMI_INTERRUPT:
 01e8 09        add     hl,bc
 01e9 3ae985    ld      a,(85e9h)
 01ec 57        ld      d,a
-01ed 3ae785    ld      a,(85e7h)
+01ed 3ae785    ld      a,(NCOLS)
 01f0 92        sub     d
 01f1 91        sub     c
 01f2 4f        ld      c,a
@@ -281,7 +285,7 @@ NMI_INTERRUPT:
 01f9 cd5503    call    0355h
 01fc 2815      jr      z,0213h
 01fe 3c        inc     a
-01ff 21e585    ld      hl,85e5h
+01ff 21e585    ld      hl,NROWS
 0202 be        cp      (hl)
 0203 280e      jr      z,0213h
 0205 cd0c05    call    050ch
@@ -311,7 +315,7 @@ NMI_INTERRUPT:
 0228 03        inc     bc
 0229 fde5      push    iy
 022b c5        push    bc
-022c 3ae585    ld      a,(85e5h)
+022c 3ae585    ld      a,(NROWS)
 022f 47        ld      b,a
 0230 3ae885    ld      a,(85e8h)
 0233 cd5503    call    0355h
@@ -322,7 +326,7 @@ NMI_INTERRUPT:
 023c 3d        dec     a
 023d f5        push    af
 023e cd0c05    call    050ch
-0241 3ae785    ld      a,(85e7h)
+0241 3ae785    ld      a,(NCOLS)
 0244 5f        ld      e,a
 0245 1600      ld      d,00h
 0247 19        add     hl,de
@@ -342,7 +346,7 @@ NMI_INTERRUPT:
 0259 f5        push    af
 025a 57        ld      d,a
 025b 14        inc     d
-025c 3ae585    ld      a,(85e5h)
+025c 3ae585    ld      a,(NROWS)
 025f ba        cp      d
 0260 2033      jr      nz,0295h
 0262 21e485    ld      hl,85e4h
@@ -396,7 +400,7 @@ NMI_INTERRUPT:
 02b1 f1        pop     af
 02b2 c1        pop     bc
 02b3 f5        push    af
-02b4 3ae785    ld      a,(85e7h)
+02b4 3ae785    ld      a,(NCOLS)
 02b7 2600      ld      h,00h
 02b9 6f        ld      l,a
 02ba 2b        dec     hl
@@ -467,10 +471,10 @@ NMI_INTERRUPT:
 031c e1        pop     hl
 031d e3        ex      (sp),hl
 031e e5        push    hl
-031f 3ae785    ld      a,(85e7h)
+031f 3ae785    ld      a,(NCOLS)
 0322 4f        ld      c,a
 0323 0600      ld      b,00h
-0325 3ae585    ld      a,(85e5h)
+0325 3ae585    ld      a,(NROWS)
 0328 3d        dec     a
 0329 d1        pop     de
 032a ba        cp      d
@@ -560,7 +564,7 @@ NMI_INTERRUPT:
 03b2 cd5503    call    0355h
 03b5 c8        ret     z
 03b6 32e885    ld      (85e8h),a
-03b9 3ae785    ld      a,(85e7h)
+03b9 3ae785    ld      a,(NCOLS)
 03bc 3d        dec     a
 03bd 77        ld      (hl),a
 03be 18e1      jr      03a1h
@@ -571,7 +575,7 @@ NMI_INTERRUPT:
 03c8 b7        or      a
 03c9 2001      jr      nz,03cch
 03cb 04        inc     b
-03cc 3ae785    ld      a,(85e7h)
+03cc 3ae785    ld      a,(NCOLS)
 03cf b8        cp      b
 03d0 2802      jr      z,03d4h
 03d2 70        ld      (hl),b
@@ -589,7 +593,7 @@ NMI_INTERRUPT:
 03e9 3d        dec     a
 03ea 32e885    ld      (85e8h),a
 03ed c9        ret     
-03ee 3ae585    ld      a,(85e5h)
+03ee 3ae585    ld      a,(NROWS)
 03f1 47        ld      b,a
 03f2 3ae885    ld      a,(85e8h)
 03f5 3c        inc     a
@@ -608,13 +612,13 @@ NMI_INTERRUPT:
 0409 79        ld      a,c
 040a 2001      jr      nz,040dh
 040c 17        rla     
-040d 21e785    ld      hl,85e7h
+040d 21e785    ld      hl,NCOLS
 0410 be        cp      (hl)
 0411 d0        ret     nc
 0412 32e985    ld      (85e9h),a
 0415 c9        ret     
 0416 d620      sub     20h
-0418 21e585    ld      hl,85e5h
+0418 21e585    ld      hl,NROWS
 041b be        cp      (hl)
 041c d0        ret     nc
 041d 21e485    ld      hl,85e4h
@@ -715,13 +719,13 @@ NMI_INTERRUPT:
 04d0 cdc504    call    04c5h
 04d3 cd0c05    call    050ch
 04d6 22e285    ld      (85e2h),hl
-04d9 3ae585    ld      a,(85e5h)
+04d9 3ae585    ld      a,(NROWS)
 04dc 5f        ld      e,a
 04dd cd8003    call    0380h
 04e0 2ae285    ld      hl,(85e2h)
 04e3 3ae985    ld      a,(85e9h)
 04e6 47        ld      b,a
-04e7 3ae785    ld      a,(85e7h)
+04e7 3ae785    ld      a,(NCOLS)
 04ea 90        sub     b
 04eb 47        ld      b,a
 04ec 3ae885    ld      a,(85e8h)
@@ -731,7 +735,7 @@ NMI_INTERRUPT:
 04f5 cbce      set     1,(hl)
 04f7 c9        ret     
 04f8 e5        push    hl
-04f9 21e585    ld      hl,85e5h
+04f9 21e585    ld      hl,NROWS
 04fc 3ae885    ld      a,(85e8h)
 04ff cd5503    call    0355h
 0502 2805      jr      z,0509h
@@ -776,7 +780,7 @@ NMI_INTERRUPT:
 0538 0602      ld      b,02h
 053a cde50a    call    0ae5h
 053d cdca05    call    05cah
-0540 21f085    ld      hl,LAST_KEY_PRESSh
+0540 21f085    ld      hl,LAST_KEY_PRESS
 0543 b7        or      a
 0544 2836      jr      z,057ch
 0546 47        ld      b,a
@@ -787,7 +791,7 @@ NMI_INTERRUPT:
 054c 3af585    ld      a,(85f5h)
 054f 32f485    ld      (85f4h),a
 0552 78        ld      a,b
-0553 21fb85    ld      hl,85fbh
+0553 21fb85    ld      hl,CAPSLOCK
 0556 cba6      res     4,(hl)
 0558 21f385    ld      hl,85f3h
 055b 3619      ld      (hl),19h
@@ -806,18 +810,18 @@ NMI_INTERRUPT:
 0574 21fa85    ld      hl,85fah
 0577 cbd6      set     2,(hl)
 0579 c3d30a    jp      0ad3h
-057c 21fb85    ld      hl,85fbh
+057c 21fb85    ld      hl,CAPSLOCK
 057f cba6      res     4,(hl)
 0581 21f385    ld      hl,85f3h
 0584 35        dec     (hl)
 0585 20b6      jr      nz,053dh
 0587 3619      ld      (hl),19h
 0589 3eff      ld      a,0ffh
-058b 32f085    ld      (LAST_KEY_PRESSh),a
+058b 32f085    ld      (LAST_KEY_PRESS),a
 058e 3af585    ld      a,(85f5h)
 0591 32f485    ld      (85f4h),a
 0594 18a7      jr      053dh
-0596 21fb85    ld      hl,85fbh
+0596 21fb85    ld      hl,CAPSLOCK
 0599 cbe6      set     4,(hl)
 059b 3e19      ld      a,19h
 059d 32f385    ld      (85f3h),a
@@ -857,7 +861,7 @@ NMI_INTERRUPT:
 05de 04        inc     b
 05df 2810      jr      z,05f1h
 05e1 05        dec     b
-05e2 3af085    ld      a,(LAST_KEY_PRESSh)
+05e2 3af085    ld      a,(LAST_KEY_PRESS)
 05e5 b9        cp      c
 05e6 2806      jr      z,05eeh
 05e8 c1        pop     bc
@@ -868,7 +872,7 @@ NMI_INTERRUPT:
 05ee d1        pop     de
 05ef 1801      jr      05f2h
 05f1 c1        pop     bc
-05f2 21fb85    ld      hl,85fbh
+05f2 21fb85    ld      hl,CAPSLOCK
 05f5 56        ld      d,(hl)
 05f6 cb5a      bit     3,d
 05f8 2831      jr      z,062bh
@@ -983,11 +987,11 @@ NMI_INTERRUPT:
 06be 2eff      ld      l,0ffh
 06c0 10f4      djnz    06b6h
 06c2 2f        cpl     
-06c3 32f085    ld      (LAST_KEY_PRESSh),a
+06c3 32f085    ld      (LAST_KEY_PRESS),a
 06c6 af        xor     a
 06c7 c3d30a    jp      0ad3h
 06ca cdca05    call    05cah
-06cd 21f085    ld      hl,LAST_KEY_PRESSh
+06cd 21f085    ld      hl,LAST_KEY_PRESS
 06d0 47        ld      b,a
 06d1 79        ld      a,c
 06d2 be        cp      (hl)
@@ -1671,7 +1675,7 @@ NMI_INTERRUPT:
 0a2e 21f985    ld      hl,85f9h
 0a31 cb5e      bit     3,(hl)
 0a33 c0        ret     nz
-0a34 21fb85    ld      hl,85fbh
+0a34 21fb85    ld      hl,CAPSLOCK
 0a37 cb76      bit     6,(hl)
 0a39 c0        ret     nz
 0a3a 21fa85    ld      hl,85fah
@@ -1699,8 +1703,8 @@ NMI_INTERRUPT:
 0a6a cb6e      bit     5,(hl)
 0a6c 2028      jr      nz,0a96h
 0a6e 3e3f      ld      a,3fh
-0a70 32f085    ld      (LAST_KEY_PRESSh),a
-0a73 21fb85    ld      hl,85fbh
+0a70 32f085    ld      (LAST_KEY_PRESS),a
+0a73 21fb85    ld      hl,CAPSLOCK
 0a76 cb6e      bit     5,(hl)
 0a78 2021      jr      nz,0a9bh
 0a7a cbee      set     5,(hl)
@@ -1715,7 +1719,7 @@ NMI_INTERRUPT:
 0a90 cbb7      res     6,a
 0a92 cbde      set     3,(hl)
 0a94 18f1      jr      0a87h
-0a96 21fb85    ld      hl,85fbh
+0a96 21fb85    ld      hl,CAPSLOCK
 0a99 cbae      res     5,(hl)
 0a9b c3d30a    jp      0ad3h
 0a9e 21fe6f    ld      hl,6ffeh
@@ -1723,7 +1727,7 @@ NMI_INTERRUPT:
 0aa3 21fd6f    ld      hl,6ffdh
 0aa6 cb76      bit     6,(hl)
 0aa8 c9        ret     
-0aa9 21fb85    ld      hl,85fbh
+0aa9 21fb85    ld      hl,CAPSLOCK
 0aac cb66      bit     4,(hl)
 0aae c8        ret     z
 0aaf 21f485    ld      hl,85f4h
@@ -1765,24 +1769,31 @@ NMI_INTERRUPT:
 0af0 d341      out     (41h),a
 0af2 f1        pop     af
 0af3 dde9      jp      (ix)
-0af5 0602      ld      b,02h
-0af7 cde50a    call    0ae5h
-0afa 3adf6f    ld      a,(6fdfh)
-0afd 21fb85    ld      hl,85fbh
-0b00 cb86      res     0,(hl)
-0b02 cb8e      res     1,(hl)
-0b04 cbde      set     3,(hl)
-0b06 cb6f      bit     5,a
-0b08 2007      jr      nz,0b11h
-0b0a cbc6      set     0,(hl)
-0b0c 21da07    ld      hl,07dah
-0b0f 180e      jr      0b1fh
-0b11 cb67      bit     4,a
-0b13 2007      jr      nz,0b1ch
-0b15 cbce      set     1,(hl)
-0b17 21d608    ld      hl,08d6h
-0b1a 1803      jr      0b1fh
-0b1c 21de06    ld      hl,06deh
+
+; comes here from boot routine
+0af5 0602      ld      b,02h            ; ???
+0af7 cde50a    call    0ae5h            ;
+
+   ld      a,(6fdfh)        ; read CAPS LOCK key
+   ld      hl,CAPSLOCK
+   res     0,(hl)
+   res     1,(hl)
+   set     3,(hl)
+
+   bit 5,a
+   if zero then 
+      set  0,(hl)
+      ld   hl,07dah
+   else
+      bit 4,a
+      if zero then
+         set 1,(hl)
+         ld  hl,08d6h   
+      else         
+         ld  hl,06deh
+      end if
+   endif    
+
 0b1f 115400    ld      de,0054h
 0b22 22ea85    ld      (85eah),hl
 0b25 19        add     hl,de
@@ -1805,11 +1816,18 @@ NMI_INTERRUPT:
 0b46 326986    ld      (8669h),a
 0b49 cd5b0b    call    0b5bh
 0b4c c3d30a    jp      0ad3h
-0b4f 21f085    ld      hl,LAST_KEY_PRESSh
-0b52 56        ld      d,(hl)
-0b53 cde416    call    16e4h
-0b56 72        ld      (hl),d
-0b57 c9        ret     
+
+;0b4f
+GETKEY:
+   ;
+   ; reads the keyboard and updates LAST_KEY_PRESSED and KEYASCII
+   ;   
+   ld     hl, LAST_KEY_PRESS
+   ld     d,(hl)
+   call   READKEY
+   ld     (hl),d
+   ret  
+
 0b58 00        nop     
 0b59 00        nop     
 0b5a 00        nop     
@@ -2160,7 +2178,7 @@ NMI_INTERRUPT:
 0dd6 cdde0a    call    0adeh
 0dd9 cd7803    call    0378h
 0ddc cdf804    call    04f8h
-0ddf 21e585    ld      hl,85e5h
+0ddf 21e585    ld      hl,NROWS
 0de2 be        cp      (hl)
 0de3 3804      jr      c,0de9h
 0de5 cd8401    call    0184h
@@ -2186,7 +2204,7 @@ NMI_INTERRUPT:
 0e0f f5        push    af
 0e10 3a0386    ld      a,(8603h)
 0e13 5f        ld      e,a
-0e14 3ae785    ld      a,(85e7h)
+0e14 3ae785    ld      a,(NCOLS)
 0e17 93        sub     e
 0e18 47        ld      b,a
 0e19 f1        pop     af
@@ -2199,7 +2217,7 @@ NMI_INTERRUPT:
 0e26 1808      jr      0e30h
 0e28 cd0c05    call    050ch
 0e2b f5        push    af
-0e2c 3ae785    ld      a,(85e7h)
+0e2c 3ae785    ld      a,(NCOLS)
 0e2f 47        ld      b,a
 0e30 7e        ld      a,(hl)
 0e31 fe20      cp      20h
@@ -2226,7 +2244,7 @@ NMI_INTERRUPT:
 0e57 10d7      djnz    0e30h
 0e59 f1        pop     af
 0e5a 3c        inc     a
-0e5b 21e585    ld      hl,85e5h
+0e5b 21e585    ld      hl,NROWS
 0e5e be        cp      (hl)
 0e5f 300c      jr      nc,0e6dh
 0e61 3d        dec     a
@@ -2256,14 +2274,14 @@ NMI_INTERRUPT:
 0e83 10f4      djnz    0e79h
 0e85 f1        pop     af
 0e86 cdc00e    call    0ec0h
-0e89 21fb85    ld      hl,85fbh
+0e89 21fb85    ld      hl,CAPSLOCK
 0e8c cbb6      res     6,(hl)
 0e8e 218882    ld      hl,8288h
 0e91 c3d30a    jp      0ad3h
 0e94 3afc85    ld      a,(85fch)
 0e97 e6f8      and     0f8h
 0e99 32fc85    ld      (85fch),a
-0e9c 21fb85    ld      hl,85fbh
+0e9c 21fb85    ld      hl,CAPSLOCK
 0e9f cbf6      set     6,(hl)
 0ea1 21fa85    ld      hl,85fah
 0ea4 cb56      bit     2,(hl)
@@ -2306,7 +2324,7 @@ NMI_INTERRUPT:
 0eea 32fc85    ld      (85fch),a
 0eed f1        pop     af
 0eee f1        pop     af
-0eef 21e585    ld      hl,85e5h
+0eef 21e585    ld      hl,NROWS
 0ef2 46        ld      b,(hl)
 0ef3 05        dec     b
 0ef4 b8        cp      b
@@ -2739,7 +2757,7 @@ NMI_INTERRUPT:
 11fb 5c        ld      e,h
 11fc 19        add     hl,de
 11fd 10fd      djnz    11fch
-11ff cde416    call    16e4h
+11ff cde416    call    READKEY
 1202 3812      jr      c,1216h
 1204 2b        dec     hl
 1205 7d        ld      a,l
@@ -2749,7 +2767,7 @@ NMI_INTERRUPT:
 120b cd0717    call    1707h
 120e d0        ret     nc
 120f 1804      jr      1215h
-1211 cde416    call    16e4h
+1211 cde416    call    READKEY
 1214 d0        ret     nc
 1215 e1        pop     hl
 1216 e1        pop     hl
@@ -2767,7 +2785,7 @@ NMI_INTERRUPT:
 1230 cb12      rl      d
 1232 b7        or      a
 1233 f5        push    af
-1234 cde416    call    16e4h
+1234 cde416    call    READKEY
 1237 3813      jr      c,124ch
 1239 f1        pop     af
 123a ee01      xor     01h
@@ -3480,6 +3498,13 @@ NMI_INTERRUPT:
 16df 90        sub     b
 16e0 323e86    ld      (863eh),a
 16e3 c9        ret     
+
+;16e4
+READKEY:
+   ;
+   ; reads the keyboard and updates LAST_KEY_PRESSED and KEYASCII
+   ; d = value of last key pressed for compare
+   ;
 16e4 c5        push    bc
 16e5 cdea16    call    16eah
 16e8 c1        pop     bc
@@ -3494,13 +3519,13 @@ NMI_INTERRUPT:
 16fc 2006      jr      nz,1704h
 16fe 37        scf     
 16ff 3e24      ld      a,24h
-1701 32f085    ld      (LAST_KEY_PRESSh),a
+1701 32f085    ld      (LAST_KEY_PRESS),a
 1704 c3d30a    jp      0ad3h
 1707 3a6c86    ld      a,(866ch)
 170a eeb7      xor     0b7h
 170c c0        ret     nz
 170d 3e24      ld      a,24h
-170f 32f085    ld      (LAST_KEY_PRESSh),a
+170f 32f085    ld      (LAST_KEY_PRESS),a
 1712 37        scf     
 1713 c9        ret     
 1714 e5        push    hl
@@ -3746,7 +3771,7 @@ NMI_INTERRUPT:
 18f3 213319    ld      hl,1933h
 18f6 cd0219    call    1902h
 18f9 c32217    jp      1722h
-18fc 3afb85    ld      a,(85fbh)
+18fc 3afb85    ld      a,(CAPSLOCK)
 18ff cb7f      bit     7,a
 1901 c0        ret     nz
 1902 7e        ld      a,(hl)
@@ -15853,14 +15878,15 @@ BOOT_SEQUENCE_CONTINUE_2:
    ld      (PORT45_LATCH),a       ; saves latch
 
    ld      a,0ffh
-   ld      (LAST_KEY_PRESS),a     ; initializes LAST_KEY_PRESSh with FFh
+   ld      (LAST_KEY_PRESS),a     ; initializes LAST_KEY_PRESS with FFh
 
    ld a,28h : ld (85f5h),a : ld (85f4h),a
 
    ld a,05h : ld (85f6h),a
    ld a,10h : ld (8606h),a : ld (8607h),a
-   ld a,18h : ld (85e5h),a ; number of scrolling rows (24)
-   ld a,50h : ld (85e7h),a ; number of columns (80)
+
+   ld a,18h : ld (NROWS),a    ; number of scrolling rows (24)
+   ld a,50h : ld (NCOLS),a    ; number of columns (80)
 
    ; sets the RESET_PTR and RESET_WARM_FLAG
    ld      de, WARM_RESET
@@ -15874,11 +15900,12 @@ BOOT_SEQUENCE_CONTINUE_2:
    add     a, RESET_CHECKSUM_VALUE
    ld      (hl), a
 
-67d7 21ff9f    ld      hl,9fffh
-67da f9        ld      sp,hl
-67db e5        push    hl
-67dc cdf50a    call    0af5h
-67df e1        pop     hl
+   ld      hl,9fffh     ; ??? calls this sub while saving HL
+   ld      sp,hl        ; on the stack at bottom of first ram bank
+   push    hl           ; (so it works on 350 too)
+   call    0af5h        ; 
+   pop     hl           ;
+
 67e0 af        xor     a
 67e1 321385    ld      (8513h),a
 67e4 223d80    ld      (803dh),hl

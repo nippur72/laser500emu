@@ -1,7 +1,7 @@
 LOW RAM MAP
 ===========
 ```
-8030      ASCII code of last key pressed (TODO verify)
+8030      KEYASCII: ASCII code of last key pressed (TODO verify)
 803D      (pointer) Topmem
 803F      (pointer) system variables 
 8041      (pointer) start of basic program (initialized with 8995h)
@@ -20,14 +20,18 @@ LOW RAM MAP
 85D2      ?? initialized with 22h
 85D4-85DF 10x "RET 00 00" configurable jump table
 85E2      (word) ?? initialized with 7800h
-85E5      number of scrolling rows (default 24, lower value means bottom rows are fixed) 
+85E5      NROWS: number of scrolling rows (default 24, lower value means bottom rows are fixed) 
 85E6      ?? Left column indent (default 0, in steps of 2, odd values will yield funny results)
-85E7      number of screen columns (initialized with 80)
+85E7      NCOLS: number of screen columns (initialized with 80)
+85EA      (word) ?? involved in capslock/keyboard table
+85EC      (word) ?? involved in capslock/keyboard table
+85EE      (word) ?? involved in capslock/keyboard table
 85F0      LAST_KEY_PRESSED: key code currently pressed (255 = no key) (initialized with ffh)
 85F4      ?? initialized with 28h
 85F5      ?? initialized with 28h
 85F6      ?? initialized with 05h
 85FA      turn on/off inverse text (bit 1) and beep (bit 3)
+85FB      CAPSLOCK: somewhat involved in CAPS LOCK state (bit 3), but other bits are used as well
 8604      content at cursor position
 8606      ?? initialized with 10h
 8607      ?? initialized with 10h
@@ -47,17 +51,17 @@ LOW RAM MAP
 KERNAL ROM ROUTINES
 ===================
 ```
-66EF - RESET software reset
-62D3 - PRINTSTR print 0 terminated string in HL
-58F0 - GETC read char from keyboard and returns in A
-57D9 - CHROUT prints character in A
-591c - print new line (apparently) 
 09EA - BEEP (not working) emet un son 
        HL = hauteur de note (plus la valeur est faible , plus la note est aigue)
        DE = durée de la note
        B = 02
-064b - key scan routine?
-09d2 - lprint character 
+0B4F - GETKEY: reads the keyboard and updates LAST_KEY_PRESSED and KEYASCII
+09D2 - lprint character
+57D9 - CHROUT prints character in A
+58F0 - GETC read char from keyboard and returns in A
+591C - print new line (apparently) 
+62D3 - PRINTSTR: print 0 terminated string in HL
+66EF - RESET cold software reset
 ```
 
 I/O PORTS
@@ -293,7 +297,7 @@ MEMORY MAPPED I/O
 ```
 PRINTING CODES
 ==============
-- CHR(24) begin line
+- CHR(24) begin line (cursor up key)
 - CHR$(31) cls
 - CHR$(28) home 0x1C
 - ESC A reverse off
