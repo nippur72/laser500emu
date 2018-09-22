@@ -121,8 +121,17 @@ function parseQueryStringCommands() {
 
    if(cmd.load !== undefined) {
       name = cmd.load;      
-      fetchProgram(name);      
+      fetchProgrmAll(name);            
    }
+}
+
+async function fetchProgramAll(name) {
+   if(await fetchProgram(name)) return;
+   if(await fetchProgram(name+".bin")) return;
+   if(await fetchProgram(name+"/"+name)) return;
+   if(await fetchProgram(name+"/"+name+".bin")) return;
+
+   console.log(`cannot load "${name}": `, err);
 }
 
 async function fetchProgram(name)
@@ -133,9 +142,10 @@ async function fetchProgram(name)
       const arrbuf = await fetch(`software/${name}`);
       const bytes = new Uint8Array(await arrbuf.arrayBuffer());
       droppedFile(name, bytes);
+      return true;
    }
    catch(err)
    {
-      console.log(`cannot load "${name}": `, err);
+      return false;      
    }
 }
