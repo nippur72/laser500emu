@@ -121,7 +121,7 @@ function parseQueryStringCommands() {
 
    if(cmd.load !== undefined) {
       name = cmd.load;      
-      fetchProgrmAll(name);            
+      fetchProgramAll(name);            
    }
 }
 
