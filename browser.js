@@ -139,8 +139,9 @@ async function fetchProgram(name)
    console.log(`wanting to load ${name}`);
    try
    {
-      const arrbuf = await fetch(`software/${name}`);
-      const bytes = new Uint8Array(await arrbuf.arrayBuffer());
+      const response = await fetch(`software/${name}`);
+      if(response.status === 404) return false;
+      const bytes = new Uint8Array(await response.arrayBuffer());
       droppedFile(name, bytes);
       return true;
    }
