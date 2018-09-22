@@ -130,8 +130,8 @@ async function fetchProgram(name)
    console.log(`wanting to load ${name}`);
    try
    {
-      const prg = await fetch(`software/${name}`);
-      const bytes = new Uint8Array(prg.arrayBuffer());
+      const arrbuf = await fetch(`software/${name}`);
+      const bytes = new Uint8Array(await arrbuf.arrayBuffer());
       droppedFile(name, bytes);
    }
    catch(err)
