@@ -45,14 +45,13 @@ function io_read(port) {
       case 0x43: return banks[3];
       case 0x2b: return joy0;  // joystick 8 directions
       case 0x27: return joy1;  // joystick fire buttons
-      case 0x00: return printerReady;            
-      /*
+      case 0x00: return printerReady;                  
       case 0x10:
       case 0x11:
       case 0x12:
       case 0x13:
-         return laser_fdc_r((port &0xFF)- 0x10);
-      */
+      case 0x14:
+         return floppy_read_port(port & 0xFF);   
    }
    console.warn(`read from unknown port ${hex(port)}h`);
    return 0x00;
@@ -92,14 +91,13 @@ function io_write(port, value) {
          printerWrite(value);
       case 0x0e:
          // printer port duplicated here
-         return;  
-      /*                      
+         return;                           
       case 0x10:
       case 0x11:
       case 0x12:
       case 0x13:
-         return laser_fdc_w((port & 0xFF) - 0x10, value);
-      */   
+      case 0x14:
+         return floppy_write_port(port & 0xFF, value);      
       default:
          console.warn(`write on unknown port ${hex(port)}h value ${hex(value)}h`);
    }   
