@@ -120,20 +120,22 @@ function parseQueryStringCommands() {
    const cmd = getQueryStringObject();
 
    if(cmd.load !== undefined) {
-      name = cmd.load;
-      loadFromFetch(name);
+      name = cmd.load;      
+      fetchProgram(name);      
    }
 }
 
-async function loadFromFetch() {
+async function fetchProgram(name)
+{
    console.log(`wanting to load ${name}`);
-   const x = fetch(`software/${name}`).arrayBuffer();
-
-   console.log(x.response);
-
-   /*
-   fetch(`software/${name}`).arrayBuffer().then(response=>{
-      droppedFile(name, response);
-   });
-   */
+   try
+   {
+      const prg = await fetch(`software/${name}`);
+      const bytes = new Uint8Array(prg.arrayBuffer());
+      droppedFile(name, bytes);
+   }
+   catch(err)
+   {
+      console.log(`cannot load "${name}": `, err);
+   }
 }
