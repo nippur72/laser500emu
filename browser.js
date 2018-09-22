@@ -103,3 +103,37 @@ function welcome() {
    console.info("");
    console.info("");
 }
+
+function getQueryStringObject() {
+   let a = window.location.search.split("&");
+   let o = a.reduce((o, v) =>{
+      var kv = v.split("=");
+      kv[0] = kv[0].replace("?", "");
+      o[kv[0]] = kv[1];
+      return o;
+      },{}
+   );
+   return o;
+}
+
+function parseQueryStringCommands() {
+   const cmd = getQueryStringObject();
+
+   if(cmd.load !== undefined) {
+      name = cmd.load;
+      loadFromFetch(name);
+   }
+}
+
+async function loadFromFetch() {
+   console.log(`wanting to load ${name}`);
+   const x = fetch(`software/${name}`).arrayBuffer();
+
+   console.log(x.response);
+
+   /*
+   fetch(`software/${name}`).arrayBuffer().then(response=>{
+      droppedFile(name, response);
+   });
+   */
+}

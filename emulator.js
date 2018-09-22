@@ -221,6 +221,8 @@ welcome();
 // try to restore previous state, if any
 restoreState();
 
+parseQueryStringCommands();
+
 // starts drawing frames
 oneFrame();
 
