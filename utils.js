@@ -41,7 +41,7 @@ function mem_read_word(address, word) {
 
 async function crun(filename) {
    cload(filename);
-   await print_string("run:\n");
+   await print_string("\nrun:\n");
 }
 
 function cload(filename) {
@@ -127,7 +127,7 @@ async function print_string(str) {
 
 async function pause() {
    return new Promise((resolve,reject)=> {
-      setTimeout(()=>resolve(), 80);
+      setTimeout(()=>resolve(), 100);
    });
 }
 
