@@ -11,8 +11,11 @@ This repo serves also as a container for Laser 500 software and documentation, h
 - [software](https://github.com/nippur72/laser500emu/tree/gh-pages/software)
 - [docs](https://github.com/nippur72/laser500emu/tree/gh-pages/docs)
 
-Other resources about the Laser computers are a dedicated [Facebook group](https://www.facebook.com/groups/263150584310074) and 
-an old forum thread on [AtariAge](http://atariage.com/forums/topic/187667-any-info-on-video-technology-laser-500-computer/page-1).
+Other resources about the Laser computers are:
+
+- Bonstra's GitHub repo [laser500-doc](https://github.com/Bonstra/laser500-doc) by 
+- a dedicated [Facebook group](https://www.facebook.com/groups/263150584310074) 
+- a forum thread on [AtariAge](http://atariage.com/forums/topic/187667-any-info-on-video-technology-laser-500-computer/page-1).
 
 EMULATOR FEATURES
 =================
