@@ -37,16 +37,16 @@ RESET:
    jp      BOOT_SEQUENCE
 
 VECTORS:
-0008 c30080    jp      8000h
-000b c36b00    jp      006bh
+0008 c30080    jp      8000h    ; ?? warm reset
+000b c36b00    jp      006bh    ; CONOUT outputs char in A to console       
 000e 00        nop     
 000f 00        nop     
 0010 c30380    jp      8003h
-0013 c33105    jp      0531h
+0013 c33105    jp      0531h    ; CONIN gets char from console and puts into A
 0016 00        nop     
 0017 00        nop     
 0018 c30680    jp      8006h
-001b c3ac06    jp      06ach
+001b c3ac06    jp      06ach    ; ??
 001e 00        nop     
 001f 00        nop     
 0020 c30980    jp      8009h
@@ -58,31 +58,34 @@ VECTORS:
 002e 00        nop     
 002f 00        nop     
 0030 c30f80    jp      800fh
-0033 c38069    jp      6980h
+0033 c38069    jp      6980h    ; READSC - read sector from disk
 0036 00        nop     
 0037 00        nop 
 
 INTERRUPT_MODE_1:
 0038 c30c0a    jp      0a0ch
+
 003b c31a28    jp      281ah
 003e c3a85f    jp      5fa8h
 0041 c30a35    jp      350ah
 0044 c3d32e    jp      2ed3h
-0047 c36518    jp      1865h
-004a c31f16    jp      161fh
+0047 c36518    jp      1865h   ; RDBYET - read byte from cassette in A
+004a c31f16    jp      161fh   ; WRBYET - write byte in A to cassette
 004d c3a038    jp      38a0h
 0050 c3f223    jp      23f2h
 0053 c3105f    jp      5f10h
 0056 c3b427    jp      27b4h
 0059 c3dc22    jp      22dch
-005c c3d45f    jp      5fd4h
+005c c3d45f    jp      5fd4h   ; CTRLBRK - handles CTRL+C
 005f c34222    jp      2242h
 0062 c32a13    jp      132ah
 
 NMI_INTERRUPT:
 0065 c36f14    jp      146fh
+
 0068 c30d0c    jp      0c0dh
 
+CONOUT:
 006b cdc785    call    85c7h
 006e 21fb85    ld      hl,CAPSLOCK
 0071 cbf6      set     6,(hl)
@@ -1986,11 +1989,13 @@ GETKEY:
 0bee 2042      jr      nz,0c32h
 0bf0 1e0d      ld      e,0dh
 0bf2 00        nop     
-0bf3 3e3f      ld      a,3fh
-0bf5 cdd957    call    57d9h
-0bf8 3e20      ld      a,20h
-0bfa cdd957    call    57d9h
-0bfd af        xor     a
+
+   ld      a,3fh     ; prints "? "
+   call    57d9h     ;   
+   ld      a,20h     ;
+   call    57d9h     ; 
+   xor     a
+
 0bfe 323080    ld      (LAST_KEY_ASCII),a
 0c01 320d85    ld      (850dh),a
 0c04 c31c0c    jp      0c1ch
@@ -13694,7 +13699,7 @@ LABEL_16ea:
 5957 fe20      cp      20h
 5959 ccf058    call    z,58f0h
 595c 323080    ld      (LAST_KEY_ASCII),a
-595f fe03      cp      03h
+595f fe03      cp      03h                   ; CTRL+C ??
 5961 c3d45f    jp      5fd4h
 5964 cd1a28    call    281ah
 5967 e5        push    hl

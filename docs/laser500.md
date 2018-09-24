@@ -10,6 +10,7 @@ LOW RAM MAP
 8043      ?? unid pointer
 8147      (pointer) initialized with 2221h
 8149      ?? initialized with 3a
+8289-838B screen editor input buffer, the line typed on screen is written here
 838C      ??
 83D8      (pointer) ??
 83E7      ?? (initialized with 0)
@@ -40,6 +41,7 @@ LOW RAM MAP
 85F4      KEYREPEATCOUNTER key repeat counter, when zero is set to KEYREPEAT (initialized with 28h)
 85F5      KEYREPEAT: key autorepeat value, initialized with 28h 
 85F6      ?? initialized with 05h
+85F7      (pointer) ??
 85F9      ?? bit 3: if 1 then do not read keyboard during interrupt
 85FA      bit 1: turn on/off inverse text 
           bit 3: turn on/off key beep
@@ -77,11 +79,14 @@ KERNAL ROM ROUTINES
        B = 02
 0B4F - not working - GETKEY: reads the keyboard and updates LAST_KEY_PRESSED and KEYASCII
 09D2 - lprint character
-57D9 - CHROUT prints character in A
 58F0 - GETC read char from keyboard and returns in A
 591C - print new line (apparently) 
 62D3 - PRINTSTR: print 0 terminated string in HL
 66EF - RESET cold software reset
+
+000B CONOUT outputs character in a to console
+006B CONOUT outputs character in a to console
+57D9 CHROUT prints character in A
 ```
 
 I/O PORTS
