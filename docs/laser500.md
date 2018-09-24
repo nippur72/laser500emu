@@ -1,6 +1,7 @@
 LOW RAM MAP
 ===========
 ```
+8012      user defined interrupt routine (default: RET) 
 8030      KEYASCII: ASCII code of last key pressed (TODO verify)
 803A      ?? (initialized with 0)
 803D      (pointer) Topmem (? used to initialize bottom of stack)
@@ -36,11 +37,19 @@ LOW RAM MAP
 85EC      (word) ?? involved in capslock/keyboard table
 85EE      (word) ?? involved in capslock/keyboard table
 85F0      LAST_KEY_PRESSED: key code currently pressed (255 = no key) (initialized with ffh)
-85F4      ?? initialized with 28h
-85F5      ?? initialized with 28h
+85F4      KEYREPEATCOUNTER key repeat counter, when zero is set to KEYREPEAT (initialized with 28h)
+85F5      KEYREPEAT: key autorepeat value, initialized with 28h 
 85F6      ?? initialized with 05h
-85FA      turn on/off inverse text (bit 1) and beep (bit 3)
-85FB      CAPSLOCK: somewhat involved in CAPS LOCK state (bit 3), but other bits are used as well
+85F9      ?? bit 3: if 1 then do not read keyboard during interrupt
+85FA      bit 1: turn on/off inverse text 
+          bit 3: turn on/off key beep
+          bit 5: 0=do not read keyboard during interrupt
+          bit 3: ??
+          bit 2: ??
+85FB      CAPSLOCK: 
+          bit 6: if 1 then do not read keyboard during interrupt
+          bit 4: if 0 then do not do key autorepeat during interrupt
+          somewhat involved in CAPS LOCK state (bit 3), but other bits are used as well
 8604      content at cursor position
 8606      ?? initialized with 10h
 8607      ?? initialized with 10h
@@ -61,11 +70,12 @@ LOW RAM MAP
 KERNAL ROM ROUTINES
 ===================
 ```
+0538 - GETKEY2: waits for keypress, updates LAST_KEY_PRESSED and returns ASCII code in A
 09EA - BEEP (not working) emet un son 
        HL = hauteur de note (plus la valeur est faible , plus la note est aigue)
        DE = durée de la note
        B = 02
-0B4F - GETKEY: reads the keyboard and updates LAST_KEY_PRESSED and KEYASCII
+0B4F - not working - GETKEY: reads the keyboard and updates LAST_KEY_PRESSED and KEYASCII
 09D2 - lprint character
 57D9 - CHROUT prints character in A
 58F0 - GETC read char from keyboard and returns in A

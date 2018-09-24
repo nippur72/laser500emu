@@ -4,7 +4,8 @@ RESET_CHECKSUM_VALUE = e1h
 TOPMEM = 803Dh
 STACKPTR = 839dh
 
-LAST_KEY_PRESS = 85f0h
+KEY_SCAN_CODE = 85f0h
+LAST_KEY_ASCII = 8030h
 
 PORT10_LATCH = 8612h
 PORT45_LATCH = 866Ah
@@ -49,7 +50,7 @@ VECTORS:
 001e 00        nop     
 001f 00        nop     
 0020 c30980    jp      8009h
-0023 c3ca05    jp      05cah
+0023 c3ca05    jp      05cah    ; ROLLOVER 
 0026 00        nop     
 0027 00        nop     
 0028 c30c80    jp      800ch
@@ -784,7 +785,7 @@ NMI_INTERRUPT:
 0538 0602      ld      b,02h
 053a cde50a    call    0ae5h
 053d cdca05    call    05cah
-0540 21f085    ld      hl,LAST_KEY_PRESS
+0540 21f085    ld      hl,KEY_SCAN_CODE
 0543 b7        or      a
 0544 2836      jr      z,057ch
 0546 47        ld      b,a
@@ -821,7 +822,7 @@ NMI_INTERRUPT:
 0585 20b6      jr      nz,053dh
 0587 3619      ld      (hl),19h
 0589 3eff      ld      a,0ffh
-058b 32f085    ld      (LAST_KEY_PRESS),a
+058b 32f085    ld      (KEY_SCAN_CODE),a
 058e 3af585    ld      a,(85f5h)
 0591 32f485    ld      (85f4h),a
 0594 18a7      jr      053dh
@@ -865,7 +866,7 @@ NMI_INTERRUPT:
 05de 04        inc     b
 05df 2810      jr      z,05f1h
 05e1 05        dec     b
-05e2 3af085    ld      a,(LAST_KEY_PRESS)
+05e2 3af085    ld      a,(KEY_SCAN_CODE)
 05e5 b9        cp      c
 05e6 2806      jr      z,05eeh
 05e8 c1        pop     bc
@@ -991,11 +992,11 @@ NMI_INTERRUPT:
 06be 2eff      ld      l,0ffh
 06c0 10f4      djnz    06b6h
 06c2 2f        cpl     
-06c3 32f085    ld      (LAST_KEY_PRESS),a
+06c3 32f085    ld      (KEY_SCAN_CODE),a
 06c6 af        xor     a
 06c7 c3d30a    jp      0ad3h
 06ca cdca05    call    05cah
-06cd 21f085    ld      hl,LAST_KEY_PRESS
+06cd 21f085    ld      hl,KEY_SCAN_CODE
 06d0 47        ld      b,a
 06d1 79        ld      a,c
 06d2 be        cp      (hl)
@@ -1657,17 +1658,19 @@ NMI_INTERRUPT:
 0a06 20ed      jr      nz,09f5h
 0a08 f1        pop     af
 0a09 c3d30a    jp      0ad3h
+
+; interrupt 0038
 0a0c f5        push    af
 0a0d c5        push    bc
 0a0e d5        push    de
 0a0f e5        push    hl
 0a10 dde5      push    ix
 0a12 fde5      push    iy
-0a14 cd1280    call    8012h
-0a17 cd2e0a    call    0a2eh
-0a1a cd560a    call    0a56h
-0a1d cda90a    call    0aa9h
-0a20 cdb80a    call    0ab8h
+0a14 cd1280    call    8012h                    ; user defined interrupt routine
+0a17 cd2e0a    call    INTERRUPT_FLASH_CURSOR
+0a1a cd560a    call    INTERRUPT_3
+0a1d cda90a    call    INTERRUPT_KEY_REPEAT
+0a20 cdb80a    call    INTERRUPT_4
 0a23 fde1      pop     iy
 0a25 dde1      pop     ix
 0a27 e1        pop     hl
@@ -1676,38 +1679,45 @@ NMI_INTERRUPT:
 0a2a f1        pop     af
 0a2b fb        ei      
 0a2c ed4d      reti    
-0a2e 21f985    ld      hl,85f9h
-0a31 cb5e      bit     3,(hl)
-0a33 c0        ret     nz
-0a34 21fb85    ld      hl,CAPSLOCK
-0a37 cb76      bit     6,(hl)
-0a39 c0        ret     nz
-0a3a 21fa85    ld      hl,85fah
-0a3d cb6e      bit     5,(hl)
-0a3f c8        ret     z
-0a40 210686    ld      hl,8606h
-0a43 35        dec     (hl)
-0a44 c0        ret     nz
-0a45 3a0786    ld      a,(8607h)
-0a48 77        ld      (hl),a
-0a49 cdde0a    call    RESTORE_BANK1
-0a4c 2ae285    ld      hl,(85e2h)
-0a4f 7e        ld      a,(hl)
-0a50 ee80      xor     80h
-0a52 77        ld      (hl),a
-0a53 c3d30a    jp      0ad3h
-0a56 0602      ld      b,02h
-0a58 cde50a    call    0ae5h
+;******************************* interrupt ends here
+
+;0a2e
+INTERRUPT_FLASH_CURSOR:
+   ld      hl,85f9h
+   bit     3,(hl)
+   ret     nz
+   ld      hl,CAPSLOCK
+   bit     6,(hl)
+   ret     nz
+   ld      hl,85fah
+   bit     5,(hl)
+   ret     z
+   ld      hl,8606h            ; flashing cursor check
+   dec     (hl)
+   ret     nz
+   ld      a,(8607h)
+   ld      (hl),a              ; restore counter
+   call    RESTORE_BANK1
+   ld      hl,(85e2h)          ; cursor address
+   ld      a,(hl)
+   xor     80h                 ; negate
+   ld      (hl),a              ; draw cursor
+   jp      0ad3h               ; something with bank 1
+
+;0a56
+INTERRUPT_3:
+0a56 0602      ld      b,02h      ; { switch to bank 2
+0a58 cde50a    call    0ae5h      ; }
 0a5b 21ff6a    ld      hl,6affh
 0a5e cb76      bit     6,(hl)
 0a60 2811      jr      z,0a73h
-0a62 cda30a    call    0aa3h
+0a62 cda30a    call    LABEL_0aa3
 0a65 202f      jr      nz,0a96h
 0a67 21f76f    ld      hl,6ff7h
 0a6a cb6e      bit     5,(hl)
 0a6c 2028      jr      nz,0a96h
 0a6e 3e3f      ld      a,3fh
-0a70 32f085    ld      (LAST_KEY_PRESS),a
+0a70 32f085    ld      (KEY_SCAN_CODE),a
 0a73 21fb85    ld      hl,CAPSLOCK
 0a76 cb6e      bit     5,(hl)
 0a78 2021      jr      nz,0a9bh
@@ -1727,10 +1737,17 @@ NMI_INTERRUPT:
 0a99 cbae      res     5,(hl)
 0a9b c3d30a    jp      0ad3h
 0a9e 21fe6f    ld      hl,6ffeh
-0aa1 1803      jr      0aa6h
+0aa1 1803      jr      0aa6
+
+LABEL_0aa3:
 0aa3 21fd6f    ld      hl,6ffdh
+
+LABEL_0aa6:
 0aa6 cb76      bit     6,(hl)
 0aa8 c9        ret     
+
+;0aa9
+INTERRUPT_KEY_REPEAT:
 0aa9 21fb85    ld      hl,CAPSLOCK
 0aac cb66      bit     4,(hl)
 0aae c8        ret     z
@@ -1741,20 +1758,27 @@ NMI_INTERRUPT:
 0ab5 c0        ret     nz
 0ab6 77        ld      (hl),a
 0ab7 c9        ret     
-0ab8 21fa85    ld      hl,85fah
-0abb cb56      bit     2,(hl)
-0abd cb96      res     2,(hl)
-0abf 2809      jr      z,0acah
-0ac1 cb6e      bit     5,(hl)
-0ac3 2805      jr      z,0acah
-0ac5 cb5e      bit     3,(hl)
-0ac7 cae209    jp      z,09e2h
-0aca 010c00    ld      bc,000ch
-0acd 0b        dec     bc
-0ace 78        ld      a,b
-0acf b1        or      c
-0ad0 20fb      jr      nz,0acdh
-0ad2 c9        ret    
+
+;0ab8
+INTERRUPT_4:
+   ld   hl,85fah
+   bit  2,(hl)
+   res  2,(hl)
+   if zero then jr INTERRUPT_4
+   bit  5,(hl)
+   if zero then jr INTERRUPT_4
+   bit  3,(hl)
+   if zero then jp 09e2
+
+;0aca
+INTERRUPT_41:              ; small delay, I guess related to keypress?
+   ld bc,000ch
+   do
+      dec bc
+      ld  a,b
+      or  c
+   while not zero 
+   ret    
 
 ;0ad3
 LABEL_0ad3:
@@ -1836,9 +1860,9 @@ SOME_KEY:
 ;0b4f
 GETKEY:
    ;
-   ; reads the keyboard and updates LAST_KEY_PRESSED and KEYASCII
+   ; reads the keyboard and updates KEY_SCAN_CODE and KEYASCII
    ;   
-   ld     hl, LAST_KEY_PRESS
+   ld     hl, KEY_SCAN_CODE
    ld     d,(hl)
    call   READKEY
    ld     (hl),d
@@ -1967,14 +1991,14 @@ GETKEY:
 0bf8 3e20      ld      a,20h
 0bfa cdd957    call    57d9h
 0bfd af        xor     a
-0bfe 323080    ld      (8030h),a
+0bfe 323080    ld      (LAST_KEY_ASCII),a
 0c01 320d85    ld      (850dh),a
 0c04 c31c0c    jp      0c1ch
 0c07 cdbc58    call    58bch
 0c0a 1835      jr      0c41h
 0c0c 70        ld      (hl),b
 0c0d af        xor     a
-0c0e 323080    ld      (8030h),a
+0c0e 323080    ld      (LAST_KEY_ASCII),a
 0c11 320d85    ld      (850dh),a
 0c14 2a3b80    ld      hl,(803bh)
 0c17 7c        ld      a,h
@@ -3173,6 +3197,8 @@ GETKEY:
 146b c8        ret     z
 146c 3e01      ld      a,01h
 146e c9        ret     
+
+;146f NMI_INTERRUPT entry point
 146f cdde0a    call    RESTORE_BANK1
 1472 d5        push    de
 1473 f5        push    af
@@ -3269,6 +3295,7 @@ GETKEY:
 1509 35        dec     (hl)
 150a 20d3      jr      nz,14dfh
 150c c3d30a    jp      0ad3h
+
 150f 42        ld      b,d
 1510 4b        ld      c,e
 1511 321c86    ld      (861ch),a
@@ -3521,32 +3548,38 @@ GETKEY:
 ;16e4
 READKEY:
    ;
-   ; reads the keyboard and updates LAST_KEY_PRESSED and KEYASCII
+   ; reads the keyboard and updates KEY_SCAN_CODE and KEYASCII
    ; d = value of last key pressed for compare
    ;
-16e4 c5        push    bc
-16e5 cdea16    call    16eah
-16e8 c1        pop     bc
-16e9 c9        ret     
-16ea 0602      ld      b,02h
-16ec cde50a    call    0ae5h
-16ef 3afd6f    ld      a,(6ffdh)
-16f2 e640      and     40h
-16f4 c2d30a    jp      nz,0ad3h
-16f7 3afe6f    ld      a,(6ffeh)
-16fa e608      and     08h
-16fc 2006      jr      nz,1704h
-16fe 37        scf     
-16ff 3e24      ld      a,24h
-1701 32f085    ld      (LAST_KEY_PRESS),a
-1704 c3d30a    jp      0ad3h
+   push    bc
+   call    LABEL_16ea
+   pop     bc
+   ret     
+
+;16ea
+LABEL_16ea:
+   ld   b,02h
+   call 0ae5h
+   ld   a,(6ffdh)
+   and  40h
+   if not zero then jp 0ad3h
+   ld   a,(6ffeh)
+   and  08h
+   if zero then 
+      scf     
+      ld   a,24h
+      ld   (KEY_SCAN_CODE),a
+   end if
+   jp   0ad3h
+
 1707 3a6c86    ld      a,(866ch)
 170a eeb7      xor     0b7h
 170c c0        ret     nz
 170d 3e24      ld      a,24h
-170f 32f085    ld      (LAST_KEY_PRESS),a
+170f 32f085    ld      (KEY_SCAN_CODE),a
 1712 37        scf     
-1713 c9        ret     
+1713 c9        ret  
+
 1714 e5        push    hl
 1715 21fa85    ld      hl,85fah
 1718 cbb6      res     6,(hl)
@@ -13660,7 +13693,7 @@ READKEY:
 5954 cdf058    call    58f0h
 5957 fe20      cp      20h
 5959 ccf058    call    z,58f0h
-595c 323080    ld      (8030h),a
+595c 323080    ld      (LAST_KEY_ASCII),a
 595f fe03      cp      03h
 5961 c3d45f    jp      5fd4h
 5964 cd1a28    call    281ah
@@ -13682,12 +13715,12 @@ READKEY:
 5987 328e83    ld      (838eh),a
 598a e1        pop     hl
 598b c9        ret     
-598c 3a3080    ld      a,(8030h)
+598c 3a3080    ld      a,(LAST_KEY_ASCII)
 598f b7        or      a
 5990 c8        ret     z
 5991 f5        push    af
 5992 af        xor     a
-5993 323080    ld      (8030h),a
+5993 323080    ld      (LAST_KEY_ASCII),a
 5996 f1        pop     af
 5997 c9        ret     
 5998 cdd957    call    57d9h
@@ -15899,7 +15932,7 @@ BOOT_SEQUENCE_CONTINUE_2:
    ld      (PORT45_LATCH),a       ; saves latch
 
    ld      a,0ffh
-   ld      (LAST_KEY_PRESS),a     ; initializes LAST_KEY_PRESS with FFh
+   ld      (KEY_SCAN_CODE),a     ; initializes KEY_SCAN_CODE with FFh
 
    ld a,28h : ld (85f5h),a : ld (85f4h),a
 
