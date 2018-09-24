@@ -23,7 +23,7 @@ const halfpalette = new Uint32Array(16);
 
 function setPalette(i,r,g,b) { 
    palette[i] = 0xFF000000 | r | g << 8 | b << 16; 
-   halfpalette[i] = 0xFF000000 | ((r/1.1)|0) | ((g/1.1)|0) << 8 | ((b/1.1)|0) << 16; 
+   halfpalette[i] = 0xFF000000 | ((r/1.2)|0) | ((g/1.2)|0) << 8 | ((b/1.2)|0) << 16; 
 }
 
 setPalette( 0, 0x00, 0x00, 0x00);  /* black */
