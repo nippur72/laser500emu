@@ -1,13 +1,20 @@
 "use strict";
 
+// im0: data = first byte of instruction, other bytes from mem_read?
+// im1: simple: call 0038H
+// im2: complex
+
+// TODO VDC generates NMI (0066H) or MI (0038H) ? 
+// TODO autoload programs for fast develop
+// TODO javascript debugger, halt
+// TODO pasting text
+// TODO use interrupts to communicate with emulator
 // TODO almost exact cycles
-// TODO sound doesn't work in Mozilla
+// TODO options from URL &parameters
 // TODO load WAV from cassette or mic
 // TODO CSAVE WAV
 // TODO CLOAD WAV
-// TODO javascript debugger, halt
-// TODO laser 350
-// TODO laser 700
+// TODO laser 350/700
 // TODO rename ram1, ram2 to page
 // TODO laser 200 family? study vzem
 // TODO Z80js, port in ES6 then webassembly
@@ -15,17 +22,15 @@
 // TODO caplock key / led ?
 // TODO visual/sound display of activity
 // TODO wrap in electron app
-// TODO save to cloud / fetch()
-// TODO verificare range indirizzi di cassette_bit 
-// TODO some way of pasting text
+// TODO save to cloud ?
+// TODO verify cassette_bit I/O range on real HW
 // TODO interrupt routine test
 // TODO check colors with real hardware
 // TODO options window (modal)
-// TODO options from URL &parameters
-// TODO investigate port 13h reads
-// TODO emulate floppy
+// TODO investigate port 13h reads, emulate floppy
 // TODO build of CP/M ?
 // TODO draw keyboard for mobile
+// TODO rewrite keyboard
 
 // *** laser 500 hardware ***
 
