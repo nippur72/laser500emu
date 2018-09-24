@@ -4,7 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
-// TODO VDC generates NMI (0066H) or MI (0038H) ? 
+// TODO investigate what does NMI (cpu.interrupt(true))
 // TODO autoload programs for fast develop
 // TODO javascript debugger, halt
 // TODO pasting text
