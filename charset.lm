@@ -1157,11 +1157,11 @@
   bitmap  ........
   bitmap  ........
 ; char $7f
-  bitmap  .XXXXXX.
-  bitmap  .XXXXXX.
-  bitmap  .XXXXXX.
-  bitmap  .XXXXXX.
-  bitmap  .XXXXXX.
-  bitmap  .XXXXXX.
-  bitmap  .XXXXXX.
-  bitmap  .XXXXXX.
+  bitmap  XXXXXXX.
+  bitmap  XXXXXXX.
+  bitmap  XXXXXXX.
+  bitmap  XXXXXXX.
+  bitmap  XXXXXXX.
+  bitmap  XXXXXXX.
+  bitmap  XXXXXXX.
+  bitmap  XXXXXXX.
