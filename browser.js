@@ -2,7 +2,7 @@
 
 function onResize(e) {
    const canvas = document.getElementById("canvas");
-   const aspect = 1.4;
+   const aspect = 1.55;
    if(window.innerWidth > (window.innerHeight*aspect))
    {
       canvas.style.width  = `${aspect*100}vmin`;
