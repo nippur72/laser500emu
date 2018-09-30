@@ -4,6 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO charset.rom finalize, submit bug report to MAME
 // TODO investigate what does NMI (cpu.interrupt(true))
 // TODO autoload programs for fast develop
 // TODO javascript debugger, halt
@@ -31,6 +32,8 @@
 // TODO build of CP/M ?
 // TODO draw keyboard for mobile
 // TODO rewrite keyboard
+// TODO slow mode, skip frames
+// TODO no double scanline (options)
 
 // *** laser 500 hardware ***
 
