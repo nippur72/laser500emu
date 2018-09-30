@@ -3741,31 +3741,43 @@ LABEL_16ea:
 185f 28f7      jr      z,1858h
 1861 b7        or      a
 1862 c3d30a    jp      0ad3h
-1865 c5        push    bc
-1866 d5        push    de
-1867 3a6686    ld      a,(BANK1_LATCH)
-186a f5        push    af
-186b 3e02      ld      a,02h
-186d d341      out     (41h),a
-186f 0608      ld      b,08h
-1871 cd9e18    call    189eh
-1874 3814      jr      c,188ah
-1876 10f9      djnz    1871h
-1878 cd9218    call    1892h
-187b 3afe6f    ld      a,(6ffeh)
-187e f6f7      or      0f7h
-1880 47        ld      b,a
-1881 3afd6f    ld      a,(6ffdh)
-1884 f6bf      or      0bfh
-1886 a0        and     b
-1887 326c86    ld      (866ch),a
-188a c1        pop     bc
-188b 78        ld      a,b
-188c d341      out     (41h),a
-188e 7a        ld      a,d
-188f d1        pop     de
-1890 c1        pop     bc
-1891 c9        ret     
+
+; Name: RDBYET
+; Purpose: reads a byte from cassette and returns into A
+;
+RDBYET:
+   push    bc
+   push    de
+   ld      a,(BANK1_LATCH)
+   push    af
+
+   ld      a,02h       ; switch to I/O in bank 1
+   out     (41h),a     ;
+
+   ld b,08h
+   do
+      call 189eh
+      if carry then jr RDBYET1
+   loopb while b <> 0 
+
+   call    1892h
+   ld      a,(6ffeh)
+   or      0f7h                 ; key "C"
+   ld      b,a
+   ld      a,(6ffdh)
+   or      0bfh
+   and     b
+   ld      (866ch),a
+
+RDBYET1:
+   pop     bc
+   ld      a,b
+   out     (41h),a     ; restores port 41?
+   ld      a,d         ; return value A=byte read
+   pop     de
+   pop     bc
+   ret     
+
 1892 e5        push    hl
 1893 213c86    ld      hl,863ch
 1896 86        add     a,(hl)
@@ -3774,13 +3786,15 @@ LABEL_16ea:
 189a 23        inc     hl
 189b 34        inc     (hl)
 189c e1        pop     hl
-189d c9        ret     
+189d c9        ret  
+
 189e c5        push    bc
 189f e5        push    hl
 18a0 cda618    call    18a6h
 18a3 e1        pop     hl
 18a4 c1        pop     bc
 18a5 c9        ret     
+
 18a6 210068    ld      hl,6800h
 18a9 01dc05    ld      bc,05dch
 18ac 7e        ld      a,(hl)
@@ -3795,6 +3809,7 @@ LABEL_16ea:
 18b8 10f3      djnz    18adh
 18ba 37        scf     
 18bb c9        ret     
+
 18bc cb7e      bit     7,(hl)
 18be 20ed      jr      nz,18adh
 18c0 cb7e      bit     7,(hl)
@@ -15904,7 +15919,7 @@ FILL_VECTORS:
    ldir    
 
    ; fills with "JP 2228" from 8585 to 85C1 
-   ; it's likely that are some configurable BASIC commands as JP 2228 gives "Syntax error"
+   ; configurable unimplemented BASIC commands (JP 2228 gives "Syntax error")
    ld      b,15h
    ld      hl,8585h
    do

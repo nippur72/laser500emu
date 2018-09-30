@@ -66,6 +66,8 @@ LOW RAM MAP
 8669      PORT_44_LATCH: SYSVAR_port44 (VDC display mode)
 866A      PORT_45_LATCH: port 45h latch (VDC foreground/background color)
 
+866C      ?? used in tape RDBYET routine
+
 8995-     Start of BASIC program
 ```
 
