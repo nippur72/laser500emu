@@ -1,10 +1,11 @@
 const fs = require('fs');
 
-const charset = fs.readFileSync("27-393-00.u10.rom");
+const charset = fs.readFileSync("charset.rom");
 
 let s = "const charset = new Uint8Array([\n   ";
 
-charset.forEach( (value, i)=> {
+charset.forEach( (v, i)=> {
+   const value = i<1024 ? charset[i] : 255-charset[i-1024]; // automatically makes reverse fonts
    const comma = (i != charset.length-1) ? ',':'';
    const cr = (i % 16 == 15) ? '\n   ' : '';
 
