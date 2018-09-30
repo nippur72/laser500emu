@@ -33,7 +33,7 @@ function mem_write_word(address, word) {
    mem_write(address + 1, (word & 0xFF00) >> 8);
 }
 
-function mem_read_word(address, word) {
+function mem_read_word(address) {
    const lo = mem_read(address + 0);
    const hi = mem_read(address + 1);
    return lo+hi*256;
@@ -62,7 +62,7 @@ function cload(filename) {
    }
 
    // modify end of basic program pointer   
-   mem_write_word(0x83E9, end+1);   
+   mem_write_word(0x83E9, end);   
 
    console.log(`loaded "${filename}" ${bytes.length} bytes from ${hex(start,4)}h to ${hex(end,4)}h`);
    cpu.reset();   
@@ -248,4 +248,24 @@ function restoreState() {
    {
 
    }
+}
+
+function dumpPointers() {
+   console.log(`
+   +------------------------+ <- TOPMEM (0x803d) ${hex(mem_read_word(0x803d),4)}
+   |      Stack space       |
+   +------------------------+ <- MEMSIZ (0x839d) ${hex(mem_read_word(0x839d),4)}
+   |        Strings         |
+   +------------------------+ <- FRETOP (0x83c2) ${hex(mem_read_word(0x83c2),4)}
+   |       Free space       |
+   +------------------------+ <- STREND (0x83ed) ${hex(mem_read_word(0x83ed),4)}
+   |     Array variables    |
+   +------------------------+ <- ARYTAB (0x83eb) ${hex(mem_read_word(0x83eb),4)}
+   |    Simple variables    |
+   +------------------------+ <- VARTAB (0x83e9) ${hex(mem_read_word(0x83e9),4)}
+   |     BASIC program      |
+   +------------------------+ <- TXTTAB (0x8041) ${hex(mem_read_word(0x8041),4)}
+   |    System variables    |
+   +------------------------+ 0x8000
+`);
 }
