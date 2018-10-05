@@ -1,13 +1,13 @@
 // PAL Standard: 720 x 576
 // 192 righe video + 96 bordo (48 sopra e 48 sotto) = 192+96 = 288 ; x2 = 576
 
-const HIDDEN_SCANLINES_TOP = 3*8;
-const HIDDEN_SCANLINES_BOTTOM = 5*8;
-const PAL_HIDDEN_LINES_VERY_BOTTOM = 24;
+const HIDDEN_SCANLINES_TOP = 6*8;
+const HIDDEN_SCANLINES_BOTTOM = 4*8;
+const PAL_HIDDEN_LINES_VERY_BOTTOM = 0;
 
-const BORDER_V        = 5*8 - HIDDEN_SCANLINES_TOP;   // 5 chars above and 7 below
-const BORDER_V_BOTTOM = 7*8 - HIDDEN_SCANLINES_BOTTOM;   // 5 chars above and 7 below
-const BORDER_H =  40;    // 1 carattere di bordo
+const BORDER_V        = 2+64    - HIDDEN_SCANLINES_TOP;      
+const BORDER_V_BOTTOM = 56-2-1  - HIDDEN_SCANLINES_BOTTOM;   
+const BORDER_H =  40;    
 
 const TEXT_W = 640; 
 const TEXT_H = 192;

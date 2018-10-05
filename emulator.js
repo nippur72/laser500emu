@@ -4,6 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO audio is detuned due to cpu wait states not emulated
 // TODO charset.rom finalize, submit bug report to MAME
 // TODO investigate what does NMI (cpu.interrupt(true))
 // TODO autoload programs for fast develop
@@ -72,8 +73,10 @@ const frameRate = 50; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
 const cpuSpeed = 3694700; // Z80 speed 3.6947 MHz (NEC D780c)
 const cyclesPerFrame = (cpuSpeed / frameDuration) / 3.5; // 
-const cyclesPerLine = 190;
-const cpuSampleRate = cyclesPerLine * TOTAL_SCANLINES * frameRate;
+const cyclesPerLine = 188.5;
+const HIDDEN_LINES = 2;
+const cpuSampleRate = (311 * cyclesPerLine) * frameRate;
+//const cpuSampleRate = cyclesPerLine * TOTAL_SCANLINES * frameRate;
 
 let stopped = false; // allows to stop/resume the emulation
 
@@ -141,12 +144,11 @@ function renderAllLines() {
 }
 */
 
-function renderAllLines() {
-   renderLines(HIDDEN_SCANLINES_TOP, true);         // hidden lines at top
-   renderLines(SCREEN_H, false);                    // screen
-   renderLines(HIDDEN_SCANLINES_BOTTOM, true);      // hidden lines at bottom   
+function renderAllLines() {   
    cpu.interrupt(false, 0);                         // generate VDC interrupt
-   renderLines(PAL_HIDDEN_LINES_VERY_BOTTOM, true); // hidden lines at bottom
+   renderLines(HIDDEN_SCANLINES_TOP, true);               
+   renderLines(SCREEN_H, false);                    
+   renderLines(HIDDEN_SCANLINES_BOTTOM, true);               
 }
 
 let nextFrame;
