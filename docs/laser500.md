@@ -75,6 +75,7 @@ KERNAL ROM ROUTINES
 ===================
 ```
 0538 - GETKEY2: waits for keypress, updates LAST_KEY_PRESSED and returns ASCII code in A
+09E2 - BELL: emits small beep sound (CHR$(7))
 09EA - BEEP (not working) emet un son 
        HL = hauteur de note (plus la valeur est faible , plus la note est aigue)
        DE = durée de la note
@@ -327,6 +328,7 @@ PRINTING CODES
 - CHR(24) begin line (cursor up key)
 - CHR$(31) cls
 - CHR$(28) home 0x1C
+- CHR$(7) bell
 - ESC A reverse off
 - ESC B reverse on
 
