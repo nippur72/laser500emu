@@ -4,18 +4,23 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO save emulator snapshots?
+// TODO no double scanline (options)
+// TODO slow mode, skip frames
+// TODO rewrite keyboard
+// TODO draw keyboard for mobile
+// TODO pasting text
+// TODO save to cloud ?
+// TODO almost exact cycles drawing
 // TODO audio is detuned due to cpu wait states not emulated
-// TODO charset.rom finalize, submit bug report to MAME
+// TODO charset.rom submit bug report to MAME
 // TODO investigate what does NMI (cpu.interrupt(true))
 // TODO autoload programs for fast develop
 // TODO javascript debugger, halt
-// TODO pasting text
 // TODO use interrupts to communicate with emulator
-// TODO almost exact cycles
 // TODO options from URL &parameters
-// TODO load WAV from cassette or mic
-// TODO CSAVE WAV
-// TODO CLOAD WAV
+// TODO CSAVE to WAV export
+// TODO CLOAD from WAV and from WebAudio Microphone
 // TODO laser 350/700
 // TODO rename ram1, ram2 to page
 // TODO laser 200 family? study vzem
@@ -24,17 +29,12 @@
 // TODO caplock key / led ?
 // TODO visual/sound display of activity
 // TODO wrap in electron app
-// TODO save to cloud ?
 // TODO verify cassette_bit I/O range on real HW
 // TODO interrupt routine test
 // TODO check colors with real hardware
 // TODO options window (modal)
 // TODO investigate port 13h reads, emulate floppy
 // TODO build of CP/M ?
-// TODO draw keyboard for mobile
-// TODO rewrite keyboard
-// TODO slow mode, skip frames
-// TODO no double scanline (options)
 
 // *** laser 500 hardware ***
 
