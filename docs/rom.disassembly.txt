@@ -14,6 +14,8 @@ BANK0_LATCH = 8665h
 BANK1_LATCH = 8666h
 BANK2_LATCH = 8667h
 
+TEXT80 = 85fdh
+
 NROWS = 85e5h
 NCOLS = 85e7h
 CAPSLOCK = 85fbh
@@ -109,7 +111,7 @@ CONOUT:
 0096 3a6986    ld      a,(8669h)
 0099 e6f8      and     0f8h
 009b 47        ld      b,a
-009c 3afd85    ld      a,(85fdh)
+009c 3afd85    ld      a,(TEXT80)
 009f b0        or      b
 00a0 326986    ld      (8669h),a
 00a3 d344      out     (44h),a
@@ -170,7 +172,7 @@ CONOUT:
 011b 12        ld      (de),a
 011c 13        inc     de
 011d 21e985    ld      hl,85e9h
-0120 3afd85    ld      a,(85fdh)
+0120 3afd85    ld      a,(TEXT80)
 0123 b7        or      a
 0124 2006      jr      nz,012ch
 0126 3a6a86    ld      a,(PORT45_LATCHh)
@@ -270,7 +272,7 @@ CONOUT:
 01d2 38e9      jr      c,01bdh
 01d4 c9        ret     
 01d5 010100    ld      bc,0001h
-01d8 3afd85    ld      a,(85fdh)
+01d8 3afd85    ld      a,(TEXT80)
 01db b7        or      a
 01dc 2001      jr      nz,01dfh
 01de 03        inc     bc
@@ -317,7 +319,7 @@ CONOUT:
 021d 72        ld      (hl),d
 021e c9        ret     
 021f 010100    ld      bc,0001h
-0222 3afd85    ld      a,(85fdh)
+0222 3afd85    ld      a,(TEXT80)
 0225 b7        or      a
 0226 2001      jr      nz,0229h
 0228 03        inc     bc
@@ -545,7 +547,7 @@ CONOUT:
 0386 cb4f      bit     1,a
 0388 2802      jr      z,038ch
 038a 0ea0      ld      c,0a0h
-038c 3afd85    ld      a,(85fdh)
+038c 3afd85    ld      a,(TEXT80)
 038f b7        or      a
 0390 79        ld      a,c
 0391 2003      jr      nz,0396h
@@ -558,7 +560,7 @@ CONOUT:
 039d b7        or      a
 039e 2808      jr      z,03a8h
 03a0 35        dec     (hl)
-03a1 3afd85    ld      a,(85fdh)
+03a1 3afd85    ld      a,(TEXT80)
 03a4 b7        or      a
 03a5 c0        ret     nz
 03a6 35        dec     (hl)
@@ -579,7 +581,7 @@ CONOUT:
 03c0 21e985    ld      hl,85e9h
 03c3 46        ld      b,(hl)
 03c4 04        inc     b
-03c5 3afd85    ld      a,(85fdh)
+03c5 3afd85    ld      a,(TEXT80)
 03c8 b7        or      a
 03c9 2001      jr      nz,03cch
 03cb 04        inc     b
@@ -615,7 +617,7 @@ CONOUT:
 0401 d620      sub     20h
 0403 f8        ret     m
 0404 4f        ld      c,a
-0405 3afd85    ld      a,(85fdh)
+0405 3afd85    ld      a,(TEXT80)
 0408 b7        or      a
 0409 79        ld      a,c
 040a 2001      jr      nz,040dh
@@ -653,19 +655,19 @@ CONOUT:
 0441 c9        ret     
 0442 cb9e      res     3,(hl)
 0444 c9        ret     
-0445 3afd85    ld      a,(85fdh)
+0445 3afd85    ld      a,(TEXT80)
 0448 b7        or      a
 0449 2801      jr      z,044ch
 044b c9        ret     
 044c 3c        inc     a
-044d 32fd85    ld      (85fdh),a
+044d 32fd85    ld      (TEXT80),a
 0450 cdd004    call    04d0h
 0453 3a6986    ld      a,(8669h)
 0456 f601      or      01h
 0458 326986    ld      (8669h),a
 045b d344      out     (44h),a
 045d c9        ret     
-045e 3afd85    ld      a,(85fdh)
+045e 3afd85    ld      a,(TEXT80)
 0461 b7        or      a
 0462 2001      jr      nz,0465h
 0464 c9        ret     
@@ -674,7 +676,7 @@ CONOUT:
 046a 326986    ld      (8669h),a
 046d d344      out     (44h),a
 046f af        xor     a
-0470 32fd85    ld      (85fdh),a
+0470 32fd85    ld      (TEXT80),a
 0473 c3d004    jp      04d0h
 0476 e5        push    hl
 0477 119e04    ld      de,049eh
@@ -775,7 +777,7 @@ CONOUT:
 0524 c1        pop     bc
 0525 f1        pop     af
 0526 c9        ret     
-0527 3afd85    ld      a,(85fdh)
+0527 3afd85    ld      a,(TEXT80)
 052a b7        or      a
 052b 3ae985    ld      a,(85e9h)
 052e c0        ret     nz
@@ -1847,7 +1849,7 @@ SOME_KEY:
 0b2e cda30a    call    0aa3h
 0b31 2001      jr      nz,0b34h
 0b33 3c        inc     a
-0b34 32fd85    ld      (85fdh),a
+0b34 32fd85    ld      (TEXT80),a
 0b37 f690      or      90h
 0b39 47        ld      b,a
 0b3a 3a6486    ld      a,(8664h)
@@ -2281,7 +2283,7 @@ GETKEY:
 0e45 fcb60e    call    m,0eb6h
 0e48 12        ld      (de),a
 0e49 23        inc     hl
-0e4a 3afd85    ld      a,(85fdh)
+0e4a 3afd85    ld      a,(TEXT80)
 0e4d b7        or      a
 0e4e 2002      jr      nz,0e52h
 0e50 23        inc     hl
@@ -16706,7 +16708,7 @@ PORT_10_WRITE:
 6cf0 c8        ret     z
 6cf1 e607      and     07h
 6cf3 c0        ret     nz
-6cf4 3afd85    ld      a,(85fdh)
+6cf4 3afd85    ld      a,(TEXT80)
 6cf7 b7        or      a
 6cf8 c9        ret     
 6cf9 ed5b2286  ld      de,(8622h)
