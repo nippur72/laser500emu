@@ -64,6 +64,20 @@ dropZone.addEventListener('drop', e => {
 
 function droppedFile(outName, bytes) {   
 
+   const ext = /\.wav$/i;
+   if(ext.test(outName)) {
+      // WAV files
+      console.log("WAV file dropped");
+      const info = decodeSync(bytes);
+      tapeSampleRate = info.sampleRate;
+      console.log(info.channelData);
+      tapeBuffer = info.channelData[0];
+      tapeLen = tapeBuffer.length;
+      tapePtr = 0;
+      tapeHighPtr = 0;
+      return;
+   }
+
    const saveObject = {
       name: outName,
       bytes: Array.from(new Uint8Array(bytes)),

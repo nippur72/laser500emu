@@ -104,6 +104,7 @@ function renderLines(nlines, hidden) {
          cycles += elapsed;
 
          writeAudioSamples(elapsed);
+         playBackAudioSamples(elapsed);         
          
          if(cycle>=cyclesPerLine) {
             cycle-=cyclesPerLine;
@@ -189,7 +190,7 @@ let initialSync = false;
 function writeAudioSamples(n) {
    samplePtr += (n * sampleRate);
    if(samplePtr > cpuSampleRate) {      
-      const s = (speaker_A ? -0.5 : 0.0) + (cassette_bit_out ? 0.5 : 0.0);
+      const s = (speaker_A ? -0.5 : 0.0) + (cassette_bit_out ? 0.5 : 0.0) + (cassette_bit_in ? 0.5 : 0.0);
       samplePtr -= cpuSampleRate;
       audioBuffer[audioPtr++] = s;
       audioPtr = audioPtr % audioBufferSize;
@@ -221,6 +222,38 @@ speakerSound.connect(audioContext.destination);
 
 function ss() {
    speakerSound.disconnect(audioContext.destination);
+}
+
+/*********************************************************************************** */
+
+let tapeSampleRate = 0;
+let tapeBuffer = new Float32Array(0);
+let tapeLen = 0;
+let tapePtr = 0;
+let tapeHighPtr = 0;
+
+function playBackAudioSamples(n) {
+   if(tapePtr >= tapeLen) return;
+
+   tapeHighPtr += (n*tapeSampleRate);
+   if(tapeHighPtr >= cpuSampleRate) {
+      tapeHighPtr-=cpuSampleRate;
+      cassette_bit_in = tapeBuffer[tapePtr] > 0 ? 0 : 1;
+      tapePtr++;
+      if(tapePtr % 44100 === 0) console.log(tapePtr);
+   }
+
+   /*
+   tapeHighPtr +=  tapeSampleRate;
+   if(tapeHighPtr > cpuSampleRate) {      
+      const s = (speaker_A ? -0.5 : 0.0) + (cassette_bit_out ? 0.5 : 0.0);
+      samplePtr -= cpuSampleRate;
+
+      audioBuffer[audioPtr++] = s;
+      audioPtr = audioPtr % audioBufferSize;
+      audioPtr_unclipped++;
+   } 
+   */     
 }
 
 /*********************************************************************************** */
