@@ -53,8 +53,8 @@ function keyDown(e) {
    let key = e.key;
    if(key=="Tab") e.preventDefault(); // TOD fix browser keys
 
-   // reset key is ALT+R or CTRL+Break
-   if(key=="Cancel" || (e.code == "KeyR" && e.altKey)) {
+   // reset key is ALT+R or CTRL+Break or Pause
+   if(key=="Cancel" || key=="Pause" || (e.code == "KeyR" && e.altKey)) {
       cpu.reset();
       e.preventDefault(); // TOD fix browser keys
       return;
