@@ -4,6 +4,8 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO check t-states in Z80.js
+// TODO check additional t-states in cpu.interrupt
 // TODO save emulator snapshots?
 // TODO no double scanline (options)
 // TODO slow mode, skip frames
@@ -35,6 +37,7 @@
 // TODO options window (modal)
 // TODO investigate port 13h reads, emulate floppy
 // TODO build of CP/M ?
+// TODO CTRL+power up
 
 // *** laser 500 hardware ***
 
