@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <lib500.h>
 
 // #region this was taken from http://home.thep.lu.se/~bjorn/crc/
 
@@ -24,16 +25,24 @@ void crc32(const void *data, unsigned long int n_bytes, unsigned long int* crc) 
 
 // #endregion 
 
-int main() {   
-   printf("CALCULATING 32K ROM CRC32...\n\n");   
+byte buf[40];
+
+int main() {      
+   set_text_mode(MODE_TEXT_40);
+   set_foreground(14);
+   set_background(0);
+   set_border(0);
+   cls();
+   rom_prints("\r\nCALCULATING 32K ROM CRC32...\r\n\r\n");   
    unsigned long int crc = 0;
    crc32(0,0x8000, &crc);   
-   printf("CRC: %08lx\n", crc);
+   sprintf(buf, "CRC: %08lx\r\n", crc);
+   rom_prints(buf);
 
    if(crc == 0x9bed01f7) {
-      printf("\nROM IS OK, IT'S THE STANDARD ONE!\n");
+      rom_prints("\r\nROM IS OK, IT'S THE STANDARD ONE!\r\n\r\n");
    }
    else {
-      printf("\nROM IS DIFFERENT\n");
+      rom_prints("\r\nROM IS DIFFERENT\r\n\r\n");
    }
 }
