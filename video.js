@@ -5,8 +5,8 @@ const HIDDEN_SCANLINES_TOP = 6*8;
 const HIDDEN_SCANLINES_BOTTOM = 4*8;
 const PAL_HIDDEN_LINES_VERY_BOTTOM = 0;
 
-const BORDER_V        = 64    +1  - HIDDEN_SCANLINES_TOP;      
-const BORDER_V_BOTTOM = 56    -1  - HIDDEN_SCANLINES_BOTTOM;   
+const BORDER_V        = 64  +2     - HIDDEN_SCANLINES_TOP;      
+const BORDER_V_BOTTOM = 56  -2     - HIDDEN_SCANLINES_BOTTOM;   
 const BORDER_H =  40;    
 
 const TEXT_W = 640; 

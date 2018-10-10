@@ -73,7 +73,7 @@ let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
 const frameRate = 50; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
-const cpuSpeed = 3694700; // Z80 speed 3.6947 MHz (NEC D780c)
+const cpuSpeed = 3672000 /*3672000 for 312 */ //3694700; // Z80 speed 3.6947 MHz (NEC D780c)
 const cyclesPerLine = (cpuSpeed / frameRate / TOTAL_SCANLINES); // 188.5=basic OK; 196=sound OK;
 const HIDDEN_LINES = 2;
 const cpuSampleRate = (TOTAL_SCANLINES * cyclesPerLine) * frameRate;
