@@ -5,7 +5,6 @@
 // im2: complex
 
 // TODO check t-states in Z80.js
-// TODO check additional t-states in cpu.interrupt
 // TODO save emulator snapshots?
 // TODO no double scanline (options)
 // TODO slow mode, skip frames
@@ -75,11 +74,9 @@ let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 const frameRate = 50; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
 const cpuSpeed = 3694700; // Z80 speed 3.6947 MHz (NEC D780c)
-const cyclesPerFrame = (cpuSpeed / frameDuration) / 3.5; // 
-const cyclesPerLine = 188.5;
+const cyclesPerLine = (cpuSpeed / frameRate / TOTAL_SCANLINES); // 188.5=basic OK; 196=sound OK;
 const HIDDEN_LINES = 2;
-const cpuSampleRate = (311 * cyclesPerLine) * frameRate;
-//const cpuSampleRate = cyclesPerLine * TOTAL_SCANLINES * frameRate;
+const cpuSampleRate = (TOTAL_SCANLINES * cyclesPerLine) * frameRate;
 
 let stopped = false; // allows to stop/resume the emulation
 
@@ -102,7 +99,11 @@ function renderLines(nlines, hidden) {
 
       // run cpu
       while(true) {
-         const elapsed = cpu.run_instruction();
+         bus_ops = 0;
+         let elapsed = cpu.run_instruction();
+         //if(t>BORDER_V && t < (BORDER_V+TEXT_H)) elapsed += bus_ops;
+         //const elapsed = cpu.run_instruction();
+         elapsed += bus_ops;
          cycle += elapsed;
          cycles += elapsed;
 
