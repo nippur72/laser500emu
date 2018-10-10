@@ -365,8 +365,8 @@ let decode_instruction = function(opcode)
    if (opcode === 0x76)
    {
       halted = true;
-      iff1 = 1;
-      iff2 = 1;
+      //iff1 = 1;
+      //iff2 = 1;
    }
    else if ((opcode >= 0x40) && (opcode < 0x80))
    {
@@ -2315,6 +2315,21 @@ ed_instructions[0x56] = function()
 // 0x57 : LD A, I
 ed_instructions[0x57] = function()
 {
+   /*
+   S is set if the I Register is negative; otherwise, it is reset.
+   Z is set if the I Register is 0; otherwise, it is reset.
+   H is reset.
+   P/V contains contents of IFF2.
+   N is reset.
+   C is not affected.
+   If an interrupt occurs during execution of this instruction, the Parity flag contains a 0.   
+   */
+   
+   flags.S = i & 0x80 ? 1 : 0; 
+   flags.Z = i ? 0 : 1;
+   flags.H = 0;
+   flags.N = 0;
+   
    a = i;
    flags.P = iff2;
 };
@@ -3291,7 +3306,7 @@ let cycle_counts = [
     5, 10, 10, 10, 10, 11,  7, 11,  5, 10, 10,  0, 10, 17,  7, 11,
     5, 10, 10, 11, 10, 11,  7, 11,  5,  4, 10, 11, 10,  0,  7, 11,
     5, 10, 10, 19, 10, 11,  7, 11,  5,  4, 10,  4, 10,  0,  7, 11,
-    5, 10, 10,  4, 10, 11,  7, 11,  5,  4, 10,  4, 10,  0,  7, 11
+    5, 10, 10,  4, 10, 11,  7, 11,  5,  6, 10,  4, 10,  0,  7, 11
 ];
 
 let cycle_counts_ed = [
