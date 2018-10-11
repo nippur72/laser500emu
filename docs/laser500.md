@@ -264,6 +264,10 @@ POKE &H8013,64:POKE &H8014,10:REM PREPARE FLASHING CURSOR
 POKE &H8012,&HC3:REM ENABLE FLASHING CURSOR
 POKE &H8012,&HC9:REM DISABLE FLASHING CURSOR
 ```
+
+How to relocate a Basic program: modify the &H8041 pointer to the
+new address and POKE address-1, 0. Then use NEW or CLEAR.
+
 INTERRUPT PART 2
 ================
 ```
