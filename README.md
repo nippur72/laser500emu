@@ -1,21 +1,54 @@
 # Laser 350/500/700 (Video Technology) emulator
 
 The Laser 350/500/700 is a family of home computers based on the Z80 CPU
-made by Video Technology in 1985. `laser500emu` emulates such computers in 
+made by Video Technology in 1985. `laser500emu` emulates these computers in 
 a web browser. 
 
-To run the emulator, simply open to the link: [nippur72.github.io/laser500emu](https://nippur72.github.io/laser500emu/)
+HOW TO USE
+==========
 
-This repo serves also as a container for Laser 500 software and documentation, have a look at:
+To run the emulator, simply open to the link: 
+[nippur72.github.io/laser500emu](https://nippur72.github.io/laser500emu/). 
+You can also clone the repo and run locally, just open the file `index.html`.
 
-- [software](https://github.com/nippur72/laser500emu/tree/gh-pages/software)
-- [docs](https://github.com/nippur72/laser500emu/tree/gh-pages/docs)
+The emulator is written in JavaScript and runs fine in Chrome and FireFox 
+on a modern PC. 
 
-Other resources about the Laser computers are:
+KEYBOARD
+========
+Currently only the italian keyboard layout is supported.
 
-- Bonstra's GitHub repo [laser500-doc](https://github.com/Bonstra/laser500-doc) by 
-- a dedicated [Facebook group](https://www.facebook.com/groups/263150584310074) 
-- a forum thread on [AtariAge](http://atariage.com/forums/topic/187667-any-info-on-video-technology-laser-500-computer/page-1).
+Special keys:
+- `Pause`: Laser's Reset key (it acts like a more powerful CTRL+Break)
+- `Alt`+`R`: alternate for Reset key
+- `Alt`+`P`: power on/off the machine
+- `Home`: HOME key
+- `Shift`+`Home`: CLS key (clear screen)
+- `End`: DEL LINE key
+- `Del`: DEL key 
+- `§`: GRAPH key 
+- Cursor Left: rewinds and plays the tape
+- Cursor Up: stops the tape
+- Numpad + `0` + right `Ctrl`: Joystick 1
+
+EMULATION SPEED
+===============
+
+If emulation is slower than expected you can check how much CPU load 
+the emulator is consuming. Open the JavaScript console (F12) and type `info()`
+```
+> info()
+frame rendering: 2.9 ms, load=14.5 %
+```
+Frame rendering should be less than 20 ms which is the PAL framerate 
+it is being emulated.
+
+AUTOSAVE
+========
+The machine state will be automatically saved and restored when you 
+close and reopen the browser, taking you back where you left it.
+
+If you want to start from scratch, press `ALT+P` to simulate power on/off.
 
 EMULATOR FEATURES
 =================
@@ -38,3 +71,18 @@ to load or save programs. Saved programs are seen as a downloaded file in the br
 
 Programs are also stored on the internal browser storage (HTML5 `localStorage`), simulating
 a sort of disk drive.
+
+RESOURCES
+=========
+
+The `laser500emu`repo serves also as a container for Laser 500 software 
+and documentation that I have collected along the way, make sure to have a look at:
+
+- [software](https://github.com/nippur72/laser500emu/tree/gh-pages/software)
+- [docs](https://github.com/nippur72/laser500emu/tree/gh-pages/docs)
+
+Other resources about the Laser 350/500/700 computers are:
+
+- Bonstra's GitHub repo [laser500-doc](https://github.com/Bonstra/laser500-doc) by 
+- a dedicated [Facebook group](https://www.facebook.com/groups/263150584310074) 
+- a forum thread on [AtariAge](http://atariage.com/forums/topic/187667-any-info-on-video-technology-laser-500-computer/page-1).
