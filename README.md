@@ -9,10 +9,10 @@ HOW TO USE
 
 To run the emulator, simply open to the link: 
 [nippur72.github.io/laser500emu](https://nippur72.github.io/laser500emu/). 
+
 You can also clone the repo and run locally, just open the file `index.html`.
 
-The emulator is written in JavaScript and runs fine in Chrome and FireFox 
-on a modern PC. 
+The emulator is written in JavaScript and runs fine in Chrome and FireFox. 
 
 KEYBOARD
 ========
@@ -35,7 +35,7 @@ EMULATION SPEED
 ===============
 
 If emulation is slower than expected you can check how much CPU load 
-the emulator is consuming. Open the JavaScript console (F12) and type `info()`
+the emulator is consuming. Open the JavaScript console (`F12`) and type `info()`
 ```
 > info()
 frame rendering: 2.9 ms, load=14.5 %
@@ -75,7 +75,7 @@ a sort of disk drive.
 RESOURCES
 =========
 
-The `laser500emu`repo serves also as a container for Laser 500 software 
+The `laser500emu` repo serves also as a container for Laser 500 software 
 and documentation that I have collected along the way, make sure to have a look at:
 
 - [software](https://github.com/nippur72/laser500emu/tree/gh-pages/software)
