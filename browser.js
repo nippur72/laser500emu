@@ -164,3 +164,12 @@ async function fetchProgram(name)
       return false;      
    }
 }
+
+function rewind_tape() {   
+   tapePtr = 0;
+   tapeHighPtr = 0;
+}
+
+function stop_tape() {   
+   tapePtr = tapeLen;   
+}

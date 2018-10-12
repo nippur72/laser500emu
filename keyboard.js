@@ -67,6 +67,20 @@ function keyDown(e) {
       return;
    }   
 
+   // ALT+Left is rewind tape
+   if(e.code == "ArrowLeft" && e.altKey) {
+      rewind_tape();
+      e.preventDefault(); 
+      return;
+   }   
+
+   // ALT+Up is stop tape
+   if(e.code == "ArrowUp" && e.altKey) {
+      stop_tape();
+      e.preventDefault(); 
+      return;
+   }   
+
    // numpad + 0 emulates joystick   
    handleJoyStick(e.code, true);
       
