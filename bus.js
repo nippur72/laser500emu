@@ -2,7 +2,7 @@ let bus_ops = 0;
 
 function mem_read(address) {
    bus_ops++;
-   const bank = banks[(address & 0xF000) >> 14];
+   const bank = banks[(address & 0xC000) >> 14];
    const base = address & 0x3FFF;
    switch(bank) {
       case 0: return rom1[base];
