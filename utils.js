@@ -44,7 +44,7 @@ async function crun(filename) {
    await print_string("\nrun:\n");
 }
 
-function cload(filename) {
+function cload(filename, address) {
    const stored = window.localStorage.getItem(`laser500/${filename}`);
 
    if(stored === undefined || stored === null) {         
@@ -55,16 +55,17 @@ function cload(filename) {
    const program = JSON.parse(stored);
 
    const { bytes, start, type } = program;
-   const end = start + bytes.length;
+   const startAddress = (address === undefined) ? start : address;
+   const end = startAddress + bytes.length;
 
-   for(let i=0,t=start;t<=end;i++,t++) {
+   for(let i=0,t=startAddress;t<=end;i++,t++) {
       mem_write(t, bytes[i]);
    }
 
    // modify end of basic program pointer   
-   mem_write_word(0x83E9, end);   
+   if(startAddress === 0x8995) mem_write_word(0x83E9, end);   
 
-   console.log(`loaded "${filename}" ${bytes.length} bytes from ${hex(start,4)}h to ${hex(end,4)}h`);
+   console.log(`loaded "${filename}" ${bytes.length} bytes from ${hex(startAddress,4)}h to ${hex(end,4)}h`);
    cpu.reset();   
 }
 
