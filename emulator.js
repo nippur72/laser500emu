@@ -23,7 +23,7 @@
 // TODO CSAVE to WAV export
 // TODO CLOAD from WAV and from WebAudio Microphone
 // TODO laser 350/700
-// TODO rename ram1, ram2 to page
+// TODO rename banks <-> pages (ram1, ram2, etc)
 // TODO laser 200 family? study vzem
 // TODO Z80js, port in ES6 then webassembly
 // TODO draw in webassembly
@@ -244,7 +244,7 @@ function playBackAudioSamples(n) {
       tapeHighPtr-=cpuSampleRate;
       cassette_bit_in = tapeBuffer[tapePtr] > 0 ? 0 : 1;
       tapePtr++;
-      if(tapePtr % 44100 === 0) console.log(tapePtr);
+      //if(tapePtr % 44100 === 0) console.log(tapePtr);
    }
 
    /*
