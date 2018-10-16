@@ -15761,43 +15761,58 @@ RDBYET1:
 669b 2a4180    ld      hl,(8041h)
 669e 2b        dec     hl
 669f 3600      ld      (hl),00h
-66a1 0605      ld      b,05h
-66a3 11bd66    ld      de,66bdh
-66a6 1a        ld      a,(de)
-66a7 d340      out     (40h),a
-66a9 cdc266    call    66c2h
-66ac 13        inc     de
-66ad 10f7      djnz    66a6h
-66af 3a6586    ld      a,(8665h)
-66b2 d340      out     (40h),a
-66b4 cd2469    call    6924h
-66b7 ed56      im      1
-66b9 fb        ei      
-66ba c3dc22    jp      22dch
+CHECK_EXPANSION_BANKS:
+   ld b,05h
+   ld de, CHECK_EXPANSION_BANK_TABLE
+   do      
+      ld   a,(de)
+      out  (40h),a
+      call CHECK_EXPANSION_BANK
+      inc  de      
+   loopb b<>0 
 
-66bd 02        ld      (bc),a
-66be 0c        inc     c
-66bf 0d        dec     c
-66c0 0e0f      ld      c,0fh
-66c2 210000    ld      hl,0000h
-66c5 3eaa      ld      a,0aah
-66c7 be        cp      (hl)
-66c8 23        inc     hl
-66c9 c0        ret     nz
-66ca 2f        cpl     
-66cb be        cp      (hl)
-66cc 23        inc     hl
-66cd c0        ret     nz
-66ce 3ee7      ld      a,0e7h
-66d0 be        cp      (hl)
-66d1 23        inc     hl
-66d2 c0        ret     nz
-66d3 2f        cpl     
-66d4 be        cp      (hl)
-66d5 23        inc     hl
-66d6 c0        ret     nz
-66d7 e9        jp      (hl)
+   ; restore bank 0 in page 0
+   ld   a,(8665h)
+   out  (40h),a
 
+   call 6924h
+   im   1
+   ei   
+   jp   22dch
+
+;$66bd
+CHECK_EXPANSION_BANK_TABLE:
+   defb $02  ; why does it checks for bank 2?      
+   defb $0c        
+   defb $0d        
+   defb $0e
+   defb $0f        
+
+; $66c2
+CHECK_EXPANSION_BANK:
+   ;
+   ; checks the sequence AA,55,EE,17
+   ; in the first 4 bytes, if found 
+   ; then jp $0004
+   ;  
+   ld      hl,0000h
+   ld      a,0aah
+   cp      (hl)
+   inc     hl
+   ret     nz
+   cpl     
+   cp      (hl)
+   inc     hl
+   ret     nz
+   ld      a,0e7h
+   cp      (hl)
+   inc     hl
+   ret     nz
+   cpl     
+   cp      (hl)
+   inc     hl
+   ret     nz
+   jp      (hl)
 
 BOOT_SEQUENCE:
    ; do a small pause of 150113 t-states, approx 50ms

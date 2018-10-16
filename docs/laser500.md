@@ -343,3 +343,15 @@ QUIRKS
 - in AND F0 results in BAD OPERAND, must write as "AND 0F0"
 - first byte in binary cassette file if FFh becomes F1h
 - ' is REM
+
+BANKS
+=====
+
+Banks C through F are for expansion ROM, made available through the expansion connector.
+At startup, the BASIC ROM will look for a magic value (byte sequence AA, 55, E7, 18) in banks 2, C, D, E and F (in that order), and transfer execution to that ROM bank at offset 0x0004 if such a value is found (the bank gets mapped at 0000-3FFF in Z80 address space).
+
+DISK
+====
+The manual mentions that the BASIC ROM can detect the presence of the disk unit interface by writing the I/O port 0x13 and reading back the result (this is the data buffer, so if the disk interface is present, you should read back the same value you've written).
+And if the disk interface is present, the sector 0 of track 0, will be loaded to memory location 0xA200, and execution will resume at that location (after checking that the boot signature is there, I assume).
+So it appears there is a least minimal support for the disk drive interface in the BASIC ROM, but it doesn't exclude loading a fuller support from an expansion ROM module.
