@@ -4,7 +4,6 @@
 // im1: simple: call 0038H
 // im2: complex
 
-// TODO check PAL refresh rate 20ms or 19.88 hz ? (367.6 Hz)
 // TODO check t-states in Z80.js
 // TODO save emulator snapshots?
 // TODO no double scanline (options)
