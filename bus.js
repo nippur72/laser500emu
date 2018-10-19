@@ -1,21 +1,30 @@
 let bus_ops = 0;
 
+/*
+let marked = new Int16Array(32768);
+marked = marked.map(e=>-1);
+*/
 function mem_read(address) {
    bus_ops++;
    const bank = banks[(address & 0xC000) >> 14];
    const base = address & 0x3FFF;
    switch(bank) {
-      case 0: return rom1[base];
-      case 1: return rom2[base];
-      case 2: return mapped_io_read(base);      
-      case 3: return page3[base]; // page 3 is video for Laser 350 only
-      case 4: return ram1[base];
-      case 5: return ram2[base];      
-      case 6: return ram3[base];      
-      case 7: return videoram[base];
-      default: 
-         // console.warn(`reading from unknown memory page ${hex(bank)}h address ${hex(address)}h`);         
-         return 0x00;
+      case  0: return rom1[base];
+      case  1: return rom2[base];
+      case  2: return mapped_io_read(base);      
+      case  3: return page3[base]; // page 3 is video for Laser 350 only
+      case  4: return ram1[base];
+      case  5: return ram2[base];      
+      case  6: return ram3[base];      
+      case  7: return videoram[base];
+      case  8: return bank8[base];
+      case  9: return bank9[base];
+      case 10: return bankA[base];
+      case 11: return bankB[base];
+      case 12: return bankC[base];
+      case 13: return bankD[base];
+      case 14: return bankE[base];
+      case 15: return bankF[base];
    }
 }
 
@@ -24,12 +33,22 @@ function mem_write(address, value) {
    const bank = banks[(address & 0xF000) >> 14];   
    const base = address & 0x3FFF;
    switch(bank) {
-      case 2: mapped_io_write(base, value); break;
-      case 3: break; // page 3 is disabled as works only in Laser 350
-      case 4: ram1[base] = value;           break;
-      case 5: ram2[base] = value;           break;
-      case 6: ram3[base] = value;           break;
-      case 7: videoram[base] = value;       break;
+      case  0: break; // writing in rom
+      case  1: break; // writing in rom
+      case  2: mapped_io_write(base, value); break;
+      case  3: break; // page 3 is disabled as works only in Laser 350
+      case  4: ram1[base] = value;           break;
+      case  5: ram2[base] = value;           break;
+      case  6: ram3[base] = value;           break;
+      case  7: videoram[base] = value;       break;
+      case  8: break; // TODO expansion slots
+      case  9: break; // TODO expansion slots
+      case 10: break; // TODO expansion slots
+      case 11: break; // TODO expansion slots
+      case 12: break; // TODO expansion slots
+      case 13: break; // TODO expansion slots
+      case 14: break; // TODO expansion slots
+      case 15: break; // TODO expansion slots
    }
 }
 

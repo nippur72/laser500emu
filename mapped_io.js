@@ -4,7 +4,7 @@ function mapped_io_read(address) {
    // TODO rewrite in negated logic?
    
    // filtra indirizzi
-   if(address<0x2800 || address>0x2fff) return 0x00;
+   if(address<0x2800 || address>0x2fff) return 0x7f;
    
    const row = address & 0x00FF;
    const hi  = (address & 0xFF00) >> 8;

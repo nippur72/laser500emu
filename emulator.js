@@ -50,9 +50,17 @@ const banks    = new Uint8Array(4);
 
 // page 3 only on laser 350 
 const page3    = new Uint8Array(16384);
-
 // makes page 3 respond as 0xFF as in real hardware
 page3.forEach((e,i)=>page3[i]=0xFF); 
+
+const bank8    = new Uint8Array(16384); bank8.forEach((e,i)=>bank8[i]=0xFF); 
+const bank9    = new Uint8Array(16384); bank9.forEach((e,i)=>bank9[i]=0xFF); 
+const bankA    = new Uint8Array(16384); bankA.forEach((e,i)=>bankA[i]=0xFF); 
+const bankB    = new Uint8Array(16384); bankB.forEach((e,i)=>bankB[i]=0xFF); 
+const bankC    = new Uint8Array(16384); bankC.forEach((e,i)=>bankC[i]=0x7F); 
+const bankD    = new Uint8Array(16384); bankD.forEach((e,i)=>bankD[i]=0x7F); 
+const bankE    = new Uint8Array(16384); bankE.forEach((e,i)=>bankE[i]=0x7F); 
+const bankF    = new Uint8Array(16384); bankF.forEach((e,i)=>bankF[i]=0x7F); 
 
 let cassette_bit_in = 1; 
 let cassette_bit_out = 0; 
