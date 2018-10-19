@@ -4,6 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO check PAL refresh rate 20ms or 19.88 hz ? (367.6 Hz)
 // TODO check t-states in Z80.js
 // TODO save emulator snapshots?
 // TODO no double scanline (options)
@@ -100,13 +101,12 @@ function renderLines(nlines, hidden) {
       // run cpu
       while(true) {
          bus_ops = 0;
+         // debugBefore();
          let elapsed = cpu.run_instruction();
-         //if(t>BORDER_V && t < (BORDER_V+TEXT_H)) elapsed += bus_ops;
-         //const elapsed = cpu.run_instruction();
+         // debugAfter();
          elapsed += bus_ops;
          cycle += elapsed;
          cycles += elapsed;
-
          writeAudioSamples(elapsed);
          playBackAudioSamples(elapsed);         
          

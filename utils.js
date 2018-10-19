@@ -270,3 +270,24 @@ function dumpPointers() {
    +------------------------+ 0x8000
 `);
 }
+
+let zzz = 0;
+let max_0 = 0;
+let min_1 = 255;
+
+function debugAfter() {
+   if(cpu.getState().pc === 0x895f) {
+      const sep = mem_read(0x894e+1);
+      const b = cpu.getState().b;
+      const bit = b<sep ? 0 : 1;
+
+      if(bit===0 && b>max_0) max_0 = b;
+      if(bit===1 && b<min_1) min_1 = b;
+      
+      if(zzz++ % 1500 === 0) {
+         console.log(`${max_0} <-- ${sep} --> ${min_1}`);
+         max_0 = 0;
+         min_1 = 255;
+      }
+   } 
+} 
