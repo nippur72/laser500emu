@@ -23,6 +23,13 @@ function hex(value, size) {
    return s.substr(s.length - size);
 }
 
+function bin(value, size) {
+   if(size === undefined) size = 8;
+   let s = "00000000" + value.toString(2);
+   return s.substr(s.length - size);
+}
+
+
 function cpu_status() {
    const state = cpu.getState();
    return `A=${hex(state.a)} BC=${hex(state.b)}${hex(state.c)} DE=${hex(state.d)}${hex(state.e)} HL=${hex(state.h)}${hex(state.l)} IX=${hex(state.ix,4)} IY=${hex(state.iy,4)} SP=${hex(state.sp,4)} PC=${hex(state.pc,4)} S=${state.flags.S}, Z=${state.flags.Z}, Y=${state.flags.Y}, H=${state.flags.H}, X=${state.flags.X}, P=${state.flags.P}, N=${state.flags.N}, C=${state.flags.C}`;   
