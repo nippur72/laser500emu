@@ -4,6 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO adjust clock speed
 // TODO check t-states in Z80.js
 // TODO save emulator snapshots?
 // TODO no double scanline (options)
@@ -21,22 +22,22 @@
 // TODO use interrupts to communicate with emulator
 // TODO options from URL &parameters
 // TODO CSAVE to WAV export
-// TODO CLOAD from WAV and from WebAudio Microphone
 // TODO laser 350/700
+// TODO cartdriges / rom expansion slots
 // TODO rename banks <-> pages (ram1, ram2, etc)
 // TODO laser 200 family? study vzem
-// TODO Z80js, port in ES6 then webassembly
+// TODO Z80.js: port in assemblyscript
+// TODO Z80.js: complete fuse tests
 // TODO draw in webassembly
 // TODO caplock key / led ?
 // TODO visual/sound display of activity
 // TODO wrap in electron app
 // TODO verify cassette_bit I/O range on real HW
-// TODO interrupt routine test
 // TODO check colors with real hardware
 // TODO options window (modal)
 // TODO investigate port 13h reads, emulate floppy
 // TODO build of CP/M ?
-// TODO CTRL+power up
+// TODO be able to emulate CTRL+power up
 
 // *** laser 500 hardware ***
 
