@@ -16155,18 +16155,18 @@ DISK_CHECK:
    ld b,aah : call IS_DRIVE_PRESENT : if Z=0 then return
    ld b,40h : call IS_DRIVE_PRESENT : if Z=0 then return
 
-6930 cdda7f    call    LABEL_7FDA    ; sets HL=8612, B=0
-6933 77        ld      (hl),a        ; reads port 10 latch
-6934 d310      out     (10h),a       ; writes 
-6936 10fe      djnz    6936h         ; ?
+6930 cdda7f    call    LABEL_7FDA    ; sets HL=PORT_10_LATCH (8612), B=0
+6933 77        ld      (hl),a        ; writes A (40h) into latch
+6934 d310      out     (10h),a       ; enable disk read (bit 6 on port 10)
+6936 10fe      djnz    6936h         ; small pause (255)
 6938 23        inc     hl
-6939 3611      ld      (hl),11h      ; writes 11h in 8613h
+6939 3611      ld      (hl),11h      ; writes 11h in PORT_11_LATCH (8613h)
 693b cd1a6b    call    PORT_10_SET_BIT_4
 693e 0628      ld      b,28h
 6940 cde26a    call    6ae2h
-6943 212c6b    ld      hl,6b2ch
+6943 212c6b    ld      hl, DISK_GCR_TABLE
 6946 1196a1    ld      de,0a196h
-6949 ed530f86  ld      (860fh),de
+6949 ed530f86  ld      (DISK_GCR_TABLE_PTR),de
 694d 0e6a      ld      c,6ah
 694f edb0      ldir    
 6951 ed430886  ld      (8608h),bc
@@ -16186,7 +16186,9 @@ MSG_DISK_ERROR:
 
 ;*********************************************************************
 ; IN: B=aah or 40h
-; returns: Z=1 if drive B not present?
+; returns: Z=1 if disk controller is not present
+; Sends writes the byte in B on "fdc_data" and reads it back. 
+; If they are the same then controller is working
 ;
 ; OUT 10h, 0
 ; OUT 13h, B
@@ -16212,18 +16214,19 @@ IS_DRIVE_PRESENT:
 6995 c3216b    jp      6b21h
 6998 cd216b    call    6b21h
 699b 37        scf     
-699c c9        ret     
-699d 2a0f86    ld      hl,(860fh)
+699c c9        ret   
+
+699d 2a0f86    ld      hl,(DISK_GCR_TABLE_PTR)
 69a0 ed5b0d86  ld      de,(860dh)
 69a4 0e00      ld      c,00h
 69a6 41        ld      b,c
-69a7 cd936a    call    6a93h
+69a7 cd936a    call    READ_DISK_BYTE
 69aa fed5      cp      0d5h
 69ac 20f9      jr      nz,69a7h
-69ae cd936a    call    6a93h
+69ae cd936a    call    READ_DISK_BYTE
 69b1 feaa      cp      0aah
 69b3 20f2      jr      nz,69a7h
-69b5 cd936a    call    6a93h
+69b5 cd936a    call    READ_DISK_BYTE
 69b8 fead      cp      0adh
 69ba 2035      jr      nz,69f1h
 69bc db12      in      a,(12h)
@@ -16255,14 +16258,15 @@ IS_DRIVE_PRESENT:
 69e1 db13      in      a,(13h)
 69e3 fede      cp      0deh
 69e5 200a      jr      nz,69f1h
-69e7 cd936a    call    6a93h
+69e7 cd936a    call    READ_DISK_BYTE
 69ea feaa      cp      0aah
 69ec 2003      jr      nz,69f1h
 69ee 79        ld      a,c
 69ef b7        or      a
 69f0 c8        ret     z
 69f1 37        scf     
-69f2 c9        ret     
+69f2 c9        ret    
+
 69f3 dd2a0b86  ld      ix,(860bh)
 69f7 2a0d86    ld      hl,(860dh)
 69fa 115600    ld      de,0056h
@@ -16286,6 +16290,7 @@ IS_DRIVE_PRESENT:
 6a18 20e7      jr      nz,6a01h
 6a1a 0654      ld      b,54h
 6a1c 18e5      jr      6a03h
+
 6a1e 3a0886    ld      a,(8608h)
 6a21 210a86    ld      hl,860ah
 6a24 96        sub     (hl)
@@ -16305,13 +16310,13 @@ IS_DRIVE_PRESENT:
 6a45 4e        ld      c,(hl)
 6a46 23        inc     hl
 6a47 56        ld      d,(hl)
-6a48 cd936a    call    6a93h
+6a48 cd936a    call    READ_DISK_BYTE
 6a4b fed5      cp      0d5h
 6a4d 20f3      jr      nz,6a42h
-6a4f cd936a    call    6a93h
+6a4f cd936a    call    READ_DISK_BYTE
 6a52 feaa      cp      0aah
 6a54 20ec      jr      nz,6a42h
-6a56 cd936a    call    6a93h
+6a56 cd936a    call    READ_DISK_BYTE
 6a59 fe96      cp      96h
 6a5b 20e5      jr      nz,6a42h
 6a5d cd9b6a    call    6a9bh
@@ -16329,10 +16334,10 @@ IS_DRIVE_PRESENT:
 6a71 cd9b6a    call    6a9bh
 6a74 a8        xor     b
 6a75 2013      jr      nz,6a8ah
-6a77 cd936a    call    6a93h
+6a77 cd936a    call    READ_DISK_BYTE
 6a7a fede      cp      0deh
 6a7c 200c      jr      nz,6a8ah
-6a7e cd936a    call    6a93h
+6a7e cd936a    call    READ_DISK_BYTE
 6a81 feaa      cp      0aah
 6a83 2005      jr      nz,6a8ah
 6a85 b7        or      a
@@ -16343,11 +16348,19 @@ IS_DRIVE_PRESENT:
 6a8e c21e6a    jp      nz,6a1eh
 6a91 37        scf     
 6a92 c9        ret     
-6a93 db12      in      a,(12h)
-6a95 07        rlca    
-6a96 30fb      jr      nc,6a93h
-6a98 db13      in      a,(13h)
-6a9a c9        ret     
+
+;
+; reads a byte from disk buffer, waits if necessary
+; and returns value into A
+;
+; 6a93
+READ_DISK_BYTE:
+   in      a,(12h)
+   rlca    
+   jr      nc,READ_DISK_BYTE
+   in      a,(13h)
+   ret     
+
 6a9b db12      in      a,(12h)
 6a9d 07        rlca    
 6a9e 30fb      jr      nc,6a9bh
@@ -16396,20 +16409,20 @@ DO_SOMETHING_WITH_B:
 6ae9 af        xor     a
 6aea 320a86    ld      (860ah),a
 6aed cb20      sla     b
-6aef 3a1386    ld      a,(8613h)
-6af2 4f        ld      c,a
-6af3 0f        rrca    
-6af4 f5        push    af
-6af5 321386    ld      (8613h),a
-6af8 b1        or      c
-6af9 cd0f6b    call    6b0fh
-6afc 117300    ld      de,0073h
-6aff cdad6a    call    6aadh
-6b02 f1        pop     af
-6b03 cd0f6b    call    6b0fh
-6b06 112503    ld      de,0325h
-6b09 cdad6a    call    6aadh
-6b0c 10e1      djnz    6aefh
+   6aef 3a1386    ld      a,(8613h)
+   6af2 4f        ld      c,a
+   6af3 0f        rrca    
+   6af4 f5        push    af
+   6af5 321386    ld      (8613h),a
+   6af8 b1        or      c
+   6af9 cd0f6b    call    6b0fh
+   6afc 117300    ld      de,0073h
+   6aff cdad6a    call    6aadh
+   6b02 f1        pop     af
+   6b03 cd0f6b    call    6b0fh
+   6b06 112503    ld      de,0325h
+   6b09 cdad6a    call    6aadh
+   6b0c 10e1      djnz    6aefh
 6b0e c9        ret     
 
 6b0f e60f      and     0fh
@@ -16435,6 +16448,10 @@ PORT_10_WRITE:
    out     (10h),a
    ret 
 
+;
+; $6a bytes sector encoding GCR table
+;
+DISK_GCR_TABLE:
 6b2c 00        nop     
 6b2d 019899    ld      bc,9998h
 6b30 02        ld      (bc),a
@@ -16509,6 +16526,7 @@ PORT_10_WRITE:
 6b93 3d        dec     a
 6b94 3e3f      ld      a,3fh
 6b96 e5        push    hl
+
 6b97 216e77    ld      hl,776eh
 6b9a cddb72    call    72dbh
 6b9d cd0d0c    call    0c0dh
