@@ -278,6 +278,7 @@ function dumpPointers() {
 `);
 }
 
+/*
 let zzz = 0;
 let max_0 = 0;
 let min_1 = 255;
@@ -298,3 +299,47 @@ function debugAfter() {
       }
    } 
 } 
+*/
+
+let before_pc;
+let nn = 0;
+let te = 0;
+function debugBefore() {
+   const pc = cpu.getState().pc;
+   if(pc >= 0x8c54 && pc <= 0x8c60)
+   {      
+      before_pc = pc;
+   }
+   else before_pc = 0;   
+}
+
+function debugAfter(elapsed) {      
+   if(before_pc !== 0 && nn < 20)
+   {
+      te+= elapsed;
+      if(before_pc == 0x8c60)
+      {         
+         console.log(`${hex(before_pc,4)}: ${te}`);
+         nn++;
+         te = 0;
+      }
+   }
+   else te = 0;
+}
+
+function bit(b,n) {
+   return (b & (1<<n))>0 ? 1 : 0;
+} 
+
+function not_bit(b,n) {
+   return (b & (1<<n))>0 ? 0 : 1;
+} 
+
+function dumpStack() {
+   const sp = cpu.getState().sp;
+
+   for(let t=sp;t<=0xffff;t+=2) {
+      const word = mem_read_word(t);
+      console.log(`${hex(t,4)}: ${hex(word,4)}  (${word})`);
+   }
+}
