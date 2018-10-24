@@ -29,7 +29,6 @@ function bin(value, size) {
    return s.substr(s.length - size);
 }
 
-
 function cpu_status() {
    const state = cpu.getState();
    return `A=${hex(state.a)} BC=${hex(state.b)}${hex(state.c)} DE=${hex(state.d)}${hex(state.e)} HL=${hex(state.h)}${hex(state.l)} IX=${hex(state.ix,4)} IY=${hex(state.iy,4)} SP=${hex(state.sp,4)} PC=${hex(state.pc,4)} S=${state.flags.S}, Z=${state.flags.Z}, Y=${state.flags.Y}, H=${state.flags.H}, X=${state.flags.X}, P=${state.flags.P}, N=${state.flags.N}, C=${state.flags.C}`;   
@@ -47,167 +46,26 @@ function mem_read_word(address) {
 }
 
 async function crun(filename) {
-   cload(filename);
+   load(filename);
    await print_string("\nrun:\n");
-}
-
-function cload(filename, address) {
-   const stored = window.localStorage.getItem(`laser500/${filename}`);
-
-   if(stored === undefined || stored === null) {         
-      console.log(`file "${filename}" not found`);            
-      return;
-   }
-
-   const program = JSON.parse(stored);
-
-   const { bytes, start, type } = program;
-   const startAddress = (address === undefined) ? start : address;
-   const end = startAddress + bytes.length - 1;
-
-   for(let i=0,t=startAddress;t<=end;i++,t++) {
-      mem_write(t, bytes[i]);
-   }
-
-   // modify end of basic program pointer   
-   if(startAddress === 0x8995) mem_write_word(0x83E9, end+1);   
-
-   console.log(`loaded "${filename}" ${bytes.length} bytes from ${hex(startAddress,4)}h to ${hex(end,4)}h`);
-   cpu.reset();   
-}
-
-function dload(diskname, drive) {
-   if(drive === undefined) drive = 0;
-
-   const stored = window.localStorage.getItem(`laser500/DISKS/${diskname}`);
-
-   if(stored === undefined || stored === null) {         
-      console.log(`disk "${diskname}" not found`);            
-      return;
-   }
-
-   const disk = JSON.parse(stored);
-
-   const { bytes } = disk;
-
-   const arr = new Uint8Array(bytes);
-
-   drives[drive] = new Drive(arr);
-      
-   console.log(`inserted disk "${diskname}" into drive ${drive}`);
-   cpu.reset();   
-}
-
-function csave(filename, start, end) {
-   const basType = (start === undefined && end === undefined);
-
-   if(start === undefined) start = mem_read_word(0x8041);
-   if(end === undefined) end = mem_read_word(0x83E9)-1;
-
-   const prg = [];
-   for(let i=0,t=start; t<=end; i++,t++) {
-      prg.push(mem_read(t));
-   }
-
-   const bytes = new Uint8Array(prg);
-
-   let blob = new Blob([bytes], {type: "application/octet-stream"});
-   const ext = basType ? "bas" : "bin";   
-   saveAs(blob, filename);
-
-   console.log(`saved "${filename}" ${bytes.length} bytes from ${hex(start,4)}h to ${hex(end,4)}h`);
-
-   const saveObject = {
-      name: filename,
-      bytes: Array.from(bytes),
-      start: start,
-      type: ext
-   };
-
-   window.localStorage.setItem(`laser500/${filename}`, JSON.stringify(saveObject));
-   cpu.reset();
-}
-
-function dsave(diskname, drive) {
-   if(drive === undefined) drive = 0;
-
-   const bytes = drives[drive].floppy;
-
-   let blob = new Blob([bytes], {type: "application/octet-stream"});
-   
-   saveAs(blob, diskname);
-
-   console.log(`stored disk "${diskname}" from drive ${drive}`);
-
-   const saveObject = {
-      name: diskname,
-      bytes: Array.from(bytes)
-   };
-
-   window.localStorage.setItem(`laser500/DISKS/${diskname}`, JSON.stringify(saveObject));
-   cpu.reset();
 }
 
 function drag_drop_disk(diskname, bytes) {
    console.log(`dropped disk "${diskname}"`);
-
-   const saveObject = {
-      name: diskname,
-      bytes: Array.from(bytes)
-   };
-
-   window.localStorage.setItem(`laser500/DISKS/${diskname}`, JSON.stringify(saveObject));   
+   writeFile(diskname, bytes);
 }
 
-function cdir() {
-   const keys = Object.keys(window.localStorage);
-   const laser500 = keys.filter(f => f.startsWith("laser500/"));   
-   laser500.forEach(fn=>console.log(fn.substr("laser500/".length)));
-}
-
-function disks() {
-   const keys = Object.keys(window.localStorage);
-   const laser500 = keys.filter(f => f.startsWith("laser500/DISKS/"));   
-   laser500.forEach(fn=>console.log(fn.substr("laser500/DISKS/".length)));
-}
-
-function cdel(fname) {
-   const key = `laser500/${fname}`;
-   const exist = window.localStorage.getItem(key) !== null;
-
-   if(exist) {
-      window.localStorage.removeItem(key);
-      console.log(`removed "${fname}"`);
-   }
-   else {
-      console.log(`file "${fname}" not found`);
-   }
-}
-
-function ddel(fname) {
-   const key = `laser500/DISKS/${fname}`;
-   const exist = window.localStorage.getItem(key) !== null;
-
-   if(exist) {
-      window.localStorage.removeItem(key);
-      console.log(`removed "${fname}"`);
-   }
-   else {
-      console.log(`file "${fname}" not found`);
-   }
-}
-
-async function print_string(str) {
+async function print_string(str) {   
    for(let t=0;t<str.length;t++) {
       let c = str.charAt(t).toLowerCase();
       if(c=='\n') c = "Enter";
       await simulateKey(c);
-   }
+   }   
 }
 
 async function pause() {
    return new Promise((resolve,reject)=> {
-      setTimeout(()=>resolve(), 100);
+      setTimeout(()=>resolve(), 50);
    });
 }
 
@@ -416,4 +274,6 @@ function dumpStack() {
    }
 }
 
-
+function endsWith(s, value) {
+   return s.substr(-value.length) === value;
+}

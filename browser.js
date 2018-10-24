@@ -56,8 +56,8 @@ dropZone.addEventListener('drop', e => {
    const files = e.dataTransfer.files; // Array of all files
 
    for(let i=0, file; file=files[i]; i++) {                   
-      const reader = new FileReader();
-      reader.onload = e2 => droppedFile(file.name, e2.target.result);
+      const reader = new FileReader();      
+      reader.onload = e2 => droppedFile(file.name, new Uint8Array(e2.target.result));
       reader.readAsArrayBuffer(file); 
    }
 });
@@ -81,48 +81,24 @@ function droppedFile(outName, bytes) {
    const dsk = /\.nic$/i;
    if(dsk.test(outName)) {
       drag_drop_disk(outName, bytes);
-      dload(outName, 0);
+      load(outName, 0);
       return;
    }
 
-   const saveObject = {
-      name: outName,
-      bytes: Array.from(new Uint8Array(bytes)),
-      start: 0x8995,
-      type: "bin"
-   };
-            
-   window.localStorage.setItem(`laser500/${outName}`, JSON.stringify(saveObject));
-         
-   crun(outName);         
+   const bin = /\.bin$/i;
+   if(bin.test(outName)) {     
+      writeFile(outName, bytes)
+      crun(outName);         
+   }
 }
 
 // **** welcome message ****
 
 function welcome() {
-   console.info("Welcome to the Video Technology Laser 500 emulator");
-   console.info("To load files into the emulator, drag & drop a file over the screen");
-   console.info("From the console you can use the following functions:");
-   console.info("");
-   console.info("    csave(name[,start,end])");
-   console.info("    crun(name)");
-   console.info("    cload(name)");
-   console.info("    cdir()");
-   console.info("    cdel(name)");
-   console.info("    info()");
-   console.info("    stop()");
-   console.info("    go()");
-   console.info("    power()");
-   console.info("");
-   console.info("Loaded and saved files are also stored permanently on the browser memory");
-   console.info("Printer is emulated by printing on the JavaScript console (here)");
-   console.info("Reset key is Pause or Ctrl+Break or Alt+R");
-   console.info("Power on/off Alt+P");
-   console.info("Currently only italian keyboard is mapped.");
-   console.info("");
-   console.info("Emulation is still in development");
-   console.info("");
-   console.info("");
+   console.info("***********************************************************************");   
+   console.info("Welcome to the Video Technology Laser 500 emulator");   
+   console.info("Please read the instructions at https://github.com/nippur72/laser500emu");
+   console.info("***********************************************************************");   
 }
 
 function getQueryStringObject() {
