@@ -86,8 +86,9 @@ function keyDown(e) {
       
    // remap shift+home into Cls
    if(key==="Home" && e.shiftKey === true) key = "Cls";
-
+   
    const k = pckey_to_laserkey(key);   
+
    if(k !== undefined) {      
       if(browser_keys_state[key] == 'down') return;      
       //console.log("down",e);
@@ -116,6 +117,13 @@ function keyUp(e) {
    // remap shift+home into Cls
    if(key==="Home" && e.shiftKey === true) key = "Cls";
 
+   // fix browser bug, up key is different from down key
+   if(key==="è") key = "[";
+   if(key==="ò") key = "@";
+   if(key==="ì") key = "^";
+   if(key==="à") key = "#";   
+   if(key==="+") key = "]";
+   
    const k = pckey_to_laserkey(key);
    if(k !== undefined) {    
       //console.log("up",e);  
@@ -326,11 +334,11 @@ assignKey('y',   KEY_Y);      assignKey('Y',   KEY_Y, true);
 
 assignKey('Escape', KEY_ESC);
 assignKey('1',      KEY_1); assignKey('!', KEY_1, true);
-assignKey('2',      KEY_2); assignKey('@', KEY_2, true); 
-assignKey('3',      KEY_3); assignKey('#', KEY_3, true); 
+assignKey('2',      KEY_2); assignKey('@', KEY_2, true); assignKey('ò', KEY_2, true); 
+assignKey('3',      KEY_3); assignKey('#', KEY_3, true); assignKey('à', KEY_3, true);
 assignKey('4',      KEY_4); assignKey('$', KEY_4, true); 
 assignKey('5',      KEY_5); assignKey('%', KEY_5, true); 
-assignKey('6',      KEY_6); assignKey('^', KEY_6, true); 
+assignKey('6',      KEY_6); assignKey('^', KEY_6, true); assignKey('ì', KEY_6, true); 
 
 assignKey('=', KEY_EQUAL); assignKey('+', KEY_EQUAL, true);
 assignKey('-', KEY_MINUS); assignKey('_', KEY_MINUS, true);
@@ -364,7 +372,7 @@ assignKey(',', KEY_COMMA); assignKey('<', KEY_COMMA, true);
 assignKey('m', KEY_M); assignKey('M', KEY_M, true);
 
 assignKey('\\'     , KEY_BACKSLASH);     assignKey('|'      , KEY_BACKSLASH, true); 
-assignKey('['      , KEY_OPEN_BRACKET);  assignKey('{'      , KEY_OPEN_BRACKET, true); 
+assignKey('['      , KEY_OPEN_BRACKET);  assignKey('{'      , KEY_OPEN_BRACKET, true);  assignKey('è'      , KEY_OPEN_BRACKET, true); 
 assignKey(']'      , KEY_CLOSE_BRACKET); assignKey('}'      , KEY_CLOSE_BRACKET, true); 
 assignKey('ù'      , KEY_MU);            assignKey('£'      , KEY_MU, true); 
 assignKey('Insert' , KEY_INS); 
