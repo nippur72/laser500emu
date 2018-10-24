@@ -76,6 +76,28 @@ function cload(filename, address) {
    cpu.reset();   
 }
 
+function dload(diskname, drive) {
+   if(drive === undefined) drive = 0;
+
+   const stored = window.localStorage.getItem(`laser500/DISKS/${diskname}`);
+
+   if(stored === undefined || stored === null) {         
+      console.log(`disk "${diskname}" not found`);            
+      return;
+   }
+
+   const disk = JSON.parse(stored);
+
+   const { bytes } = disk;
+
+   const arr = new Uint8Array(bytes);
+
+   drives[drive] = new Drive(arr);
+      
+   console.log(`inserted disk "${diskname}" into drive ${drive}`);
+   cpu.reset();   
+}
+
 function csave(filename, start, end) {
    const basType = (start === undefined && end === undefined);
 
@@ -106,14 +128,64 @@ function csave(filename, start, end) {
    cpu.reset();
 }
 
+function dsave(diskname, drive) {
+   if(drive === undefined) drive = 0;
+
+   const bytes = drives[drive].floppy;
+
+   let blob = new Blob([bytes], {type: "application/octet-stream"});
+   
+   saveAs(blob, diskname);
+
+   console.log(`stored disk "${diskname}" from drive ${drive}`);
+
+   const saveObject = {
+      name: diskname,
+      bytes: Array.from(bytes)
+   };
+
+   window.localStorage.setItem(`laser500/DISKS/${diskname}`, JSON.stringify(saveObject));
+   cpu.reset();
+}
+
+function drag_drop_disk(diskname, bytes) {
+   console.log(`dropped disk "${diskname}"`);
+
+   const saveObject = {
+      name: diskname,
+      bytes: Array.from(bytes)
+   };
+
+   window.localStorage.setItem(`laser500/DISKS/${diskname}`, JSON.stringify(saveObject));   
+}
+
 function cdir() {
    const keys = Object.keys(window.localStorage);
    const laser500 = keys.filter(f => f.startsWith("laser500/"));   
    laser500.forEach(fn=>console.log(fn.substr("laser500/".length)));
 }
 
+function disks() {
+   const keys = Object.keys(window.localStorage);
+   const laser500 = keys.filter(f => f.startsWith("laser500/DISKS/"));   
+   laser500.forEach(fn=>console.log(fn.substr("laser500/DISKS/".length)));
+}
+
 function cdel(fname) {
    const key = `laser500/${fname}`;
+   const exist = window.localStorage.getItem(key) !== null;
+
+   if(exist) {
+      window.localStorage.removeItem(key);
+      console.log(`removed "${fname}"`);
+   }
+   else {
+      console.log(`file "${fname}" not found`);
+   }
+}
+
+function ddel(fname) {
+   const key = `laser500/DISKS/${fname}`;
    const exist = window.localStorage.getItem(key) !== null;
 
    if(exist) {
@@ -343,3 +415,5 @@ function dumpStack() {
       console.log(`${hex(t,4)}: ${hex(word,4)}  (${word})`);
    }
 }
+
+

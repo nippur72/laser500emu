@@ -64,8 +64,8 @@ dropZone.addEventListener('drop', e => {
 
 function droppedFile(outName, bytes) {   
 
-   const ext = /\.wav$/i;
-   if(ext.test(outName)) {
+   const wav = /\.wav$/i;
+   if(wav.test(outName)) {
       // WAV files
       console.log("WAV file dropped");
       const info = decodeSync(bytes);
@@ -75,6 +75,13 @@ function droppedFile(outName, bytes) {
       tapeLen = tapeBuffer.length;
       tapePtr = 0;
       tapeHighPtr = 0;
+      return;
+   }
+
+   const dsk = /\.nic$/i;
+   if(dsk.test(outName)) {
+      drag_drop_disk(outName, bytes);
+      dload(outName, 0);
       return;
    }
 
