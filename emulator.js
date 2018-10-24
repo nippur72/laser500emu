@@ -4,12 +4,14 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO LPRINT command communicate with emu or via OUT 255
+// TODO verify dos copy in ram is loaded correctly because of sector interleaving
 // TODO adjust clock speed
 // TODO check t-states in Z80.js
 // TODO save emulator snapshots?
 // TODO no double scanline (options)
 // TODO slow mode, skip frames
-// TODO rewrite keyboard
+// TODO logical keyboard vs original keyboard
 // TODO draw keyboard for mobile
 // TODO pasting text
 // TODO save to cloud ?
