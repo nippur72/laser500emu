@@ -1,0 +1,144 @@
+Floppy disk controller
+
+The Laser 700 built-in floppy disk interface (and presumably the external
+extension for the Laser 350/500) allows to control up to 2 floppy disk drives.
+
+Supported disks:
+- Soft-sectored
+- Double sided (potentially)
+- Index hole is not used
+- 40 tracks (the hardware might be able to handle 80 tracks)
+- Write protect sense
+
+I/O registers
+
+Address	Access	Description
+0x10	WO	Latch register 1
+0x11	WO	Latch register 2
+0x12	RO	Status register
+0x13	WO	Data write register
+0x13	RO	Data read register
+
+0x10: Latch register 1
+Bit(s)	Description
+7	Side select: 0 = side 0
+	             1 = side 1
+6	Write request: 0 = write
+	               1 = read
+	Controls the /WREQ output line on the controller.
+5	Drive select: 0 = drive 1
+	              1 = drive 2
+4	Drive enable: 0 = drive disabled
+	              1 = drive enabled (motor spinning?)
+	Controls the /ENBL1 or /ENBL2 output depending on the drive selected
+	by bit 5.
+3-0	Stepper motor phase control. bit 0 = phase 0
+	                             ...
+	                             bit 3 = phase 3
+	Each phase is controlled independently by one bit. A phase is
+	enabled when its bit is set.
+
+0x11: Latch register 2
+Bit(s)	Description
+7-1	Reserved
+0	Data write mode: 0 = 8 bit
+	                 1 = 16 bit
+
+0x12: Status register
+Bit(s)	Description
+7	Controller buffer status.
+	When writing: 0 = buffer not empty
+	              1 = buffer empty
+	When reading: 0 = data not ready
+	              1 = data ready
+6-1	Reserved
+0	Write protect sense: 0 = write-protected
+	                     1 = not write-protected
+	Status of the WPROT input (for selected drive).
+
+0x13: Data write register
+Bit(s)	Description
+7-0	Data to write to the controller's buffer. Should be written when bit 7
+	of status register is set.
+
+0x13: Data read register
+Bit(s)	Description
+7-0	Data to read from the controller's buffer. Should be read when bit 7
+	of status register is set.
+
+On-disk format
+
+Bytes written on the media must comply with the following constraints:
+- MSB must be 1 (bytes are written on the media MSB first, and this is used
+  for synchronization)
+- A byte must not contain more than 2 consecutive zero bits
+
+The GCR "6 and 2" encoding, which is used on the Apple ][, is used to encode
+the data part of a sector.
+The sector address part uses a "4 and 4" encoding, which obeys stricter
+restrictions than GCR (no more than one 0 between 1's), and is also less
+efficient. It occupies two bytes on disk to encode a single byte of data.
+
+When writing the sector data part, the input data is read 6 bits at once, and
+stored into a secondary buffer, XOR'ed with the previous value in that buffer
+(the first value is not modified), then GCR-encoded. A checksum byte is
+appended to the buffer; it is equal to the last 6 bits of input data.
+When all the values (incl. checksum) are XOR'ed together, the result should
+be 0.
+
+A lookup table to decode "6 and 2" GCR is in the BASIC ROM (at address
+0x6b2c). It is copied to RAM on boot. A pointer to that table is stored at
+address 0x860f.
+
+Byte to 4&4 pair:
+b0 = (b >> 1) | 0xaa
+b1 = b | 0xaa
+
+4&4 pair to byte:
+b = ((b0 << 1) | 1) & b1
+
+Sector address part:
+D5 AA // Data start
+96 // Data type: sector address (0x00 in GCR encoding)
+4&4_pair(volume_num) // Volume number (usually 0)
+4&4_pair(track)
+4&4_pair(sector)
+4&4_pair(checksum)
+DE AA // Data end
+(EB?)
+
+Checksum must check:
+volume_num ^ track ^ sector ^ checksum == 0
+
+Sector data part:
+D5 AA // Data start
+AD // Data type: sector data (0x0b in GCR encoding)
+(342 XOR'ed + GCR-encoded bytes)
+checksum (GCR-encoded 6-bit checksum "byte"; previous XOR'ed bytes XOR checksum byte should be 0)
+DE AA // Data end
+(EB?)
+
+
+Stepper motor control
+
+The floppy disk drive controller allows to directly drive each of the four
+phases (phy0~phy3) of the drive's stepper motor, through register 0x10.
+
+A transition from a phase to the next (a step) causes the drive's heads to
+move a distance of half a track for a 40-tracks disk. Two step are needed to
+move from one track to the next (assuming a 40-tracks disk, only one step
+would be needed for a 80-tracks disk).
+
+The BASIC ROM controls the stepper motor in half-step drive: instead of
+driving one coil at a time, with an immediate transision from, say, phy0 to
+phy1, the ROM add an additional transition step which enables both phy0 and
+phy1 for a short amount of time, before disabling phy0.
+After one full step, the ROM waits for 0x325 loop iterations. After a
+half-step, the ROM waits 7 times less loop iterations (0x73). This is required
+for the stepper motor to actually move and the head position to stabilize.
+
+Doing so smoothens the transition from one position to the next, causing less
+noise and vibrations. This technique could also be used to double the angular
+resolution of the stepper motor, at the expense of a lower torque, but this is
+not used in that way by the ROM.
+
