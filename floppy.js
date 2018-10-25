@@ -54,14 +54,14 @@ class Drive {
          this.track_x2 += direction;
          if(this.track_x2 >= TRACKS_PER_FLOPPY) {
             this.track_x2 = TRACKS_PER_FLOPPY-1;
-            console.log(`bump on track ${this.track_x2}/80`);
+            // console.log(`bump on track ${this.track_x2}/80`);
          }
          else if(this.track_x2 < 0) {
             this.track_x2 = 0;
-            console.log(`bump on track ${this.track_x2}/80`);
+            // console.log(`bump on track ${this.track_x2}/80`);
          }
          else {
-            console.log(`moving to track ${this.track_x2}/80    (${direction})`);
+            // console.log(`moving to track ${this.track_x2}/80    (${direction})`);
          }
       }
    }
