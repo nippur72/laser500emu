@@ -55,17 +55,51 @@ function drag_drop_disk(diskname, bytes) {
    writeFile(diskname, bytes);
 }
 
+let is_pasting_text = false;
 async function print_string(str) {   
+   is_pasting_text = true;
    for(let t=0;t<str.length;t++) {
       let c = str.charAt(t).toLowerCase();
       if(c=='\n') c = "Enter";
       await simulateKey(c);
+      if(!is_pasting_text) break;
    }   
+   is_pasting_text = false;
 }
 
-async function pause() {
+async function wait_cursor_move_or_timeout(oldpos, maxtime, oldframe) {
+   let time_counter = 0;
+   const tick = 5;
+
+   function check(resolve) {
+      if(frames !== oldframe) {
+         if(mem_read_word(0x85e2)!==oldpos) resolve();
+         time_counter += tick;
+         if(time_counter > maxtime) resolve();
+      }
+      setTimeout(()=>check(resolve), tick);
+   }
+
+   return new Promise((resolve,reject)=> {      
+      setTimeout(()=>check(resolve), tick);
+   });
+}
+
+async function skip_frame(oldframe) {
+   const tick = 5;
+   function check(resolve) {
+      if(frames !== oldframe) resolve();
+      setTimeout(()=>check(resolve), tick);
+   }
+
+   return new Promise((resolve,reject)=> {      
+      setTimeout(()=>check(resolve), tick);
+   });
+}
+
+async function pause(time) {
    return new Promise((resolve,reject)=> {
-      setTimeout(()=>resolve(), 50);
+      setTimeout(()=>resolve(), time);
    });
 }
 
@@ -74,10 +108,13 @@ async function simulateKey(pckey) {
 }
 
 async function singleKey(pckey) {
-   keyDown(evkey(pckey)); 
-   await pause(); 
+   const old_cursor_pos = mem_read_word(0x85e2);
+   const old_frames = frames;
+   keyDown(evkey(pckey));    
+   await wait_cursor_move_or_timeout(old_cursor_pos, 5*1000, old_frames); 
    keyUp(evkey(pckey));
-   await pause(); 
+   //await pause(25); 
+   await skip_frame(frames); 
 }
 
 function evkey(pcKey) {
@@ -99,6 +136,7 @@ function power() {
    let state = cpu.getState();
    state.halted = true;
    cpu.setState(state);
+   is_pasting_text = false;
    setTimeout(()=>cpu.reset(),200);
 }
 
