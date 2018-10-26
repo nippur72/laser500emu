@@ -4,6 +4,8 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO fix paste with end of frame hook
+// TODO VM target for C
 // TODO LPRINT command communicate with emu or via OUT 255
 // TODO verify dos copy in ram is loaded correctly because of sector interleaving
 // TODO adjust clock speed
@@ -13,7 +15,7 @@
 // TODO slow mode, skip frames
 // TODO logical keyboard vs original keyboard
 // TODO draw keyboard for mobile
-// TODO pasting text
+// TODO pasting text with cursor monitoring
 // TODO save to cloud ?
 // TODO almost exact cycles drawing
 // TODO audio is detuned due to cpu wait states not emulated
@@ -102,6 +104,8 @@ let averageFrameTime = 0;
 let cycle = 0;
 let cycles = 0;
 
+let throttle = false;
+
 // scanline version
 function renderLines(nlines, hidden) {
    for(let t=0; t<nlines; t++) {
@@ -167,6 +171,8 @@ function renderAllLines() {
 }
 
 let nextFrame;
+let end_of_frame_hook = undefined;
+
 function oneFrame() {   
    const startTime = new Date().getTime();      
 
@@ -174,14 +180,17 @@ function oneFrame() {
 
    nextFrame = nextFrame + 20; // 20ms, 50Hz  
 
-   renderAllLines();   
+   renderAllLines();
+   frames++;   
+
+   if(end_of_frame_hook !== undefined) end_of_frame_hook();
 
    const now = new Date().getTime();
    const elapsed = now - startTime;
    averageFrameTime = averageFrameTime * 0.99 + elapsed * 0.01;
 
    let time_out = nextFrame - now;
-   if(time_out < 0) {
+   if(time_out < 0 || throttle) {
       time_out = 0;
       nextFrame = undefined;      
    }
