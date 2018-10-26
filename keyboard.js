@@ -1,3 +1,27 @@
+
+class PCKeyboard {
+   constructor() {
+      this.keys_state = { };
+   }   
+
+   key_press(key) {
+      this.keys_state[key] = true;
+   }
+
+   key_release(key) {
+      this.keys_state[key] = false;
+   }
+
+   dump_keys() {
+      const keys = Object.keys(this.keys_state);
+      keys.forEach(k=>{
+         if(this.keys_state[k]===true) console.log(`${k} is pressed`);
+      })
+   }
+}
+
+pckeyb = new PCKeyboard();
+
 const nrows = 13;
 const ncols = 0x06;
 const keyboard_rows = new Uint8Array(nrows+1); // the hardware key matrix 6x13 rows // 1-based TODO fix
@@ -49,13 +73,17 @@ function assignKey(pckey, laserkey, lasershift) {
 
 const element = document; //.getElementById("canvas");
 
-function keyDown(e) {   
+function keyDown(e) {  
+   //pckeyb.key_press(e.key);
+   //pckeyb.dump_keys();
+
    let key = e.key;
    if(key=="Tab") e.preventDefault(); // TOD fix browser keys
 
    // reset key is ALT+R or CTRL+Break or Pause
    if(key=="Cancel" || key=="Pause" || (e.code == "KeyR" && e.altKey)) {
       cpu.reset();
+      is_pasting_text = false;
       e.preventDefault(); // TOD fix browser keys
       return;
    }
@@ -108,7 +136,10 @@ function keyDown(e) {
    }
 }
 
-function keyUp(e) {   
+function keyUp(e) { 
+   //pckeyb.key_release(e.key);
+   //pckeyb.dump_keys();
+
    let key = e.key;
 
    // numpad + 0 emulates joystick   
@@ -116,13 +147,6 @@ function keyUp(e) {
 
    // remap shift+home into Cls
    if(key==="Home" && e.shiftKey === true) key = "Cls";
-
-   // fix browser bug, up key is different from down key
-   if(key==="è") key = "[";
-   if(key==="ò") key = "@";
-   if(key==="ì") key = "^";
-   if(key==="à") key = "#";   
-   if(key==="+") key = "]";
    
    const k = pckey_to_laserkey(key);
    if(k !== undefined) {    
@@ -137,6 +161,30 @@ function keyUp(e) {
       e.preventDefault();
       // debugKeyboard("relea", key);
    }   
+
+   // fix browser bug, up key is different from down key
+        if(key==="è") key = "[";
+   else if(key==="ò") key = "@";
+   else if(key==="à") key = "#";   
+   else if(key==="+") key = "]";
+   else key = undefined;
+
+   if(key!==undefined) {
+      // copied from above
+      const k = pckey_to_laserkey(key);
+      if(k !== undefined) {    
+         //console.log("up",e);  
+         browser_keys_state[key] = 'up';
+         const shift = needsShift(key);
+         if(isPressed(k.row, k.col)) keyRelease(k.row, k.col); 
+         else clearKeyboardMatrix(); // TOD hack           
+              if(shift === true) keyRelease(1, 0x40);   
+         else if(shift === false) keyRelease(1, 0x40);         
+         //console.log(keyboard_rows);
+         e.preventDefault();
+         // debugKeyboard("relea", key);
+      }      
+   }
 }
 
 element.onkeydown = keyDown;
