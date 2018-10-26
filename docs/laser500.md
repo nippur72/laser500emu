@@ -30,7 +30,7 @@ LOW RAM MAP
 85D1      ?? initialized with 28h
 85D2      ?? initialized with 22h
 85D4-85DF 10x "RET 00 00" configurable jump table
-85E2      (word) ?? initialized with 7800h
+85E2      (word) CURSOR_ADDRESS, initialized with 7800h
 85E5      NROWS: number of scrolling rows (default 24, lower value means bottom rows are fixed) 
 85E6      ?? Left column indent (default 0, in steps of 2, odd values will yield funny results)
 85E7      NCOLS: number of screen columns (initialized with 80)
