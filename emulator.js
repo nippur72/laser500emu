@@ -4,6 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO option for disabling disk drive interface
 // TODO verify CSAVE file name length
 // TODO check sound buffer
 // TODO change localStorage to use https://github.com/ebidel/idb.filesystem.js/
@@ -34,7 +35,6 @@
 // TODO CSAVE to WAV export
 // TODO laser 350/700
 // TODO cartdriges / rom expansion slots
-// TODO rename banks <-> pages (ram1, ram2, etc)
 // TODO laser 200 family? study vzem
 // TODO Z80.js: port in assemblyscript
 // TODO Z80.js: complete fuse tests
@@ -63,10 +63,10 @@
 // *** laser 500 hardware ***
 
 // rom1,rom2 are defined in roms.js
-const ram1     = new Uint8Array(16384); // page 4
-const ram2     = new Uint8Array(16384); // page 5
-const ram3     = new Uint8Array(16384); // page 6
-const videoram = new Uint8Array(16384); // page 7
+const bank4     = new Uint8Array(16384); // page 4
+const bank5     = new Uint8Array(16384); // page 5
+const bank6     = new Uint8Array(16384); // page 6
+const bank7 = new Uint8Array(16384); // page 7
 const banks    = new Uint8Array(4);
 
 // page 3 only on laser 350 

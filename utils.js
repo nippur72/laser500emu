@@ -126,10 +126,10 @@ function evkey(pcKey) {
 }
 
 function power() {      
-   ram1.forEach((e,i)=>ram1[i]=i % 4 === 0 ? 0 : 0xFF);
-   ram2.forEach((e,i)=>ram2[i]=i % 4 === 0 ? 0 : 0xFF);
-   ram3.forEach((e,i)=>ram2[i]=i % 4 === 0 ? 0 : 0xFF);
-   videoram.forEach((e,i)=>videoram[i]=i % 4 === 0 ? 0 : 0);
+   bank4.forEach((e,i)=>bank4[i]=i % 4 === 0 ? 0 : 0xFF);
+   bank5.forEach((e,i)=>bank5[i]=i % 4 === 0 ? 0 : 0xFF);
+   bank6.forEach((e,i)=>bank5[i]=i % 4 === 0 ? 0 : 0xFF);
+   bank7.forEach((e,i)=>bank7[i]=i % 4 === 0 ? 0 : 0);
    banks.forEach((e,i)=>banks[i]=0);
    vdc_border_color = 0;
    vdc_text80_background = 0;
@@ -166,10 +166,10 @@ function reset(value, bitmask) {
 
 function saveState() {
    const saveObject = {
-      ram1: Array.from(ram1),
-      ram2: Array.from(ram2),
-      ram3: Array.from(ram3),
-      videoram: Array.from(videoram),
+      bank4: Array.from(bank4),
+      bank5: Array.from(bank5),
+      bank6: Array.from(bank6),
+      bank7: Array.from(bank7),
       banks: Array.from(banks),
       cassette_bit_in, 
       cassette_bit_out, 
@@ -199,11 +199,11 @@ function restoreState() {
 
       s = JSON.parse(s);      
       
-         s.ram1.forEach((e,i)=>{ram1[i]=e;});
-         s.ram2.forEach((e,i)=>{ram2[i]=e;});
-         s.ram3.forEach((e,i)=>{ram3[i]=e;});
-      s.videoram.forEach((e,i)=>{videoram[i]=e;});
-         s.banks.forEach((e,i)=>{banks[i]=e;});
+      copyArray( s.bank4, bank4);
+      copyArray( s.bank5, bank5);
+      copyArray( s.bank6, bank6);
+      copyArray( s.bank7, bank7);
+      copyArray( s.banks, banks);         
 
       cassette_bit_in         = s.cassette_bit_in;
       cassette_bit_out        = s.cassette_bit_out;
@@ -314,4 +314,8 @@ function dumpStack() {
 
 function endsWith(s, value) {
    return s.substr(-value.length) === value;
+}
+
+function copyArray(source, dest) {
+   source.forEach((e,i)=>dest[i] = e);
 }

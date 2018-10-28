@@ -95,7 +95,7 @@ function drawEight() {
 // draws 8 pixel horizontally on the display area and advances raster_x and raster_x_text
 function drawEight_text() 
 {  
-   let video = vdc_page_7 ? videoram : bank3;
+   let video = vdc_page_7 ? bank7 : bank3;
 
    if(vdc_graphic_mode_enabled) 
    {
@@ -273,7 +273,7 @@ function drawFrame_y_border(y)
 
 function drawFrame_y_text(y) 
 {  
-   let video = vdc_page_7 ? videoram : bank3;
+   let video = vdc_page_7 ? bank7 : bank3;
 
    if(vdc_graphic_mode_enabled) 
    {
@@ -417,7 +417,7 @@ function _drawFrame()
                for(let y=0; y<192; y++) {
                   offs = offs_2[y];
                   for(let x=0; x<80; x++, offs++) {
-                     const row = videoram[offs]; 
+                     const row = bank7[offs]; 
                      for(let xx=0;xx<8;xx++) {                     
                         const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
                         setPixel640(x*8+xx, y, pixel_color);
@@ -429,9 +429,9 @@ function _drawFrame()
                for(let y=0; y<192; y++) {
                   offs = offs_2[y];
                   for(let x=0; x<40; x++, offs += 2) {
-                     const row = videoram[offs];
-                     const fg = (videoram[offs+1] & 0xF0) >> 4;
-                     const bg = (videoram[offs+1] & 0x0F);
+                     const row = bank7[offs];
+                     const fg = (bank7[offs+1] & 0xF0) >> 4;
+                     const bg = (bank7[offs+1] & 0x0F);
                      for(let xx=0;xx<8;xx++) {                     
                         const pixel_color = (row & (1<<xx)) > 0 ? fg : bg;                                                   
                         setPixel320(x*8+xx, y, pixel_color);
@@ -443,7 +443,7 @@ function _drawFrame()
                for(let y=0; y<192; y++) {
                   let offs = offs_2[y];
                   for(let x=0; x<80; x++, offs++) {
-                     const code = videoram[offs];
+                     const code = bank7[offs];
                      const left_pixel_color = (code & 0x0F);
                      const right_pixel_color = (code & 0xF0) >> 4;
                      setPixel160(x*2+0, y, left_pixel_color);
@@ -455,7 +455,7 @@ function _drawFrame()
                for(let y=0; y<192; y++) {
                   offs = offs_1[y];
                   for(let x=0; x<40; x++, offs++) {                  
-                     const row = videoram[offs];
+                     const row = bank7[offs];
                      for(let xx=0;xx<8;xx++) {                     
                         const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
                         setPixel320(x*8+xx, y, pixel_color);
@@ -467,8 +467,8 @@ function _drawFrame()
                for(let y=0; y<192; y++) {
                   offs = offs_1[y];
                   for(let x=0; x<20; x++, offs += 2) {
-                     const code = videoram[offs];
-                     const color = videoram[offs+1];
+                     const code = bank7[offs];
+                     const color = bank7[offs+1];
                      const fg = (color & 0xF0) >> 4;
                      const bg = (color & 0x0F);
                      for(let xx=0;xx<8;xx++) {                     
@@ -482,7 +482,7 @@ function _drawFrame()
                for(let y=0; y<96; y++) {            
                   let offs = offs_0[y];
                   for(let x=0; x<80; x++, offs++) {                  
-                     const code = videoram[offs];
+                     const code = bank7[offs];
                      const left_pixel_color = (code & 0x0F);
                      const right_pixel_color = (code & 0xF0) >> 4;
                      setPixel96(x*2+0, y, left_pixel_color);
@@ -501,7 +501,7 @@ function _drawFrame()
             let offs = ((y & 7) << 8) + ((y >> 3) * 80);
             for(let x=0; x<80; x++, offs++)
             {
-               const code = videoram[0x3800+offs];  
+               const code = bank7[0x3800+offs];  
                
                const startchar = code*8;
                
@@ -524,8 +524,8 @@ function _drawFrame()
             let offs = ((y & 7) << 8) + ((y >> 3) * 80);
             for(let x=0; x<40; x++, offs+=2)
             {
-               const code = videoram[0x3800+offs];
-               const color = videoram[0x3801+offs];
+               const code = bank7[0x3800+offs];
+               const color = bank7[0x3801+offs];
                
                const bg = color & 0xF;
                const fg = color >> 4;

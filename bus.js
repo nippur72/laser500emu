@@ -13,10 +13,10 @@ function mem_read(address) {
       case  1: return rom2[base];
       case  2: return mapped_io_read(base);      
       case  3: return bank3[base]; // page 3 is video for Laser 350 only
-      case  4: return ram1[base];
-      case  5: return ram2[base];      
-      case  6: return ram3[base];      
-      case  7: return videoram[base];
+      case  4: return bank4[base];
+      case  5: return bank5[base];      
+      case  6: return bank6[base];      
+      case  7: return bank7[base];
       case  8: return bank8[base];
       case  9: return bank9[base];
       case 10: return bankA[base];
@@ -37,10 +37,10 @@ function mem_write(address, value) {
       case  1: break; // writing in rom
       case  2: mapped_io_write(base, value); break;
       case  3: break; // page 3 is disabled as works only in Laser 350
-      case  4: ram1[base] = value;           break;
-      case  5: ram2[base] = value;           break;
-      case  6: ram3[base] = value;           break;
-      case  7: videoram[base] = value;       break;
+      case  4: bank4[base] = value;           break;
+      case  5: bank5[base] = value;           break;
+      case  6: bank6[base] = value;           break;
+      case  7: bank7[base] = value;       break;
       case  8: break; // TODO expansion slots
       case  9: break; // TODO expansion slots
       case 10: break; // TODO expansion slots
