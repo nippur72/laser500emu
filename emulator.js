@@ -4,6 +4,9 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO verify CSAVE file name length
+// TODO check sound buffer
+// TODO change localStorage to use https://github.com/ebidel/idb.filesystem.js/
 // TODO publish Jaime's disks
 // TODO turbotape finalize / puchrunch
 // TODO drop wav file bug
@@ -45,6 +48,16 @@
 // TODO investigate port 13h reads, emulate floppy
 // TODO build of CP/M ?
 // TODO be able to emulate CTRL+power up
+
+// speed test check:
+// PASS: raster test with "raster_test.c"
+// PASS: "tape_monitor.c" with 397.6 Hz wave
+// PASS:* 1 FOR T=1 TO 2000:NEXT:SOUND 30,1:GOTO 1 ()  (*emu skips frames)
+// PASS: "PAL_frame_counter.c" with real machine
+// TODO: "highpitch.c" measure frequency
+// TODO: "tstates_counter.c" (improve program)
+// TODO: SOUND 20, 10 measure frequency
+// TODO: CSAVE wav file compare
 
 // *** laser 500 hardware ***
 
