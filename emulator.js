@@ -70,9 +70,9 @@ const videoram = new Uint8Array(16384); // page 7
 const banks    = new Uint8Array(4);
 
 // page 3 only on laser 350 
-const page3    = new Uint8Array(16384);
+const bank3    = new Uint8Array(16384);
 // makes page 3 respond as 0xFF as in real hardware
-page3.forEach((e,i)=>page3[i]=0xFF); 
+bank3.forEach((e,i)=>bank3[i]=0xFF); 
 
 const bank8    = new Uint8Array(16384); bank8.forEach((e,i)=>bank8[i]=0xFF); 
 const bank9    = new Uint8Array(16384); bank9.forEach((e,i)=>bank9[i]=0xFF); 

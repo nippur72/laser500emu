@@ -12,7 +12,7 @@ function mem_read(address) {
       case  0: return rom1[base];
       case  1: return rom2[base];
       case  2: return mapped_io_read(base);      
-      case  3: return page3[base]; // page 3 is video for Laser 350 only
+      case  3: return bank3[base]; // page 3 is video for Laser 350 only
       case  4: return ram1[base];
       case  5: return ram2[base];      
       case  6: return ram3[base];      

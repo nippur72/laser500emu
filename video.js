@@ -95,7 +95,7 @@ function drawEight() {
 // draws 8 pixel horizontally on the display area and advances raster_x and raster_x_text
 function drawEight_text() 
 {  
-   let video = vdc_page_7 ? videoram : page3;
+   let video = vdc_page_7 ? videoram : bank3;
 
    if(vdc_graphic_mode_enabled) 
    {
@@ -273,7 +273,7 @@ function drawFrame_y_border(y)
 
 function drawFrame_y_text(y) 
 {  
-   let video = vdc_page_7 ? videoram : page3;
+   let video = vdc_page_7 ? videoram : bank3;
 
    if(vdc_graphic_mode_enabled) 
    {
