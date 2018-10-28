@@ -48,11 +48,12 @@
 // TODO investigate port 13h reads, emulate floppy
 // TODO build of CP/M ?
 // TODO be able to emulate CTRL+power up
+// TODO sprite routine?
 
 // speed test check:
 // PASS: raster test with "raster_test.c"
 // PASS: "tape_monitor.c" with 397.6 Hz wave
-// PASS:* 1 FOR T=1 TO 2000:NEXT:SOUND 30,1:GOTO 1 ()  (*emu skips frames)
+// PASS:* 1 FOR T=1 TO 2000:NEXT:SOUND 30,1:GOTO 1 (*emu skips frames)
 // PASS: "PAL_frame_counter.c" with real machine
 // TODO: "highpitch.c" measure frequency
 // TODO: "tstates_counter.c" (improve program)
