@@ -4,10 +4,13 @@
 // im1: simple: call 0038H
 // im2: complex
 
-// TODO fix paste with end of frame hook
-// TODO VM target for C
+// TODO publish Jaime's disks
+// TODO turbotape finalize / puchrunch
+// TODO drop wav file bug
+// TODO finalize throttle / end of frame hook
+// TODO disk drive sounds
+// TODO fix/improve paste text, why does it lags?
 // TODO LPRINT command communicate with emu or via OUT 255
-// TODO verify dos copy in ram is loaded correctly because of sector interleaving
 // TODO adjust clock speed
 // TODO check t-states in Z80.js
 // TODO save emulator snapshots?
