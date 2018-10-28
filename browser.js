@@ -95,10 +95,9 @@ function droppedFile(outName, bytes) {
 // **** welcome message ****
 
 function welcome() {
-   console.info("***********************************************************************");   
-   console.info("Welcome to the Video Technology Laser 500 emulator");   
-   console.info("Please read the instructions at https://github.com/nippur72/laser500emu");
-   console.info("***********************************************************************");   
+   console.info(
+`Welcome to the Video Technology Laser 500 emulator
+Please read the instructions at https://github.com/nippur72/laser500emu`);   
 }
 
 function getQueryStringObject() {
