@@ -81,7 +81,7 @@ function droppedFile(outName, bytes) {
    const dsk = /\.nic$/i;
    if(dsk.test(outName)) {
       drag_drop_disk(outName, bytes);
-      load(outName, 0);
+      load(outName, 1);
       return;
    }
 
