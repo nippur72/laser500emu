@@ -68,7 +68,7 @@ function droppedFile(outName, bytes) {
    if(wav.test(outName)) {
       // WAV files
       console.log("WAV file dropped");
-      const info = decodeSync(bytes);
+      const info = decodeSync(bytes.buffer);
       tapeSampleRate = info.sampleRate;
       console.log(info.channelData);
       tapeBuffer = info.channelData[0];
