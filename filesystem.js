@@ -23,16 +23,23 @@ function load(filename, p) {
       console.log(`file "${filename}" not found`);
       return;
    }
+   
+   const ext = filename.substr(-4).toLowerCase();
 
-        if(endsWith(filename,".bin")) load_file(filename, p);
-   else if(endsWith(filename,".dsk")) load_disk(filename, p);
-   else if(endsWith(filename,".emu")) load_state(filename);
+        if(ext === ".bin") load_file(filename, p);
+   else if(ext === ".dsk") load_disk(filename, p);
+   else if(ext === ".nic") load_disk(filename, p);
+   else if(ext === ".emu") load_state(filename);
+   else console.log("give filename .bin, .dsk or .emu extension");
 }
 
 function save(filename, p1, p2) {
-        if(endsWith(filename,".bin")) save_file(filename, p1, p2);
-   else if(endsWith(filename,".dsk")) save_disk(filename, p1);
-   else if(endsWith(filename,".emu")) save_state(filename);
+   const ext = filename.substr(-4).toLowerCase();
+
+        if(ext == ".bin") save_file(filename, p1, p2);
+   else if(ext == ".dsk") save_disk(filename, p1);
+   else if(ext == ".nic") save_disk(filename, p1);
+   else if(ext == ".emu") save_state(filename);
    else console.log("give filename .bin, .dsk or .emu extension");
 }
 
@@ -69,8 +76,12 @@ function save_file(filename, start, end) {
    cpu.reset();
 }
 
-function save_disk(diskname, drive) {   
+function save_disk(diskname, drive) {      
    if(drive === undefined) drive = 1;
+   if(drive < 1 || drive >2) {
+      console.log("wrong drive number");
+      return;
+   }
    const bytes = drives[drive-1].floppy;
    writeFile(diskname, bytes);
    console.log(`disk in drive ${drive} saved as "${diskname}" (${bytes.length} bytes)`);
@@ -79,8 +90,12 @@ function save_disk(diskname, drive) {
 
 function load_disk(diskname, drive) {   
    if(drive === undefined) drive = 1;
+   if(drive < 1 || drive >2) {
+      console.log("wrong drive number");
+      return;
+   }
    const bytes = readFile(diskname);
-   console.log(bytes);
+   //console.log(bytes);
    drives[drive-1].floppy = bytes;   
    console.log(`disk in drive ${drive} has been loaded with "${diskname}" (${bytes.length} bytes)`);
    cpu.reset();
