@@ -9,23 +9,19 @@
 // TODO check sound buffer
 // TODO change localStorage to use https://github.com/ebidel/idb.filesystem.js/
 // TODO publish Jaime's disks
-// TODO turbotape finalize / puchrunch
-// TODO drop wav file bug
+// TODO turbotape finalize / puchrunch, aplib, exomizer
 // TODO finalize throttle / end of frame hook
 // TODO disk drive sounds
 // TODO fix/improve paste text, why does it lags?
 // TODO LPRINT command communicate with emu or via OUT 255
-// TODO adjust clock speed
 // TODO check t-states in Z80.js
 // TODO save emulator snapshots?
 // TODO no double scanline (options)
 // TODO slow mode, skip frames
 // TODO logical keyboard vs original keyboard
 // TODO draw keyboard for mobile
-// TODO pasting text with cursor monitoring
 // TODO save to cloud ?
 // TODO almost exact cycles drawing
-// TODO audio is detuned due to cpu wait states not emulated
 // TODO charset.rom submit bug report to MAME
 // TODO investigate what does NMI (cpu.interrupt(true))
 // TODO autoload programs for fast develop
