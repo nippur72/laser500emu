@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const charset = fs.readFileSync("vt-dos.dsk");
+const charset = fs.readFileSync("software/disks/vt-dos-11.nic");
 
 let s = "const disk_image = new Uint8Array([\n   ";
 
