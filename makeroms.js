@@ -2,6 +2,21 @@ const fs = require('fs');
 
 const charset = fs.readFileSync("charset.rom");
 
+/*
+function writeForMame() {
+   const mameRom = new Uint8Array(2048);
+   charset.forEach((value, i)=> {
+      mameRom[i] = value;
+      mameRom[i+1024] = 255-value;
+   });         
+   fs.writeFileSync("mame.rom", mameRom);
+   console.log("rom for MAME generated");
+}
+
+writeForMame();
+process.exit();
+*/
+
 let s = "const charset = new Uint8Array([\n   ";
 
 // normal set
