@@ -69,7 +69,7 @@ class Drive {
 
 // the actual floppy disks inserted in the drives
 const drives = [ new Drive(disk_image), new Drive() ];
-let fdc_drive = 0;   // drive currently selected (0,1)
+let fdc_drive = -1;   // drive currently selected (0,1), -1 = none
 
 function floppy_read_port(port) {      
 	switch(port-0x10)	
@@ -160,8 +160,11 @@ function write_11(data) {
 // 	    of status register is set.
 
 function write_13(data) {  
-   //console.log(`FDC: 0x13 SET: data=${data}`);   
-   drives[fdc_drive].write_byte(data);   
+   //console.log(`FDC: 0x13 SET: data=${data}`); 
+   if(fdc_drive !== -1)  
+   {
+      drives[fdc_drive].write_byte(data);   
+   }
 }
 
 // 0x13: Data read register
@@ -169,7 +172,8 @@ function write_13(data) {
 // ---------------------------------------
 // 7-0    Data to read from the controller's buffer. Should be read when bit 7
 //        of status register is set.
-function read_13() {         
+function read_13() {     
+   if(fdc_drive === -1) return 0xFF; // @Bonstra test on no drive select
    return drives[fdc_drive].read_byte();
 }
 
@@ -182,12 +186,16 @@ function read_13() {
 // 	     When reading: 0 = data not ready
 // 	                   1 = data ready
 // 6-1     Reserved
-// 0       Write protect sense: 0 = write-protected
-// 	                          1 = not write-protected
+// 0       Write protect sense: 0 = not write-protected
+// 	                          1 = write-protected
 // 	     Status of the WPROT input (for selected drive).
 //
 function read_12() {
-   const buffer_status = 0x80; // always ready
+   if(fdc_drive === -1) {
+      return 0x13; // @Bonstra test on no drive selected 0x13 = not ready + write protected + reserved
+   }
+
+   let buffer_status = 0x80; // always ready
    let write_enabled = drives[fdc_drive].write_enabled;   
    data = buffer_status | write_enabled;         
    //console.log(`fdc 0x12: read status register of drive ${fdc_drive} is $${hex(data)}`);   
