@@ -341,6 +341,7 @@ QUIRKS
 - CALL expression works only if expression == variable
 - in MON LD (A000),A results in BAD OPERAND with arguments > 9999h
 - in AND F0 results in BAD OPERAND, must write as "AND 0F0"
+- in MON ld de, 1 / call exo_getbit is listed as "??"
 - first byte in binary cassette file if FFh becomes F1h
 - ' is REM
 
