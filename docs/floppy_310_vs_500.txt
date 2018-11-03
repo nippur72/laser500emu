@@ -1,0 +1,58 @@
+DIFFERENZE:
+
+porta 10h (WRITE ONLY) LATCH: 
+=============================
+su entrabi è porta 10h
+
+Bit 0-3: fasi UGUALE IN ENTRAMBI
+
+Bit 4: (vz200) drive 1 enable 
+Bit 7: (vz200) drive 2 enable
+
+sono gestiti in maniera diversa, azichè avere due segnali di enable,
+c'è n'è uno solo e c'è un bit di selezione drive. 
+
+Bit 4: (L500) Drive enable
+Bit 5: (L500) Drive select
+
+Bit 6: write request UGUALE IN ENTRAMBI
+
+Bit 7: (solo L500) side select, apparentemente non usato
+
+
+porta DATA 
+======================
+porta 11h su vz200
+porta 13h su L500
+sul manuale del vz00 c'è scritto che è solo in lettura
+ma io penso sia anche in scrittura come nel 500,
+è la porta dove transita il byte letto o scritto
+
+porta POLLING 12h (read-only) 
+=============================
+è solo su vz200, non ha corrispondente su L500
+non ho capito a cosa serva esattamente
+Bit 0 - 6: not used
+Bit 7: clock bit polling input 
+
+porta 11h DATA SIZE (write only)
+================================
+solo su L500, e non sembra sia usata,
+serve a stabilire se i dati sono a 8 o a 16 bit
+
+
+porta 13h WRITE PROTECT STATUS (read-only) 
+==========================================
+vale solo per il vz200
+Bit 0- 6 : not used
+Bit 7: 1 = write-protect
+0 = no write-protect 
+
+nel vz500 il write protect si legge dalla porta 12h
+
+bit 0: Write protect sense
+
+la stessa porta 12h nel 500 fa anche:
+bit 1-6: Reserved
+bit 7: data status, 1=ready for write or read
+
