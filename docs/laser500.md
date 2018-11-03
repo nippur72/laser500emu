@@ -356,3 +356,12 @@ DISK
 The manual mentions that the BASIC ROM can detect the presence of the disk unit interface by writing the I/O port 0x13 and reading back the result (this is the data buffer, so if the disk interface is present, you should read back the same value you've written).
 And if the disk interface is present, the sector 0 of track 0, will be loaded to memory location 0xA200, and execution will resume at that location (after checking that the boot signature is there, I assume).
 So it appears there is a least minimal support for the disk drive interface in the BASIC ROM, but it doesn't exclude loading a fuller support from an expansion ROM module.
+
+CHARSET ROM
+===========
+containts the following character sets:
+00 -    0 ($0000) english (standard)
+01 - 2048 ($0800) nothing (vertical strips)
+10 - 4096 ($1000) german
+11 - 6144 ($1800) french
+
