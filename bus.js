@@ -91,10 +91,10 @@ function io_write(port, value) {
    bus_ops++;
    // console.log(`io write ${hex(port)} ${hex(value)}`)  
    switch(port & 0xFF) {
-      case 0x40: banks[0] = value; break;
-      case 0x41: banks[1] = value; break;
-      case 0x42: banks[2] = value; break;
-      case 0x43: banks[3] = value; break;
+      case 0x40: banks[0] = value & 0xF; break;
+      case 0x41: banks[1] = value & 0xF; break;
+      case 0x42: banks[2] = value & 0xF; break;
+      case 0x43: banks[3] = value & 0xF; break;
       case 0x44:          
          vdc_page_7 = ((value & 0b1000) >> 3) === 0;
          vdc_text80_enabled = value & 1; 
