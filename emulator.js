@@ -4,10 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
-// TODO disable scanlines if Y res < 192
-// TODO command norestore=1
 // TODO emulate true drive @300 RPM
-// TODO option for disabling disk drive interface
 // TODO verify CSAVE file name length
 // TODO check sound buffer
 // TODO change localStorage to use https://github.com/ebidel/idb.filesystem.js/
@@ -25,12 +22,10 @@
 // TODO draw keyboard for mobile
 // TODO save to cloud ?
 // TODO almost exact cycles drawing
-// TODO charset.rom submit bug report to MAME
 // TODO investigate what does NMI (cpu.interrupt(true))
 // TODO autoload programs for fast develop
 // TODO javascript debugger, halt
 // TODO use interrupts to communicate with emulator
-// TODO options from URL &parameters
 // TODO CSAVE to WAV export
 // TODO laser 350/700
 // TODO cartdriges / rom expansion slots
@@ -95,12 +90,11 @@ let speaker_A = 0;
 let speaker_B = 0;
 let joy0 = 255;
 let joy1 = 255;
+let emulate_fdc = true;
 
 let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
 /******************/
-
-const emulate_fdc = true;
 
 const frameRate = 49.7; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
@@ -123,6 +117,14 @@ let cycle = 0;
 let cycles = 0;
 
 let throttle = false;
+
+let options = {
+   load: undefined,
+   restore: true,
+   nodisk: false,
+   scanlines: true,
+   charset: "english"
+};
 
 // scanline version
 function renderLines(nlines, hidden) {
@@ -301,9 +303,6 @@ function playBackAudioSamples(n) {
 
 // prints welcome message on the console
 welcome();
-
-// try to restore previous state, if any
-restoreState();
 
 parseQueryStringCommands();
 

@@ -37,10 +37,10 @@ function mem_write(address, value) {
       case  1: break; // writing in rom
       case  2: mapped_io_write(base, value); break;
       case  3: break; // page 3 is disabled as works only in Laser 350
-      case  4: bank4[base] = value;           break;
-      case  5: bank5[base] = value;           break;
-      case  6: bank6[base] = value;           break;
-      case  7: bank7[base] = value;       break;
+      case  4: bank4[base] = value; break;
+      case  5: bank5[base] = value; break;
+      case  6: bank6[base] = value; break;
+      case  7: bank7[base] = value; break;
       case  8: break; // TODO expansion slots
       case  9: break; // TODO expansion slots
       case 10: break; // TODO expansion slots

@@ -20,7 +20,7 @@ function onResize(e) {
    }   
 
    const trueHeight = canvas.offsetHeight
-   no_scanlines = (trueHeight < 512);
+   hide_scanlines = (trueHeight < 512);
    buildPalette();
 }
 
@@ -104,24 +104,48 @@ function welcome() {
 Please read the instructions at https://github.com/nippur72/laser500emu`);   
 }
 
-function getQueryStringObject() {
+function getQueryStringObject(options) {
    let a = window.location.search.split("&");
    let o = a.reduce((o, v) =>{
       var kv = v.split("=");
-      kv[0] = kv[0].replace("?", "");
-      o[kv[0]] = kv[1];
+      const key = kv[0].replace("?", "");
+      let value = kv[1];
+           if(value === "true") value = true;
+      else if(value === "false") value = false;
+      o[key] = value;
       return o;
-      },{}
-   );
+   }, options);
    return o;
 }
 
 function parseQueryStringCommands() {
-   const cmd = getQueryStringObject();
+   options = getQueryStringObject(options);
 
-   if(cmd.load !== undefined) {
-      name = cmd.load;      
+   if(options.restore !== false) {
+      // try to restore previous state, if any
+      restoreState();
+   }
+
+   if(options.load !== undefined) {
+      const name = options.load;      
       fetchProgramAll(name);            
+   }
+
+   if(options.nodisk === true) {
+      emulate_fdc = false;      
+   }
+
+   if(options.scanlines === false) {
+      show_scanlines = false;   
+      buildPalette();   
+   }
+
+   if(options.charset !== undefined) {
+      if(options.charset == "english") charset_offset = 0;
+      else if(options.charset == "bincode") charset_offset = 2048;
+      else if(options.charset == "german") charset_offset = 4096;
+      else if(options.charset == "french") charset_offset = 6144;
+      else console.warn(`option charset=${options.charset} not recognized`);
    }
 }
 

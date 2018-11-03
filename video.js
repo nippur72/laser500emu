@@ -21,15 +21,15 @@ const TOTAL_SCANLINES = HIDDEN_SCANLINES_TOP + BORDER_V + TEXT_H + BORDER_V_BOTT
 const palette = new Uint32Array(16);
 const halfpalette = new Uint32Array(16);
 
-let no_scanlines = false;
-
+let hide_scanlines = false;
+let show_scanlines = true;
 let charset_offset = 0;
 
 function buildPalette() {
    function setPalette(i,r,g,b) { 
       palette[i] = 0xFF000000 | r | g << 8 | b << 16; 
       halfpalette[i] = 0xFF000000 | ((r/1.2)|0) | ((g/1.2)|0) << 8 | ((b/1.2)|0) << 16; 
-      if(no_scanlines) halfpalette[i] = palette[i];
+      if(hide_scanlines || !show_scanlines) halfpalette[i] = palette[i];
    }
 
    setPalette( 0, 0x00, 0x00, 0x00);  /* black */

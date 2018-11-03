@@ -72,6 +72,17 @@ to load or save programs. Saved programs are seen as a downloaded file in the br
 Programs are also stored on the internal browser storage (HTML5 `localStorage`), simulating
 a sort of disk drive.
 
+OPTIONS
+=======
+Options can be given in the form of query string commands on the URL of the emulator,
+e.g. `https://nippur72.github.io/laser500emu?scanlines=false&nodisk=true`
+
+- `restore=false` do not restore previous emulator state, start fresh (default is restore)
+- `load=programName` load and run the specified program from the `software` directory of the emulator GitHub repo. If no relative path is specified, `programName` will be searched in all subdirectories. 
+- `nodisk=true` disconnect emulated disk drive interface (default is attached)
+- `scanlines=false` turn off the scanlines effect (default is on)
+- `charset=english|german|french` modify the hardware switches used to address the charset ROM (default is english). 
+
 RESOURCES
 =========
 

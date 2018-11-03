@@ -184,6 +184,7 @@ function saveState() {
       speaker_B,
       joy0,
       joy1,
+      emulate_fdc, 
       cpu: cpu.getState()  
    };   
 
@@ -217,7 +218,8 @@ function restoreState() {
       speaker_A               = s.speaker_A;
       speaker_B               = s.speaker_B;
       joy0                    = s.joy0;
-      joy1                    = s.joy1;   
+      joy1                    = s.joy1;  
+      emulate_fdc             = s.emulate_fdc; 
       cpu.setState(s.cpu);
    }
    catch(error)
