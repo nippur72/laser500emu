@@ -25,6 +25,8 @@ function setPalette(i,r,g,b) {
    palette[i] = 0xFF000000 | r | g << 8 | b << 16; 
    halfpalette[i] = 0xFF000000 | ((r/1.2)|0) | ((g/1.2)|0) << 8 | ((b/1.2)|0) << 16; 
 }
+let no_scanlines = false;
+
 
 setPalette( 0, 0x00, 0x00, 0x00);  /* black */
 setPalette( 1, 0x10, 0x10, 0xdf);  /* blue */
@@ -42,7 +44,30 @@ setPalette(12, 0xaf, 0x20, 0x20);  /* bright red */
 setPalette(13, 0xff, 0x90, 0xff);  /* bright magenta */
 setPalette(14, 0xdf, 0xdf, 0x60);  /* bright yellow */
 setPalette(15, 0xff, 0xff, 0xff);  /* white */
+function buildPalette() {
+   function setPalette(i,r,g,b) { 
+      palette[i] = 0xFF000000 | r | g << 8 | b << 16; 
+      halfpalette[i] = 0xFF000000 | ((r/1.2)|0) | ((g/1.2)|0) << 8 | ((b/1.2)|0) << 16; 
+      if(no_scanlines) halfpalette[i] = palette[i];
+   }
 
+   setPalette( 0, 0x00, 0x00, 0x00);  /* black */
+   setPalette( 1, 0x10, 0x10, 0xdf);  /* blue */
+   setPalette( 2, 0x00, 0x80, 0x00);  /* green */
+   setPalette( 3, 0x00, 0x90, 0xff);  /* cyan */
+   setPalette( 4, 0x60, 0x00, 0x00);  /* red */
+   setPalette( 5, 0x80, 0x30, 0xf0);  /* magenta */
+   setPalette( 6, 0x80, 0xa0, 0x00);  /* yellow */
+   setPalette( 7, 0xc0, 0xc0, 0xc0);  /* bright grey */
+   setPalette( 8, 0x5f, 0x5f, 0x6f);  /* dark grey */
+   setPalette( 9, 0x80, 0x80, 0xff);  /* bright blue */
+   setPalette(10, 0x50, 0xdf, 0x30);  /* bright green */
+   setPalette(11, 0x90, 0xdf, 0xff);  /* bright cyan */
+   setPalette(12, 0xaf, 0x20, 0x20);  /* bright red */
+   setPalette(13, 0xff, 0x90, 0xff);  /* bright magenta */
+   setPalette(14, 0xdf, 0xdf, 0x60);  /* bright yellow */
+   setPalette(15, 0xff, 0xff, 0xff);  /* white */
+}
 // canvas is the outer canvas where the aspect ratio is corrected
 const canvas = document.getElementById("canvas");
 canvas.width = SCREEN_W;

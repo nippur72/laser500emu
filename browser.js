@@ -18,6 +18,10 @@ function onResize(e) {
       canvas.style.width  = "100vmin";
       canvas.style.height = `${(1/aspect)*100}vmin`;
    }   
+
+   const trueHeight = canvas.offsetHeight
+   no_scanlines = (trueHeight < 512);
+   buildPalette();
 }
 
 function goFullScreen() 
