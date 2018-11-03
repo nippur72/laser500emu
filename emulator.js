@@ -100,7 +100,7 @@ let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
 /******************/
 
-const emulate_fdc = false;
+const emulate_fdc = true;
 
 const frameRate = 49.7; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
