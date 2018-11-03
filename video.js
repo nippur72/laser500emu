@@ -21,29 +21,10 @@ const TOTAL_SCANLINES = HIDDEN_SCANLINES_TOP + BORDER_V + TEXT_H + BORDER_V_BOTT
 const palette = new Uint32Array(16);
 const halfpalette = new Uint32Array(16);
 
-function setPalette(i,r,g,b) { 
-   palette[i] = 0xFF000000 | r | g << 8 | b << 16; 
-   halfpalette[i] = 0xFF000000 | ((r/1.2)|0) | ((g/1.2)|0) << 8 | ((b/1.2)|0) << 16; 
-}
 let no_scanlines = false;
 
+let charset_offset = 0;
 
-setPalette( 0, 0x00, 0x00, 0x00);  /* black */
-setPalette( 1, 0x10, 0x10, 0xdf);  /* blue */
-setPalette( 2, 0x00, 0x80, 0x00);  /* green */
-setPalette( 3, 0x00, 0x90, 0xff);  /* cyan */
-setPalette( 4, 0x60, 0x00, 0x00);  /* red */
-setPalette( 5, 0x80, 0x30, 0xf0);  /* magenta */
-setPalette( 6, 0x80, 0xa0, 0x00);  /* yellow */
-setPalette( 7, 0xc0, 0xc0, 0xc0);  /* bright grey */
-setPalette( 8, 0x5f, 0x5f, 0x6f);  /* dark grey */
-setPalette( 9, 0x80, 0x80, 0xff);  /* bright blue */
-setPalette(10, 0x50, 0xdf, 0x30);  /* bright green */
-setPalette(11, 0x90, 0xdf, 0xff);  /* bright cyan */
-setPalette(12, 0xaf, 0x20, 0x20);  /* bright red */
-setPalette(13, 0xff, 0x90, 0xff);  /* bright magenta */
-setPalette(14, 0xdf, 0xdf, 0x60);  /* bright yellow */
-setPalette(15, 0xff, 0xff, 0xff);  /* white */
 function buildPalette() {
    function setPalette(i,r,g,b) { 
       palette[i] = 0xFF000000 | r | g << 8 | b << 16; 
@@ -245,10 +226,9 @@ function drawEight_text()
 
          const startchar = code*8;
          
-         const row  = charset[startchar+oy];
+         const row  = charset[charset_offset+startchar+oy];
          for(let xx=0;xx<8;xx++) {
-            const bb = 7-xx;
-            const pixel_color = (row & (1<<bb)) > 0 ? fg : bg;                  
+            const pixel_color = (row & (1<<xx)) > 0 ? fg : bg;                  
             const c = palette[pixel_color]; 
             const c1 = halfpalette[pixel_color];                   
             setPixel320(x*8+xx, y, pixel_color);
@@ -389,10 +369,9 @@ function drawFrame_y_text(y)
          
          const startchar = code*8;
          
-         const row  = charset[startchar+oy];
+         const row  = charset[charset_offset+startchar+oy];
          for(let xx=0;xx<8;xx++) {
-            const bb = 7-xx;
-            const pixel_color = (row & (1<<bb)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
+            const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
             setPixel640(x*8+xx, y, pixel_color);
          }
       }
@@ -414,10 +393,9 @@ function drawFrame_y_text(y)
 
          const startchar = code*8;
          
-         const row  = charset[startchar+oy];
+         const row  = charset[charset_offset+startchar+oy];
          for(let xx=0;xx<8;xx++) {
-            const bb = 7-xx;
-            const pixel_color = (row & (1<<bb)) > 0 ? fg : bg;                  
+            const pixel_color = (row & (1<<xx)) > 0 ? fg : bg;                  
             const c = palette[pixel_color]; 
             const c1 = halfpalette[pixel_color];                   
             setPixel320(x*8+xx, y, pixel_color);
@@ -531,10 +509,9 @@ function _drawFrame()
                const startchar = code*8;
                
                for(let yy=0;yy<8;yy++) {
-                  const row  = charset[startchar+yy];
+                  const row  = charset[charset_offset+startchar+yy];
                   for(let xx=0;xx<8;xx++) {
-                     const bb = 7-xx;
-                     const pixel_color = (row & (1<<bb)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
+                     const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
                      setPixel640(x*8+xx, y*8+yy, pixel_color);
                   }
                }                        
@@ -558,10 +535,9 @@ function _drawFrame()
                const startchar = code*8;
                
                for(let yy=0;yy<8;yy++) {
-                  const row  = charset[startchar+yy];
+                  const row  = charset[charset_offset+startchar+yy];
                   for(let xx=0;xx<8;xx++) {
-                     const bb = 7-xx;
-                     const pixel_color = (row & (1<<bb)) > 0 ? fg : bg;                  
+                     const pixel_color = (row & (1<<xx)) > 0 ? fg : bg;                  
                      const c = palette[pixel_color]; 
                      const c1 = halfpalette[pixel_color];                   
                      setPixel320(x*8+xx, y*8+yy, pixel_color);
