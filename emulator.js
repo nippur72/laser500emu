@@ -4,6 +4,9 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO disable scanlines if Y res < 192
+// TODO command norestore=1
+// TODO emulate true drive @300 RPM
 // TODO option for disabling disk drive interface
 // TODO verify CSAVE file name length
 // TODO check sound buffer
@@ -96,6 +99,8 @@ let joy1 = 255;
 let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
 /******************/
+
+const emulate_fdc = false;
 
 const frameRate = 49.7; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
