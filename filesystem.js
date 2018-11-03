@@ -118,7 +118,7 @@ function dir() {
 
 function download(fileName) {   
    if(!fileExists(fileName)) {
-      console.log(`file "${filename}" not found`);
+      console.log(`file "${fileName}" not found`);
       return;
    }
    const bytes = readFile(fileName);
