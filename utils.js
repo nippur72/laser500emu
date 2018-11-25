@@ -251,59 +251,6 @@ function dumpPointers() {
 let debugBefore = undefined;
 let debugAfter = undefined;
 
-/*
-let zzz = 0;
-let max_0 = 0;
-let min_1 = 255;
-
-function debugAfter() {
-   if(cpu.getState().pc === 0x895f) {
-      const sep = mem_read(0x894e+1);
-      const b = cpu.getState().b;
-      const bit = b<sep ? 0 : 1;
-
-      if(bit===0 && b>max_0) max_0 = b;
-      if(bit===1 && b<min_1) min_1 = b;
-      
-      if(zzz++ % 1500 === 0) {
-         console.log(`${max_0} <-- ${sep} --> ${min_1}`);
-         max_0 = 0;
-         min_1 = 255;
-      }
-   } 
-} 
-*/
-
-/*
-
-let before_pc;
-let nn = 0;
-let te = 0;
-
-let debugBefore = function() {
-   const pc = cpu.getState().pc;
-   if(pc >= 0x8c54 && pc <= 0x8c60)
-   {      
-      before_pc = pc;
-   }
-   else before_pc = 0;   
-}
-
-let debugAfter = function(elapsed) {      
-   if(before_pc !== 0 && nn < 20)
-   {
-      te+= elapsed;
-      if(before_pc == 0x8c60)
-      {         
-         console.log(`${hex(before_pc,4)}: ${te}`);
-         nn++;
-         te = 0;
-      }
-   }
-   else te = 0;
-}
-*/
-
 function bit(b,n) {
    return (b & (1<<n))>0 ? 1 : 0;
 } 
