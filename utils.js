@@ -248,6 +248,9 @@ function dumpPointers() {
 `);
 }
 
+let debugBefore = undefined;
+let debugAfter = undefined;
+
 /*
 let zzz = 0;
 let max_0 = 0;
@@ -271,10 +274,13 @@ function debugAfter() {
 } 
 */
 
+/*
+
 let before_pc;
 let nn = 0;
 let te = 0;
-function debugBefore() {
+
+let debugBefore = function() {
    const pc = cpu.getState().pc;
    if(pc >= 0x8c54 && pc <= 0x8c60)
    {      
@@ -283,7 +289,7 @@ function debugBefore() {
    else before_pc = 0;   
 }
 
-function debugAfter(elapsed) {      
+let debugAfter = function(elapsed) {      
    if(before_pc !== 0 && nn < 20)
    {
       te+= elapsed;
@@ -296,6 +302,7 @@ function debugAfter(elapsed) {
    }
    else te = 0;
 }
+*/
 
 function bit(b,n) {
    return (b & (1<<n))>0 ? 1 : 0;

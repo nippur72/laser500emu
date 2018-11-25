@@ -50,6 +50,17 @@ close and reopen the browser, taking you back where you left it.
 
 If you want to start from scratch, press `ALT+P` to simulate power on/off.
 
+DEBUGGER
+========
+You can plug your own Javascript debug functions by defining 
+`debugBefore()` and `debugAfter(elapsed)` in the JavaScript console.
+
+`debugBefore` is executed before any Z80 instruction; `debugAfter` is executed
+after the istruction and the number of occurred T-states is passed in the `elapsed` argument.
+
+Within the debug functions you can access all the emulator variables, most likely 
+you'll want to read the Z80 state with `cpu.getState()`. 
+
 EMULATOR FEATURES
 =================
 - accurate to the scanline level (changing video mode will reflect next scanline)

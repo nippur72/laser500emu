@@ -4,6 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO exomizer: standalone Z80 verify of decrunch
 // TODO emulate true drive @300 RPM
 // TODO verify CSAVE file name length
 // TODO check sound buffer
@@ -135,9 +136,9 @@ function renderLines(nlines, hidden) {
       // run cpu
       while(true) {
          bus_ops = 0;
-         // debugBefore();
+         if(debugBefore !== undefined) debugBefore();
          let elapsed = cpu.run_instruction();
-         // debugAfter();
+         if(debugBefore !== undefined) debugAfter(elapsed);
          elapsed += bus_ops;
          cycle += elapsed;
          cycles += elapsed;
