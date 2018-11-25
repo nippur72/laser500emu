@@ -34,14 +34,14 @@ LOW RAM MAP
 85E5      NROWS: number of scrolling rows (default 24, lower value means bottom rows are fixed) 
 85E6      ?? Left column indent (default 0, in steps of 2, odd values will yield funny results)
 85E7      NCOLS: number of screen columns (initialized with 80)
-85EA      (word) ?? involved in capslock/keyboard table
-85EC      (word) ?? involved in capslock/keyboard table
-85EE      (word) ?? involved in capslock/keyboard table
+85EA      (word) keyboard table layout: 06de (eng), 07da (fre), 08d6 (ger)
+85EC      (word) keyboard table layout: 06de (eng), 07da (fre), 08d6 (ger) + 54h
+85EE      (word) keyboard table layout: 06de (eng), 07da (fre), 08d6 (ger) + 54h + 54h
 85F0      LAST_KEY_PRESSED: key code currently pressed (255 = no key) (initialized with ffh)
 85F4      KEYREPEATCOUNTER key repeat counter, when zero is set to KEYREPEAT (initialized with 28h)
 85F5      KEYREPEAT: key autorepeat value, initialized with 28h 
 85F6      ?? initialized with 05h
-85F7      (pointer) ??
+85F7      (pointer) KEY_REPLAY_STRING: if not zero replay the 0 terminated string pointed by this (used for FKEYS?)
 85F9      ?? bit 3: if 1 then do not read keyboard during interrupt
 85FA      bit 1: turn on/off inverse text 
           bit 3: turn on/off key beep
@@ -52,6 +52,9 @@ LOW RAM MAP
           bit 6: if 1 then do not read keyboard during interrupt
           bit 4: if 0 then do not do key autorepeat during interrupt
           somewhat involved in CAPS LOCK state (bit 3), but other bits are used as well
+          bit 1-0: 00 = QWERTY keyboard layout
+                   01 = AZERTY keyboard layout
+                   10 = QWERTZ keyboard layout
 8604      content at cursor position
 8606      ?? initialized with 10h
 8607      ?? initialized with 10h

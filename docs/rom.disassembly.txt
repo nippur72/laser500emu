@@ -6,6 +6,7 @@ STACKPTR = 839dh
 
 KEY_SCAN_CODE = 85f0h
 LAST_KEY_ASCII = 8030h
+KEY_REPLAY_STRING = 85f7h
 
 PORT10_LATCH = 8612h
 PORT45_LATCH = 866Ah
@@ -44,7 +45,7 @@ VECTORS:
 000e 00        nop     
 000f 00        nop     
 0010 c30380    jp      8003h
-0013 c33105    jp      0531h    ; CONIN gets char from console and puts into A
+0013 c33105    jp      CONIN    ; CONIN gets char from console and puts into A
 0016 00        nop     
 0017 00        nop     
 0018 c30680    jp      8006h
@@ -100,7 +101,7 @@ CONOUT:
 007e 118e00    ld      de,008eh
 0081 d5        push    de
 0082 0602      ld      b,02h
-0084 cde50a    call    0ae5h
+0084 cde50a    call    SETBANK1
 0087 77        ld      (hl),a
 0088 320068    ld      (6800h),a
 008b c3d30a    jp      0ad3h
@@ -777,22 +778,30 @@ CONOUT:
 0524 c1        pop     bc
 0525 f1        pop     af
 0526 c9        ret     
+
 0527 3afd85    ld      a,(TEXT80)
 052a b7        or      a
 052b 3ae985    ld      a,(85e9h)
 052e c0        ret     nz
 052f 1f        rra     
-0530 c9        ret     
-0531 2af785    ld      hl,(85f7h)
-0534 7d        ld      a,l
-0535 b4        or      h
-0536 2077      jr      nz,05afh
+0530 c9        ret  
+
+;
+; CONIN gets a character from console and puts into A
+;
+;0531
+CONIN:
+   ld      hl, (KEY_REPLAY_STRING) ; if (KEY_REPLAY_STRING) <> 0 then jr 05fah
+   ld      a,l                     ;
+   or      h                       ;
+   jr      nz, 05afh               ;
+            
 0538 0602      ld      b,02h
-053a cde50a    call    0ae5h
+053a cde50a    call    SETBANK1
 053d cdca05    call    05cah
 0540 21f085    ld      hl,KEY_SCAN_CODE
 0543 b7        or      a
-0544 2836      jr      z,057ch
+               if not zero then 
 0546 47        ld      b,a
 0547 79        ld      a,c
 0548 be        cp      (hl)
@@ -820,6 +829,8 @@ CONOUT:
 0574 21fa85    ld      hl,85fah
 0577 cbd6      set     2,(hl)
 0579 c3d30a    jp      0ad3h
+               end if
+               
 057c 21fb85    ld      hl,CAPSLOCK
 057f cba6      res     4,(hl)
 0581 21f385    ld      hl,85f3h
@@ -842,8 +853,10 @@ CONOUT:
 05a9 32f485    ld      (85f4h),a
 05ac 78        ld      a,b
 05ad 18a4      jr      0553h
+
+REPLAY_KEY_IN_HL_BUFFER:
 05af 0606      ld      b,06h
-05b1 cde50a    call    0ae5h
+05b1 cde50a    call    SETBANK1
 05b4 46        ld      b,(hl)
 05b5 23        inc     hl
 05b6 7e        ld      a,(hl)
@@ -852,11 +865,12 @@ CONOUT:
 05ba 2c        inc     l
 05bb 2d        dec     l
 05bc 2807      jr      z,05c5h
-05be 22f785    ld      (85f7h),hl
+05be 22f785    ld      (KEY_REPLAY_STRING),hl
 05c1 78        ld      a,b
 05c2 c3d30a    jp      0ad3h
 05c5 210000    ld      hl,0000h
 05c8 18f4      jr      05beh
+
 05ca cd4b06    call    064bh
 05cd 04        inc     b
 05ce 281c      jr      z,05ech
@@ -928,15 +942,16 @@ CONOUT:
 0648 00        nop     
 0649 00        nop     
 064a 00        nop     
+
 064b 21ff6b    ld      hl,6bffh
 064e 0e0c      ld      c,0ch
 0650 1604      ld      d,04h
 0652 0607      ld      b,07h
 0654 7e        ld      a,(hl)
 0655 f6c0      or      0c0h
-0657 1f        rra     
-0658 302f      jr      nc,0689h
-065a 10fb      djnz    0657h
+   0657 1f        rra     
+   0658 302f      jr      nc,0689h
+   065a 10fb      djnz    0657h
 065c 15        dec     d
 065d 2822      jr      z,0681h
 065f f28506    jp      p,0685h
@@ -957,6 +972,7 @@ CONOUT:
 067b 20f5      jr      nz,0672h
 067d 01ffff    ld      bc,0ffffh
 0680 c9        ret     
+
 0681 2efe      ld      l,0feh
 0683 18dd      jr      0662h
 0685 25        dec     h
@@ -985,7 +1001,7 @@ CONOUT:
 06aa 4f        ld      c,a
 06ab c9        ret     
 06ac 0602      ld      b,02h
-06ae cde50a    call    0ae5h
+06ae cde50a    call    SETBANK1
 06b1 210068    ld      hl,6800h
 06b4 0604      ld      b,04h
 06b6 7e        ld      a,(hl)
@@ -1642,7 +1658,7 @@ CONOUT:
 09e2 216400    ld      hl,0064h
 09e5 110600    ld      de,0006h
 09e8 0602      ld      b,02h
-09ea cde50a    call    0ae5h
+09ea cde50a    call    SETBANK1
 09ed 3af985    ld      a,(85f9h)
 09f0 cb23      sla     e
 09f2 cb12      rl      d
@@ -1712,7 +1728,7 @@ INTERRUPT_FLASH_CURSOR:
 ;0a56
 INTERRUPT_3:
 0a56 0602      ld      b,02h      ; { switch to bank 2
-0a58 cde50a    call    0ae5h      ; }
+0a58 cde50a    call    SETBANK1      ; }
 0a5b 21ff6a    ld      hl,6affh
 0a5e cb76      bit     6,(hl)
 0a60 2811      jr      z,0a73h
@@ -1819,20 +1835,20 @@ SOME_KEY:
    ld      b,02h            ; I/O in bank 1
    call    SETBANK1         ;
 
-   ld      a,(6fdfh)        ; read CAPS LOCK key
-   ld      hl,CAPSLOCK
-   res     0,(hl)
-   res     1,(hl)
+   ld      a, (6fdfh)       ; read AZERTY/QWERTZ layout key
+   ld      hl, CAPSLOCK
+   res     0,(hl)           ; reset AZERTY flag
+   res     1,(hl)           ; reset QWERTZ flag
    set     3,(hl)
 
    bit 5,a
    if zero then 
-      set  0,(hl)
+      set  0,(hl)           ; BIT 0 = AZERTY
       ld   hl,07dah
    else
-      bit 4,a
+      bit 4,a               
       if zero then
-         set 1,(hl)
+         set 1,(hl)         ; BIT 0 = QWERTZ
          ld  hl,08d6h   
       else         
          ld  hl,06deh
@@ -1879,7 +1895,7 @@ GETKEY:
 0b5a 00        nop    
 
 0b5b 0606      ld      b,06h
-0b5d cde50a    call    0ae5h
+0b5d cde50a    call    SETBANK1
 0b60 0e03      ld      c,03h
 0b62 210040    ld      hl,4000h
 0b65 117b0b    ld      de,0b7bh
@@ -2439,7 +2455,7 @@ GETKEY:
 0f66 46        ld      b,(hl)
 0f67 0e00      ld      c,00h
 0f69 0602      ld      b,02h
-0f6b cde50a    call    0ae5h
+0f6b cde50a    call    SETBANK1
 0f6e e5        push    hl
 0f6f 3af985    ld      a,(85f9h)
 0f72 cbbf      res     7,a
@@ -2550,7 +2566,7 @@ GETKEY:
 1035 56        ld      d,(hl)
 1036 e1        pop     hl
 1037 0606      ld      b,06h
-1039 cde50a    call    0ae5h
+1039 cde50a    call    SETBANK1
 103c 0600      ld      b,00h
 103e eb        ex      de,hl
 103f 0c        inc     c
@@ -2615,7 +2631,7 @@ GETKEY:
 10aa e1        pop     hl
 10ab c9        ret     
 10ac 0606      ld      b,06h
-10ae cde50a    call    0ae5h
+10ae cde50a    call    SETBANK1
 10b1 7e        ld      a,(hl)
 10b2 c3d30a    jp      0ad3h
 10b5 284d      jr      z,1104h
@@ -2690,7 +2706,7 @@ GETKEY:
 1122 bf        cp      a
 1123 00        nop     
 1124 0602      ld      b,02h
-1126 cde50a    call    0ae5h
+1126 cde50a    call    SETBANK1
 1129 21f985    ld      hl,85f9h
 112c cbde      set     3,(hl)
 112e 7e        ld      a,(hl)
@@ -2829,7 +2845,7 @@ GETKEY:
 1222 3d        dec     a
 1223 c3d45f    jp      5fd4h
 1226 0602      ld      b,02h
-1228 cde50a    call    0ae5h
+1228 cde50a    call    SETBANK1
 122b 3af985    ld      a,(85f9h)
 122e cb23      sla     e
 1230 cb12      rl      d
@@ -3566,7 +3582,7 @@ READKEY:
 ;16ea
 LABEL_16ea:
    ld   b,02h
-   call 0ae5h
+   call SETBANK1
    ld   a,(6ffdh)
    and  40h
    if not zero then jp 0ad3h
@@ -3719,7 +3735,7 @@ LABEL_16ea:
 1829 3a001e    ld      a,(1e00h)
 182c 00        nop     
 182d 0602      ld      b,02h
-182f cde50a    call    0ae5h
+182f cde50a    call    SETBANK1
 1832 cdea16    call    16eah
 1835 dad30a    jp      c,0ad3h
 1838 3a0068    ld      a,(6800h)
@@ -13658,7 +13674,7 @@ RDBYET1:
 58f1 d5        push    de
 58f2 e5        push    hl
 58f3 cdca85    call    85cah
-58f6 cd3105    call    0531h
+58f6 cd3105    call    CONIN
 58f9 e1        pop     hl
 58fa d1        pop     de
 58fb c1        pop     bc
