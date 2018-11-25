@@ -13,7 +13,7 @@
 // TODO turbotape finalize / puchrunch, aplib, exomizer
 // TODO finalize throttle / end of frame hook
 // TODO disk drive sounds
-// TODO fix/improve paste text, why does it lags?
+// TODO finalize pasteLine/pasteText
 // TODO LPRINT command communicate with emu or via OUT 255
 // TODO check t-states in Z80.js
 // TODO save emulator snapshots?

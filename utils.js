@@ -47,12 +47,26 @@ function mem_read_word(address) {
 
 async function crun(filename) {
    load(filename);
-   await print_string("\nrun:\n");
+   //await print_string("\nrun:\n");
+   pasteLine("RUN\r\n");
 }
 
 function drag_drop_disk(diskname, bytes) {
    console.log(`dropped disk "${diskname}"`);
    writeFile(diskname, bytes);
+}
+
+function pasteLine(text) {
+   // keyboard buffer: 8289-838b  
+   // key repeat address: 85F7
+   
+   for(let t=0;t<text.length;t++) {
+      const v = text.charCodeAt(t);
+      mem_write(0x8289 + t, v);
+   }
+   mem_write_word(0x85f7, 0x8289);
+   //simulateKey("End");
+   cpu.reset();
 }
 
 let is_pasting_text = false;

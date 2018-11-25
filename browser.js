@@ -79,6 +79,7 @@ function droppedFile(outName, bytes) {
       tapeLen = tapeBuffer.length;
       tapePtr = 0;
       tapeHighPtr = 0;
+      pasteLine("CRUN\r\n");
       return;
    }
 
@@ -86,6 +87,7 @@ function droppedFile(outName, bytes) {
    if(dsk.test(outName)) {
       drag_drop_disk(outName, bytes);
       load(outName, 1);
+      pasteLine("DIR\r\n");
       return;
    }
 
