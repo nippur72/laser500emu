@@ -138,7 +138,7 @@ function renderLines(nlines, hidden) {
          bus_ops = 0;
          if(debugBefore !== undefined) debugBefore();
          let elapsed = cpu.run_instruction();
-         if(debugBefore !== undefined) debugAfter(elapsed);
+         if(debugAfter !== undefined) debugAfter(elapsed);
          elapsed += bus_ops;
          cycle += elapsed;
          cycles += elapsed;
