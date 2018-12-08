@@ -61,6 +61,32 @@ after the istruction and the number of occurred T-states is passed in the `elaps
 Within the debug functions you can access all the emulator variables, most likely 
 you'll want to read the Z80 state with `cpu.getState()`. 
 
+LOADING AND SAVING FILES
+========================
+There are three types of files you can work with:
+
+- binary files (`.bin`), plain files that are loaded in memory as-is
+- floppy disk images (`.nic` or `.dsk`), created with `dsk2nic` or saved from the emulator
+- audio files (`.wav`), tape audio files created on the real hardware
+
+Dragging & dropping a file on the emulator's window causes the file to be loaded.
+Binaries are loaded at the standard memory address 0x8995. Disk images are mounted on
+the drive #1. Audio files are loaded from simulated tape (`CRUN` command is launched 
+automatically).
+
+Once a file is loaded, it's also stored on the browser cache so that you don't have
+to drag&drop it again; you can use the `load()` function from the JavaScript console.
+
+These are the commands you can type from the JavaScript console (F12 key):
+
+- `load("file.bin" [,start])` loads a binary file at the specified address
+- `load("disk.dsk" [,drive])` loads a disk image on the specified drive (1,2)
+- `save("file.bin" [,start, end])` saves a binary file 
+- `save("disk.dsk" [,drive])` create a disk image from the specified drive (1,2)
+- `download("file_or_image")` gets a file as download on the browser
+- `remove("file_or_image")` remove file or image from browser's cache
+- `dir()` lists files on browser's cache
+
 EMULATOR FEATURES
 =================
 - accurate to the scanline level (changing video mode will reflect next scanline)
