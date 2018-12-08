@@ -4,17 +4,20 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO change localStorage to use https://github.com/ebidel/idb.filesystem.js/
 // TODO exomizer: standalone Z80 verify of decrunch
 // TODO emulate true drive @300 RPM
 // TODO verify CSAVE file name length
 // TODO check sound buffer
-// TODO change localStorage to use https://github.com/ebidel/idb.filesystem.js/
 // TODO publish Jaime's disks
-// TODO turbotape finalize / puchrunch, aplib, exomizer
+// TODO turbotape check T-states, finalize 
+// TODO finalize exomizer
 // TODO finalize throttle / end of frame hook
+// TODO finalize Z80.js fuse tests
 // TODO disk drive sounds
 // TODO finalize pasteLine/pasteText
-// TODO LPRINT command communicate with emu or via OUT 255
+// TODO LPRINT command communicate with emu or via OUT 255 
+// TODO use interrupts to communicate with z80
 // TODO check t-states in Z80.js
 // TODO save emulator snapshots?
 // TODO no double scanline (options)
@@ -26,13 +29,11 @@
 // TODO investigate what does NMI (cpu.interrupt(true))
 // TODO autoload programs for fast develop
 // TODO javascript debugger, halt
-// TODO use interrupts to communicate with emulator
 // TODO CSAVE to WAV export
 // TODO laser 350/700
 // TODO cartdriges / rom expansion slots
 // TODO laser 200 family? study vzem
 // TODO Z80.js: port in assemblyscript
-// TODO Z80.js: complete fuse tests
 // TODO draw in webassembly
 // TODO caplock key / led ?
 // TODO visual/sound display of activity
@@ -40,7 +41,6 @@
 // TODO verify cassette_bit I/O range on real HW
 // TODO check colors with real hardware
 // TODO options window (modal)
-// TODO investigate port 13h reads, emulate floppy
 // TODO build of CP/M ?
 // TODO be able to emulate CTRL+power up
 // TODO sprite routine?
@@ -57,26 +57,30 @@
 
 // *** laser 500 hardware ***
 
+// bank switching slots, done in the custom chip
+const banks = new Uint8Array(4);
+
+// 32K ROM
 // rom1,rom2 are defined in roms.js
-const bank4     = new Uint8Array(16384); // page 4
-const bank5     = new Uint8Array(16384); // page 5
-const bank6     = new Uint8Array(16384); // page 6
+
+// 64K RAM
+const bank4 = new Uint8Array(16384); // page 4
+const bank5 = new Uint8Array(16384); // page 5
+const bank6 = new Uint8Array(16384); // page 6
 const bank7 = new Uint8Array(16384); // page 7
-const banks    = new Uint8Array(4);
 
-// page 3 only on laser 350 
-const bank3    = new Uint8Array(16384);
-// makes page 3 respond as 0xFF as in real hardware
-bank3.forEach((e,i)=>bank3[i]=0xFF); 
+// bank 3 only on laser 350, makes it respond as 0xFF as in real hardware
+const bank3 = new Uint8Array(16384).fill(0xFF);
 
-const bank8    = new Uint8Array(16384); bank8.forEach((e,i)=>bank8[i]=0xFF); 
-const bank9    = new Uint8Array(16384); bank9.forEach((e,i)=>bank9[i]=0xFF); 
-const bankA    = new Uint8Array(16384); bankA.forEach((e,i)=>bankA[i]=0xFF); 
-const bankB    = new Uint8Array(16384); bankB.forEach((e,i)=>bankB[i]=0xFF); 
-const bankC    = new Uint8Array(16384); bankC.forEach((e,i)=>bankC[i]=0x7F); 
-const bankD    = new Uint8Array(16384); bankD.forEach((e,i)=>bankD[i]=0x7F); 
-const bankE    = new Uint8Array(16384); bankE.forEach((e,i)=>bankE[i]=0x7F); 
-const bankF    = new Uint8Array(16384); bankF.forEach((e,i)=>bankF[i]=0x7F); 
+// unused banks
+const bank8 = new Uint8Array(16384).fill(0xFF); 
+const bank9 = new Uint8Array(16384).fill(0xFF); 
+const bankA = new Uint8Array(16384).fill(0xFF); 
+const bankB = new Uint8Array(16384).fill(0xFF); 
+const bankC = new Uint8Array(16384).fill(0x7F); 
+const bankD = new Uint8Array(16384).fill(0x7F); 
+const bankE = new Uint8Array(16384).fill(0x7F); 
+const bankF = new Uint8Array(16384).fill(0x7F); 
 
 let cassette_bit_in = 1; 
 let cassette_bit_out = 0; 
@@ -283,21 +287,8 @@ function playBackAudioSamples(n) {
    if(tapeHighPtr >= cpuSampleRate) {
       tapeHighPtr-=cpuSampleRate;
       cassette_bit_in = tapeBuffer[tapePtr] > 0 ? 0 : 1;
-      tapePtr++;
-      //if(tapePtr % 44100 === 0) console.log(tapePtr);
+      tapePtr++;      
    }
-
-   /*
-   tapeHighPtr +=  tapeSampleRate;
-   if(tapeHighPtr > cpuSampleRate) {      
-      const s = (speaker_A ? -0.5 : 0.0) + (cassette_bit_out ? 0.5 : 0.0);
-      samplePtr -= cpuSampleRate;
-
-      audioBuffer[audioPtr++] = s;
-      audioPtr = audioPtr % audioBufferSize;
-      audioPtr_unclipped++;
-   } 
-   */     
 }
 
 /*********************************************************************************** */
