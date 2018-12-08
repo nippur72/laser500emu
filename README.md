@@ -86,6 +86,8 @@ These are the commands you can type from the JavaScript console (F12 key):
 - `download("file_or_image")` gets a file as download on the browser
 - `remove("file_or_image")` remove file or image from browser's cache
 - `dir()` lists files on browser's cache
+- `csave()` starts recording to WAV (max 5 minutes); use before typing "CSAVE" on the emulator
+- `cstop()` stops recording and downloads in the browser the resulting WAV file. Silence before and after is trimmed out.
 
 EMULATOR FEATURES
 =================
