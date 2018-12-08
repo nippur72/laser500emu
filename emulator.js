@@ -4,11 +4,9 @@
 // im1: simple: call 0038H
 // im2: complex
 
-// TODO change localStorage to use https://github.com/ebidel/idb.filesystem.js/
 // TODO exomizer: standalone Z80 verify of decrunch
 // TODO emulate true drive @300 RPM
 // TODO verify CSAVE file name length
-// TODO check sound buffer
 // TODO publish Jaime's disks
 // TODO turbotape check T-states, finalize 
 // TODO finalize exomizer
