@@ -45,7 +45,7 @@
 // TODO be able to emulate CTRL+power up
 // TODO sprite routine?
 
-// speed test check:
+// TODO make again a speed test check:
 // PASS: raster test with "raster_test.c"
 // PASS: "tape_monitor.c" with 397.6 Hz wave
 // PASS:* 1 FOR T=1 TO 2000:NEXT:SOUND 30,1:GOTO 1 (*emu skips frames)
@@ -103,10 +103,9 @@ let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
 const frameRate = 49.7; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
-const cpuSpeed = 3672000 /*3672000 for 312 */ //3694700; // Z80 speed 3.6947 MHz (NEC D780c)
+const cpuSpeed = 3670200 /*3672000 for 312 */ //3694700; // Z80 speed 3.6947 MHz (NEC D780c)
 const cyclesPerLine = (cpuSpeed / frameRate / TOTAL_SCANLINES); // 188.5=basic OK; 196=sound OK;
 const HIDDEN_LINES = 2;
-const cpuSampleRate = (TOTAL_SCANLINES * cyclesPerLine) * frameRate;
 
 let stopped = false; // allows to stop/resume the emulation
 
@@ -203,7 +202,7 @@ function oneFrame() {
 
    if(nextFrame === undefined) nextFrame = startTime;
 
-   nextFrame = nextFrame + 20; // 20ms, 50Hz  
+   nextFrame = nextFrame + (1000/frameRate); // ~50Hz  
 
    renderAllLines();
    frames++;   
@@ -222,55 +221,73 @@ function oneFrame() {
    if(!stopped) setTimeout(()=>oneFrame(), time_out);   
 }
 
-/*********************************************************************************** */
+// ********************************* CPU TO AUDIO BUFFER *********************************************
 
 const audioBufferSize = 16384; // enough to hold more than one frame time
 const audioBuffer = new Float32Array(audioBufferSize);
 
-let samplePtr = 0; // high speed pointer used to downsample
-let audioPtr = 0;  // pointer at audio frequency
-let audioPlayPtr = 0;
-let audioPtr_unclipped = 0;
-let audioPlayPtr_unclipped = 0;
-
-let initialSync = false;
+let audioPtr = 0;                // points to the write position in the audio buffer (modulus)
+let audioPtr_unclipped = 0;      // audio buffer writing absolute counter 
+let downSampleCounter = 0;       // counter used to downsample from CPU speed to 48 Khz
 
 function writeAudioSamples(n) {
-   samplePtr += (n * sampleRate);
-   if(samplePtr > cpuSampleRate) {      
+   downSampleCounter += (n * sampleRate);
+   if(downSampleCounter >= cpuSpeed) {
       const s = (speaker_A ? -0.5 : 0.0) + (cassette_bit_out ? 0.5 : 0.0) + (cassette_bit_in ? 0.5 : 0.0);
-      samplePtr -= cpuSampleRate;
+      downSampleCounter -= cpuSpeed;
       audioBuffer[audioPtr++] = s;
       audioPtr = audioPtr % audioBufferSize;
       audioPtr_unclipped++;
    }      
 }
 
+// ********************************* AUDIO BUFFER TO BROWSER AUDIO ************************************
+
 let audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const bufferSize = 2048;
 const sampleRate = audioContext.sampleRate;
 var speakerSound = audioContext.createScriptProcessor(bufferSize, 1, 1);
 
-speakerSound.onaudioprocess = function(e) {
-   if(audioPtr_unclipped < (audioPlayPtr_unclipped + bufferSize)) {
-      // console.warn(`audio buffer not filled: ${audioPtr_unclipped} < ${audioPlayPtr_unclipped + bufferSize}, behind ${audioPtr_unclipped - (audioPlayPtr_unclipped + bufferSize)}`);
-      return; 
-   }   
+let audioPlayPtr = 0;
+let audioPlayPtr_unclipped = 0;
 
+speakerSound.onaudioprocess = function(e) {
    const output = e.outputBuffer.getChannelData(0);
+
+   // playback gone too far, wait   
+   if(audioPlayPtr_unclipped + bufferSize > audioPtr_unclipped ) {
+      for(let i=0; i<bufferSize; i++) output[i];
+      return;
+   }
+  
+   // playback what is in the audio buffer
    for(let i=0; i<bufferSize; i++) {
       const audio = audioBuffer[audioPlayPtr++];
       audioPlayPtr = audioPlayPtr % audioBufferSize;
       audioPlayPtr_unclipped++;
       output[i] = audio;
-    }        
+    }    
+    
+    // write pointer should be always ahead of reading pointer
+    // if(kk++%50==0) console.log(`write: ${audioPtr_unclipped} read: ${audioPlayPtr_unclipped} diff: ${audioPtr_unclipped-audioPlayPtr_unclipped}`);
 }
 
-speakerSound.connect(audioContext.destination);
+function goAudio() {
+   audioPlayPtr_unclipped = 0;
+   audioPlayPtr = 0;
 
-function ss() {
+   audioPtr = 0;
+   audioPtr_unclipped = 0;
+
+   speakerSound.connect(audioContext.destination);
+}
+
+function stopAudio() {
    speakerSound.disconnect(audioContext.destination);
 }
+
+goAudio();
+
 
 /*********************************************************************************** */
 
@@ -284,8 +301,8 @@ function playBackAudioSamples(n) {
    if(tapePtr >= tapeLen) return;
 
    tapeHighPtr += (n*tapeSampleRate);
-   if(tapeHighPtr >= cpuSampleRate) {
-      tapeHighPtr-=cpuSampleRate;
+   if(tapeHighPtr >= cpuSpeed) {
+      tapeHighPtr-=cpuSpeed;
       cassette_bit_in = tapeBuffer[tapePtr] > 0 ? 0 : 1;
       tapePtr++;      
    }
@@ -300,4 +317,3 @@ parseQueryStringCommands();
 
 // starts drawing frames
 oneFrame();
-

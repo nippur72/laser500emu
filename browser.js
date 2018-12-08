@@ -42,6 +42,22 @@ window.onbeforeunload = function(e) {
    saveState();   
  };
 
+// **** visibility change ****
+
+window.addEventListener("visibilitychange", function() {
+   if(document.visibilityState === "hidden")
+   {
+      stopped = true;
+      stopAudio();
+   }
+   else if(document.visibilityState === "visible")
+   {
+      stopped = false;
+      oneFrame();
+      goAudio();
+   }
+});
+
 // **** drag & drop ****
 
 const dropZone = document.getElementById('canvas');
