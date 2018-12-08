@@ -308,9 +308,11 @@ function playBackAudioSamples(n) {
 // ********************************* CPU TO CSAVE BUFFER *********************************************
 
 const csaveBufferSize = 44100 * 5 * 60; // five minutes max
-let csaveBuffer = new Float32Array(csaveBufferSize);
-let csavePtr = 0;                // points to the write position in the csaveo buffer 
-let csaveDownSampleCounter = 0;  // counter used to downsample from CPU speed to 48 Khz
+
+let csaveBuffer;                 // holds the tape audio for generating the WAV file
+let csavePtr;                    // points to the write position in the csaveo buffer 
+let csaveDownSampleCounter;      // counter used to downsample from CPU speed to 48 Khz
+
 let csaving = false;
 
 function csaveAudioSamples(n) {
@@ -324,6 +326,8 @@ function csaveAudioSamples(n) {
 
 function csave() {
    csavePtr = 0;
+   csaveDownSampleCounter = 0;
+   csaveBuffer = new Float32Array(csaveBufferSize);
    csaving = true;
    console.log("saving audio (max 5 minutes); use cstop() to stop recording");
 }
