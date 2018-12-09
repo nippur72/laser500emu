@@ -4,6 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO screen writing emulation as browser support
 // TODO exomizer: standalone Z80 verify of decrunch
 // TODO emulate true drive @300 RPM
 // TODO publish Jaime's disks

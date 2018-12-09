@@ -149,7 +149,7 @@ async function download(fileName) {
       console.log(`file "${fileName}" not found`);
       return;
    }
-   const bytes = readFile(fileName);
+   const bytes = await readFile(fileName);
    let blob = new Blob([bytes], {type: "application/octet-stream"});   
    saveAs(blob, fileName);
    console.log(`downloaded "${fileName}"`);
