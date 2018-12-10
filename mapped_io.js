@@ -13,14 +13,14 @@ function mapped_io_read(address) {
 
    switch(hi) 
    {
-      case 0x28: sum = keyboard_rows[11]; break;
-      case 0x29: sum = keyboard_rows[12]; break;
-      case 0x2a: sum = keyboard_rows[10]; break;
-      case 0x2b: sum = keyboard_rows[9];  break;         
+      case 0x28: sum = keyboard_matrix[11]; break;
+      case 0x29: sum = keyboard_matrix[12]; break;
+      case 0x2a: sum = keyboard_matrix[10]; break;
+      case 0x2b: sum = keyboard_matrix[9];  break;         
    }
 
    for(let t=0;t<8;t++) {
-      if((row & (1<<t)) == 0 ) sum |= keyboard_rows[t+1];      
+      if((row & (1<<t)) == 0 ) sum |= keyboard_matrix[t+1];      
    }      
    
    return (cassette_bit_in << 7) | (~sum & 0b01111111);

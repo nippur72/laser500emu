@@ -19,6 +19,7 @@ Remarks: bits are with negated logic, 0 when button in pressed.
 
 function handleJoyStick(key, press) 
 {
+   let joystick_key = true;
    if(press) 
    {
            if(key === "Numpad8")       joy0 = reset(joy0, 1);
@@ -29,9 +30,9 @@ function handleJoyStick(key, press)
       else if(key === "Numpad1")       joy0 = reset(joy0, 2+4);
       else if(key === "Numpad4")       joy0 = reset(joy0, 4);
       else if(key === "Numpad7")       joy0 = reset(joy0, 4+1);
-
       else if(key === "Numpad0")       joy1 = reset(joy1, 16);
       else if(key === "ControlRight")  joy0 = reset(joy0, 16);
+      else joystick_key = false;
    }
    else
    {
@@ -45,5 +46,7 @@ function handleJoyStick(key, press)
       else if(key === "Numpad7")       joy0 = set(joy0, 4+1);
       else if(key === "Numpad0")       joy1 = set(joy1, 16);
       else if(key === "ControlRight")  joy0 = set(joy0, 16);
+      else joystick_key = false;
    }
+   return joystick_key;
 }
