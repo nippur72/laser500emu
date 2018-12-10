@@ -139,7 +139,7 @@ function evkey(pcKey) {
    return ev;
 }
 
-function power() {      
+function zap() {      
    bank4.forEach((e,i)=>bank4[i]=i % 4 === 0 ? 0 : 0xFF);
    bank5.forEach((e,i)=>bank5[i]=i % 4 === 0 ? 0 : 0xFF);
    bank6.forEach((e,i)=>bank5[i]=i % 4 === 0 ? 0 : 0xFF);
@@ -151,6 +151,10 @@ function power() {
    state.halted = true;
    cpu.setState(state);
    is_pasting_text = false;
+}
+
+function power() {      
+   zap();
    setTimeout(()=>cpu.reset(),200);
 }
 

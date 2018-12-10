@@ -50,17 +50,6 @@ close and reopen the browser, taking you back where you left it.
 
 If you want to start from scratch, press `ALT+P` to simulate power on/off.
 
-DEBUGGER
-========
-You can plug your own Javascript debug functions by defining 
-`debugBefore()` and `debugAfter(elapsed)` in the JavaScript console.
-
-`debugBefore` is executed before any Z80 instruction; `debugAfter` is executed
-after the istruction and the number of occurred T-states is passed in the `elapsed` argument.
-
-Within the debug functions you can access all the emulator variables, most likely 
-you'll want to read the Z80 state with `cpu.getState()`. 
-
 LOADING AND SAVING FILES
 ========================
 There are three types of files you can work with:
@@ -70,9 +59,11 @@ There are three types of files you can work with:
 - audio files (`.wav`), tape audio files created on the real hardware
 
 Dragging & dropping a file on the emulator's window causes the file to be loaded.
-Binaries are loaded at the standard memory address 0x8995. Disk images are mounted on
-the drive #1. Audio files are loaded from simulated tape (`CRUN` command is launched 
-automatically).
+
+- Binaries are loaded at the standard memory address 0x8995. 
+- Disk images are mounted on the drive #1. 
+- Audio files are played back and loaded from simulated tape (`CRUN` command is launched 
+automatically). To control playback, use `Alt+Left` (rewind tape) or `Alt+Up`/`Alt+Down` (stop tape).
 
 Once a file is loaded, it's also stored on the browser cache so that you don't have
 to drag&drop it again; you can use the `load()` function from the JavaScript console.
@@ -88,6 +79,40 @@ These are the commands you can type from the JavaScript console (F12 key):
 - `dir()` lists files on browser's cache
 - `csave()` starts recording to WAV (max 5 minutes); use before typing "CSAVE" on the emulator
 - `cstop()` stops recording and downloads in the browser the resulting WAV file. Silence before and after is trimmed out.
+
+OPTIONS
+=======
+Options can be given in the form of query string commands on the URL of the emulator,
+e.g. `https://nippur72.github.io/laser500emu?scanlines=false&nodisk=true`
+
+- `restore=false` do not restore previous emulator state, start fresh (default is restore)
+- `load=programName` load and run the specified program from the `software` directory of the emulator GitHub repo. If no relative path is specified, `programName` will be searched in all subdirectories. 
+- `nodisk=true` disconnect emulated disk drive interface (default is attached)
+- `scanlines=false` turn off the scanlines effect (default is on)
+- `charset=english|german|french` modify the hardware switches used to address the charset ROM (default is english).  
+
+DEBUGGER
+========
+You can plug your own Javascript debug functions by defining 
+`debugBefore()` and `debugAfter(elapsed)` in the JavaScript console.
+
+`debugBefore` is executed before any Z80 instruction; `debugAfter` is executed
+after the istruction and the number of occurred T-states is passed in the `elapsed` argument.
+
+Within the debug functions you can access all the emulator variables, most likely 
+you'll want to read the Z80 state with `cpu.getState()`. 
+
+AUTOLOADING
+=================
+The emulator can be used in cross-development allowing to automate the process of 
+loading and executing the program being developed. This will save lot of annoying drag&drops. 
+
+To enable "autoload":
+- clone the emulator on your local machine (it won't work in the online-version because of browser restrictions)
+- in your compile chain (`make` etc..), copy the binary you want to execute in the emulator directory naming it `autoload.bin`
+- execute `node makeautoload`, this will turn `autoload.bin` into JavaScript code (`autoload.js`).
+- refresh the browser, the program will be loaded in memory and make it RUN
+When you no longer want the file to be autoloaded, delete `autoload.bin` and run again `node makeautoload`.
 
 EMULATOR FEATURES
 =================
@@ -110,17 +135,6 @@ to load or save programs. Saved programs are seen as a downloaded file in the br
 
 Programs are also stored on the internal browser storage (HTML5 `localStorage`), simulating
 a sort of disk drive.
-
-OPTIONS
-=======
-Options can be given in the form of query string commands on the URL of the emulator,
-e.g. `https://nippur72.github.io/laser500emu?scanlines=false&nodisk=true`
-
-- `restore=false` do not restore previous emulator state, start fresh (default is restore)
-- `load=programName` load and run the specified program from the `software` directory of the emulator GitHub repo. If no relative path is specified, `programName` will be searched in all subdirectories. 
-- `nodisk=true` disconnect emulated disk drive interface (default is attached)
-- `scanlines=false` turn off the scanlines effect (default is on)
-- `charset=english|german|french` modify the hardware switches used to address the charset ROM (default is english). 
 
 RESOURCES
 =========

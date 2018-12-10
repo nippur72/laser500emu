@@ -4,6 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO experiment with keyboard buffer sync with frames
 // TODO autorun in turbotape and exomizer
 // TODO screen writing emulation as browser support
 // TODO exomizer: standalone Z80 verify of decrunch
@@ -21,12 +22,10 @@
 // TODO save emulator snapshots?
 // TODO no double scanline (options)
 // TODO slow mode, skip frames
-// TODO logical keyboard vs original keyboard
 // TODO draw keyboard for mobile
 // TODO save to cloud ?
 // TODO almost exact cycles drawing
 // TODO investigate what does NMI (cpu.interrupt(true))
-// TODO autoload programs for fast develop
 // TODO javascript debugger, halt
 // TODO laser 350/700
 // TODO cartdriges / rom expansion slots
@@ -366,3 +365,14 @@ parseQueryStringCommands();
 
 // starts drawing frames
 oneFrame();
+
+// autoload program and run it
+if(autoload !== undefined) {
+   zap();
+   cpu.reset();
+   
+   setTimeout(()=>{
+      loadBytes(autoload);   
+      pasteLine("RUN\r\n");
+   }, 200);
+}

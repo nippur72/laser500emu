@@ -77,9 +77,7 @@ async function save(filename, p1, p2) {
    else console.log("give filename .bin, .dsk or .emu extension");
 }
 
-async function load_file(filename, address) {   
-   const bytes = await readFile(filename);
-
+function loadBytes(bytes, address) {
    const startAddress = (address === undefined) ? 0x8995 : address;
    const end = startAddress + bytes.length - 1;
 
@@ -89,7 +87,11 @@ async function load_file(filename, address) {
 
    // modify end of basic program pointer   
    if(startAddress === 0x8995) mem_write_word(0x83E9, end+1);   
+}
 
+async function load_file(filename, address) {   
+   const bytes = await readFile(filename);
+   loadBytes(bytes);
    console.log(`loaded "${filename}" ${bytes.length} bytes from ${hex(startAddress,4)}h to ${hex(end,4)}h`);
    cpu.reset();   
 }
