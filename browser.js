@@ -88,10 +88,10 @@ function droppedFile(outName, bytes) {
    const wav = /\.wav$/i;
    if(wav.test(outName)) {
       // WAV files
-      console.log("WAV file dropped");
+      //console.log("WAV file dropped");
       const info = decodeSync(bytes.buffer);
       tapeSampleRate = info.sampleRate;
-      console.log(info.channelData);
+      //console.log(info.channelData);
       tapeBuffer = info.channelData[0];
       tapeLen = tapeBuffer.length;
       tapePtr = 0;
