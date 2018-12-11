@@ -69,7 +69,7 @@ function buildPalette() {
    }
 
    setPalette( 0, 0x00, 0x00, 0x00);  /* black */
-   setPalette( 1, 0x10, 0x10, 0xdf);  /* blue */
+   setPalette( 1, 0x00, 0x00, 0xff);  /* blue */
    setPalette( 2, 0x00, 0x80, 0x00);  /* green */
    setPalette( 3, 0x00, 0x90, 0xff);  /* cyan */
    setPalette( 4, 0x60, 0x00, 0x00);  /* red */
@@ -80,7 +80,7 @@ function buildPalette() {
    setPalette( 9, 0x80, 0x80, 0xff);  /* bright blue */
    setPalette(10, 0x50, 0xdf, 0x30);  /* bright green */
    setPalette(11, 0x90, 0xdf, 0xff);  /* bright cyan */
-   setPalette(12, 0xaf, 0x20, 0x20);  /* bright red */
+   setPalette(12, 0xff, 0x60, 0xb7);  /* bright red */
    setPalette(13, 0xff, 0x90, 0xff);  /* bright magenta */
    setPalette(14, 0xdf, 0xdf, 0x60);  /* bright yellow */
    setPalette(15, 0xff, 0xff, 0xff);  /* white */
