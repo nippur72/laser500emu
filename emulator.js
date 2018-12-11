@@ -284,6 +284,14 @@ function stopAudio() {
    speakerSound.disconnect(audioContext.destination);
 }
 
+function audioContextResume() {   
+   if(audioContext.state === 'suspended') {
+      audioContext.resume().then(() => {
+         console.log('sound playback resumed successfully');
+      });
+   }
+}
+
 goAudio();
 
 

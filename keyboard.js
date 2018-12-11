@@ -39,7 +39,11 @@ function assignKey(pckey, laserkey, lasershift) {
    assign_table[pckey] = { key: laserkey, shift: lasershift };
 }
 
-function keyDown(e) {  
+function keyDown(e) { 
+
+   // from Chrome 71 audio is suspended by default and must resume within an user-generated event
+   audioContextResume();
+
    let key = e.key;
 
    // disable auto repeat, as it is handled on the Laser
