@@ -92,6 +92,7 @@ let speaker_A = 0;
 let speaker_B = 0;
 let joy0 = 255;
 let joy1 = 255;
+
 let emulate_fdc = true;
 let tape_monitor = true;
 
@@ -124,8 +125,12 @@ let options = {
    load: undefined,
    restore: true,
    nodisk: false,
+   notapemonitor: false,
    scanlines: true,
-   charset: "english"
+   charset: "english",
+   bt: undefined,
+   bb: undefined,
+   bh: undefined
 };
 
 // scanline version

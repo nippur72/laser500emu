@@ -1,22 +1,58 @@
 // PAL Standard: 720 x 576
 // 192 righe video + 96 bordo (48 sopra e 48 sotto) = 192+96 = 288 ; x2 = 576
 
-const HIDDEN_SCANLINES_TOP = 6*8;
-const HIDDEN_SCANLINES_BOTTOM = 4*8;
-const PAL_HIDDEN_LINES_VERY_BOTTOM = 0;
-
-const BORDER_V        = 64  +1     - HIDDEN_SCANLINES_TOP;      
-const BORDER_V_BOTTOM = 56  -1     - HIDDEN_SCANLINES_BOTTOM;   
-const BORDER_H =  40;    
+let border_top = undefined;
+let border_bottom = undefined;
+let border_h = undefined;
+let aspect = 1.55;
 
 const TEXT_W = 640; 
 const TEXT_H = 192;
+const PAL_HIDDEN_LINES_VERY_BOTTOM = 0;
+let HIDDEN_SCANLINES_TOP;
+let HIDDEN_SCANLINES_BOTTOM;
 
-const SCREEN_W = BORDER_H + TEXT_W + BORDER_H;
-const SCREEN_H = BORDER_V + TEXT_H + BORDER_V_BOTTOM;
-const DOUBLE_SCANLINES = 2;
+let BORDER_V;
+let BORDER_V_BOTTOM;
+let BORDER_H;    
+let SCREEN_W = BORDER_H + TEXT_W + BORDER_H;
+let SCREEN_H = BORDER_V + TEXT_H + BORDER_V_BOTTOM;
+let DOUBLE_SCANLINES = 2;
+let TOTAL_SCANLINES = HIDDEN_SCANLINES_TOP + BORDER_V + TEXT_H + BORDER_V_BOTTOM + HIDDEN_SCANLINES_BOTTOM + PAL_HIDDEN_LINES_VERY_BOTTOM;
 
-const TOTAL_SCANLINES = HIDDEN_SCANLINES_TOP + BORDER_V + TEXT_H + BORDER_V_BOTTOM + HIDDEN_SCANLINES_BOTTOM + PAL_HIDDEN_LINES_VERY_BOTTOM;
+let canvas, canvasContext;
+let screenCanvas, screenContext;
+let imageData, bmp;
+
+function calculateGeometry() {
+   BORDER_V        = (border_top    ? border_top    : 17);
+   BORDER_V_BOTTOM = (border_bottom ? border_bottom : 23);
+   HIDDEN_SCANLINES_TOP    = 65 - BORDER_V; 
+   HIDDEN_SCANLINES_BOTTOM = 55 - BORDER_V_BOTTOM;   
+   BORDER_H = border_h !== undefined ? border_h : 5*8;    
+   SCREEN_W = BORDER_H + TEXT_W + BORDER_H;
+   SCREEN_H = BORDER_V + TEXT_H + BORDER_V_BOTTOM;
+   DOUBLE_SCANLINES = 2;
+   TOTAL_SCANLINES = HIDDEN_SCANLINES_TOP + BORDER_V + TEXT_H + BORDER_V_BOTTOM + HIDDEN_SCANLINES_BOTTOM + PAL_HIDDEN_LINES_VERY_BOTTOM;
+
+   // canvas is the outer canvas where the aspect ratio is corrected
+   canvas = document.getElementById("canvas");
+   canvas.width = SCREEN_W;
+   canvas.height = SCREEN_H * DOUBLE_SCANLINES;
+   canvasContext = canvas.getContext('2d');
+
+   // screen is the inner canvas that contains the emulated PAL screen
+   screenCanvas = document.createElement("canvas");
+   screenCanvas.width = SCREEN_W;
+   screenCanvas.height = SCREEN_H * DOUBLE_SCANLINES;
+   screenContext = screenCanvas.getContext('2d');
+
+   imageData = screenContext.getImageData(0, 0, SCREEN_W, SCREEN_H * DOUBLE_SCANLINES);
+   
+   bmp = new Uint32Array(imageData.data.buffer);   
+}
+
+calculateGeometry();
 
 const palette = new Uint32Array(16);
 const halfpalette = new Uint32Array(16);
@@ -49,22 +85,7 @@ function buildPalette() {
    setPalette(14, 0xdf, 0xdf, 0x60);  /* bright yellow */
    setPalette(15, 0xff, 0xff, 0xff);  /* white */
 }
-// canvas is the outer canvas where the aspect ratio is corrected
-const canvas = document.getElementById("canvas");
-canvas.width = SCREEN_W;
-canvas.height = SCREEN_H * DOUBLE_SCANLINES;
-const canvasContext = canvas.getContext('2d');
 
-// screen is the inner canvas that contains the emulated PAL screen
-const screenCanvas = document.createElement("canvas");
-screenCanvas.width = SCREEN_W;
-screenCanvas.height = SCREEN_H * DOUBLE_SCANLINES;
-const screenContext = screenCanvas.getContext('2d');
-
-const imageData = screenContext.getImageData(0, 0, SCREEN_W, SCREEN_H * DOUBLE_SCANLINES);
-
-const bmp2 = imageData.data.buffer;
-const bmp = new Uint32Array(bmp2);
 
 // #region rendeding at the cycle level
 

@@ -1,8 +1,7 @@
 // handles interaction between browser and emulation 
 
 function onResize(e) {
-   const canvas = document.getElementById("canvas");
-   const aspect = 1.55;
+   const canvas = document.getElementById("canvas");   
    if(window.innerWidth > (window.innerHeight*aspect))
    {
       canvas.style.width  = `${aspect*100}vmin`;
@@ -173,6 +172,19 @@ function parseQueryStringCommands() {
       else if(options.charset == "german") charset_offset = 4096;
       else if(options.charset == "french") charset_offset = 6144;
       else console.warn(`option charset=${options.charset} not recognized`);
+   }
+
+   if(options.bt !== undefined || 
+      options.bb !== undefined || 
+      options.bh !== undefined || 
+      options.aspect !== undefined
+   ) {
+      if(options.bt     !== undefined) border_top    = Number(options.bt); 
+      if(options.bb     !== undefined) border_bottom = Number(options.bb);
+      if(options.bh     !== undefined) border_h      = Number(options.bh);
+      if(options.aspect !== undefined) aspect        = Number(options.aspect);
+      calculateGeometry();
+      onResize();
    }
 }
 
