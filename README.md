@@ -88,6 +88,7 @@ e.g. `https://nippur72.github.io/laser500emu?scanlines=false&nodisk=true`
 - `restore=false` do not restore previous emulator state, start fresh (default is restore)
 - `load=programName` load and run the specified program from the `software` directory of the emulator GitHub repo. If no relative path is specified, `programName` will be searched in all subdirectories. 
 - `nodisk=true` disconnect emulated disk drive interface (default is attached)
+- `notapemonitor=true` disables audio playback from tape (tape monitor)
 - `scanlines=false` turn off the scanlines effect (default is on)
 - `charset=english|german|french` modify the hardware switches used to address the charset ROM (default is english).  
 

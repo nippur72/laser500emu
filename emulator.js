@@ -93,6 +93,7 @@ let speaker_B = 0;
 let joy0 = 255;
 let joy1 = 255;
 let emulate_fdc = true;
+let tape_monitor = true;
 
 let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
@@ -231,7 +232,8 @@ let downSampleCounter = 0;       // counter used to downsample from CPU speed to
 function writeAudioSamples(n) {
    downSampleCounter += (n * sampleRate);
    if(downSampleCounter >= cpuSpeed) {
-      const s = (speaker_A ? -0.5 : 0.0) + (cassette_bit_out ? 0.5 : 0.0) + (cassette_bit_in ? 0.5 : 0.0);
+      let s = (speaker_A ? -0.5 : 0.0);
+      if(tape_monitor) s += (cassette_bit_out ? 0.5 : 0.0) + (cassette_bit_in ? 0.5 : 0.0);
       downSampleCounter -= cpuSpeed;
       audioBuffer[audioPtr++] = s;
       audioPtr = audioPtr % audioBufferSize;

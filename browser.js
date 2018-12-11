@@ -153,6 +153,10 @@ function parseQueryStringCommands() {
       emulate_fdc = false;      
    }
 
+   if(options.notapemonitor === true) {
+      tape_monitor = false;      
+   }
+
    if(options.scanlines === false) {
       show_scanlines = false;   
       buildPalette();   
