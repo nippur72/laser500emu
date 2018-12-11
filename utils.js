@@ -1,5 +1,23 @@
 /**** utility functions ****/
 
+function dumpMem(start, end, rows) {
+   if(rows==undefined) rows=16;
+   let s="\r\n";
+   for(let r=start;r<end;r+=rows) {
+      s+= hex(r, 4) + ": ";      
+      for(let c=0;c<rows && (r+c)<=end;c++) {
+         const byte = mem_read(r+c);
+         s+= hex(byte)+" ";
+      }
+      for(let c=0;c<rows && (r+c)<=end;c++) {
+         const byte = mem_read(r+c);
+         s+= (byte>32 && byte<127) ? String.fromCharCode(byte) : '.' ;
+      }
+      s+="\n";
+   }
+   console.log(s);
+}
+
 function hexDump(memory, start, end, rows) {
    let s="";
    for(let r=start;r<end;r+=rows) {
