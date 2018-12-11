@@ -71,6 +71,8 @@ dropZone.addEventListener('dragover', function(e) {
 
 // Get file data on drop
 dropZone.addEventListener('drop', e => {
+   audioContextResume();
+
    e.stopPropagation();
    e.preventDefault();
    const files = e.dataTransfer.files; // Array of all files
@@ -94,8 +96,11 @@ function droppedFile(outName, bytes) {
       tapeBuffer = info.channelData[0];
       tapeLen = tapeBuffer.length;
       tapePtr = 0;
-      tapeHighPtr = 0;
-      pasteLine("CRUN\r\n");
+      tapeHighPtr = 0;      
+
+      // CRUN run only if in immediate mode
+      if(mem_read_word(0x803f) === 0xffff) pasteLine("CRUN\r\n");
+            
       return;
    }
 
