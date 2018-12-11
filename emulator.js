@@ -149,7 +149,7 @@ function renderLines(nlines, hidden) {
          cycle += elapsed;
          cycles += elapsed;
          writeAudioSamples(elapsed);
-         playBackAudioSamples(elapsed); 
+         cloadAudioSamples(elapsed); 
          if(csaving) csaveAudioSamples(elapsed);       
          
          if(cycle>=cyclesPerLine) {
@@ -310,7 +310,7 @@ let tapeLen = 0;
 let tapePtr = 0;
 let tapeHighPtr = 0;
 
-function playBackAudioSamples(n) {
+function cloadAudioSamples(n) {
    if(tapePtr >= tapeLen) return;
 
    tapeHighPtr += (n*tapeSampleRate);
