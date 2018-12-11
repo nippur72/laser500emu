@@ -143,9 +143,9 @@ function renderLines(nlines, hidden) {
       while(true) {
          bus_ops = 0;
          if(debugBefore !== undefined) debugBefore();
-         let elapsed = cpu.run_instruction();
-         if(debugAfter !== undefined) debugAfter(elapsed);
+         let elapsed = cpu.run_instruction();         
          elapsed += bus_ops;
+         if(debugAfter !== undefined) debugAfter(elapsed);
          cycle += elapsed;
          cycles += elapsed;
          writeAudioSamples(elapsed);
