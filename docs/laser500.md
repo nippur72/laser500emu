@@ -5,7 +5,7 @@ LOW RAM MAP
 8030      KEYASCII: ASCII code of last key pressed (TODO verify)
 803A      ?? (initialized with 0)
 803D      (pointer) Topmem (? used to initialize bottom of stack)
-803F      (pointer) SYSVARS: system variables (initialized with fffeh)
+803F      current line number ffff=immediate mode (initialized with fffeh)
 8041      (pointer) start of basic program (initialized with 8995h)
 8043      ?? unid pointer
 8147      (pointer) initialized with 2221h
