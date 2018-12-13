@@ -42,7 +42,7 @@ LOW RAM MAP
 85F5      KEYREPEAT: key autorepeat value, initialized with 28h 
 85F6      ?? initialized with 05h
 85F7      (pointer) KEY_REPLAY_STRING: if not zero replay the 0 terminated string pointed by this (used for FKEYS?)
-85F9      ?? bit 3: if 1 then do not read keyboard during interrupt
+85F9      latch of I/O image (was :?? bit 3: if 1 then do not read keyboard during interrupt)
 85FA      bit 1: turn on/off inverse text 
           bit 3: turn on/off key beep
           bit 5: 0=do not read keyboard during interrupt
