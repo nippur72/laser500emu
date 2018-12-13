@@ -4,10 +4,12 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO fix bug introduced with audioContext.resume
 // TODO experiment with keyboard buffer sync with frames
-// TODO autorun in turbotape and exomizer
-// TODO screen writing emulation as browser support
+// TODO autorun in exomizer
+// TODO exomizer standalone tool
 // TODO exomizer: standalone Z80 verify of decrunch
+// TODO screen writing emulation as browser support
 // TODO emulate true drive @300 RPM
 // TODO publish Jaime's disks
 // TODO turbotape check T-states, finalize 
