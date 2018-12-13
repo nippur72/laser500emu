@@ -3,7 +3,7 @@
 function dumpMem(start, end, rows) {
    if(rows==undefined) rows=16;
    let s="\r\n";
-   for(let r=start;r<end;r+=rows) {
+   for(let r=start;r<=end;r+=rows) {
       s+= hex(r, 4) + ": ";      
       for(let c=0;c<rows && (r+c)<=end;c++) {
          const byte = mem_read(r+c);
