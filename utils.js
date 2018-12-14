@@ -189,7 +189,7 @@ function go() {
 
 function info() { 
    const average = averageFrameTime; /* oneFrameTimeSum/frames; */
-   console.log(`frame rendering: ${Math.round(average*10,2)/10} ms, load=${Math.round(average/frameDuration*100*10,2)/10} %`);   
+   console.log(`frame rendering: min ${Math.round(minFrameTime*10,2)/10} ms (load=${Math.round(minFrameTime/frameDuration*100*10,2)/10} %) average ${Math.round(average*10,2)/10} ms (${Math.round(average/frameDuration*100*10,2)/10} %)`);   
 }
 
 function set(value, bitmask) {

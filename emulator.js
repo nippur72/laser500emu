@@ -117,6 +117,7 @@ let stopped = false; // allows to stop/resume the emulation
 let frames = 0;
 let nextFrameTime = 0;
 let averageFrameTime = 0;
+let minFrameTime = Number.MAX_VALUE;
 
 let cycle = 0;
 let cycles = 0;
@@ -217,7 +218,8 @@ function oneFrame() {
 
    const now = new Date().getTime();
    const elapsed = now - startTime;
-   averageFrameTime = averageFrameTime * 0.99 + elapsed * 0.01;
+   averageFrameTime = averageFrameTime * 0.992 + elapsed * 0.008;
+   if(elapsed < minFrameTime) minFrameTime = elapsed;
 
    let time_out = nextFrame - now;
    if(time_out < 0 || throttle) {
