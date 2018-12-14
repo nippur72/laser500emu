@@ -1,9 +1,5 @@
 let bus_ops = 0;
 
-/*
-let marked = new Int16Array(32768);
-marked = marked.map(e=>-1);
-*/
 function mem_read(address) {
    bus_ops++;
    const bank = banks[(address & 0xC000) >> 14];
