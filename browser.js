@@ -194,7 +194,7 @@ async function fetchProgramAll(name) {
    if(await fetchProgram(name+"/"+name)) return;
    if(await fetchProgram(name+"/"+name+".bin")) return;
 
-   console.log(`cannot load "${name}": `, err);
+   console.log(`cannot load "${name}"`);
 }
 
 async function fetchProgram(name)
