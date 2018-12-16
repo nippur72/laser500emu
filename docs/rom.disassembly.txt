@@ -33,6 +33,7 @@ BOOT_SEQUENCE = 66C8h
 ; 
 ; on Saturday, 16 of June 2018 at 12:33 PM
 ; 
+; #RST 00#
 RESET:
    di      
    ld      a,01h     ; select ROM 1 in BANK 1
@@ -40,31 +41,32 @@ RESET:
    jp      BOOT_SEQUENCE
 
 VECTORS:
-0008 c30080    jp      8000h    ; ?? warm reset
+0008 c30080    jp      8000h    ; ?? warm reset #RST 08#
 000b c36b00    jp      006bh    ; CONOUT outputs char in A to console       
 000e 00        nop     
 000f 00        nop     
-0010 c30380    jp      8003h
+0010 c30380    jp      8003h    ; #RST 10#
 0013 c33105    jp      CONIN    ; CONIN gets char from console and puts into A
 0016 00        nop     
 0017 00        nop     
-0018 c30680    jp      8006h
+0018 c30680    jp      8006h    ; #RST 18#
 001b c3ac06    jp      06ach    ; ??
 001e 00        nop     
 001f 00        nop     
-0020 c30980    jp      8009h
+0020 c30980    jp      8009h    ; #RST 20#
 0023 c3ca05    jp      05cah    ; ROLLOVER 
 0026 00        nop     
 0027 00        nop     
-0028 c30c80    jp      800ch
+0028 c30c80    jp      800ch    ; #RST 28#
 002b c3d957    jp      57d9h
 002e 00        nop     
 002f 00        nop     
-0030 c30f80    jp      800fh
+0030 c30f80    jp      800fh    ; #RST 30#
 0033 c38069    jp      6980h    ; READSC - read sector from disk
 0036 00        nop     
 0037 00        nop 
 
+; #RST 38#
 INTERRUPT_MODE_1:
 0038 c30c0a    jp      0a0ch
 
