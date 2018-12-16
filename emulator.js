@@ -4,6 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO saturation control
 // TODO fix bug introduced with audioContext.resume
 // TODO experiment with keyboard buffer sync with frames
 // TODO autorun in exomizer
@@ -18,7 +19,7 @@
 // TODO finalize Z80.js fuse tests
 // TODO disk drive sounds
 // TODO finalize pasteLine/pasteText
-// TODO LPRINT command communicate with emu or via OUT 255 
+// TODO LPRINT command communicate with emu or via OUT 255, RST $30 
 // TODO use interrupts to communicate with z80
 // TODO check t-states in Z80.js
 // TODO save emulator snapshots?
