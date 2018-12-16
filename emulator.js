@@ -143,9 +143,9 @@ function renderLines(nlines, hidden) {
       if(!hidden) drawFrame_y();
 
       // run cpu
-      while(true) {
-         bus_ops = 0;
+      while(true) {         
          if(debugBefore !== undefined) debugBefore();
+         bus_ops = 0;
          let elapsed = cpu.run_instruction();         
          elapsed += bus_ops;
          if(debugAfter !== undefined) debugAfter(elapsed);
