@@ -4,6 +4,8 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO inverted waveform option and investigate real tape
+// TODO remove software from facebook group
 // TODO saturation control
 // TODO fix bug introduced with audioContext.resume
 // TODO experiment with keyboard buffer sync with frames
@@ -82,8 +84,8 @@ const bankD = new Uint8Array(16384).fill(0x7F);
 const bankE = new Uint8Array(16384).fill(0x7F); 
 const bankF = new Uint8Array(16384).fill(0x7F); 
 
-let cassette_bit_in = 1; 
-let cassette_bit_out = 0; 
+let cassette_bit_in; 
+let cassette_bit_out; 
 let vdc_graphic_mode_enabled = 0;
 let vdc_graphic_mode_number = 0;
 let vdc_page_7 = 0;
@@ -316,12 +318,15 @@ let tapePtr = 0;
 let tapeHighPtr = 0;
 
 function cloadAudioSamples(n) {
-   if(tapePtr >= tapeLen) return;
+   if(tapePtr >= tapeLen) {
+      cassette_bit_in = 1;
+      return;
+   }
 
    tapeHighPtr += (n*tapeSampleRate);
    if(tapeHighPtr >= cpuSpeed) {
       tapeHighPtr-=cpuSpeed;
-      cassette_bit_in = tapeBuffer[tapePtr] > 0 ? 0 : 1;
+      cassette_bit_in = tapeBuffer[tapePtr] > 0 ? 1 : 0;
       tapePtr++;      
    }
 }
