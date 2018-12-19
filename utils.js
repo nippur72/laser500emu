@@ -43,7 +43,7 @@ function hex(value, size) {
 
 function bin(value, size) {
    if(size === undefined) size = 8;
-   let s = "00000000" + value.toString(2);
+   let s = "0000000000000000" + value.toString(2);
    return s.substr(s.length - size);
 }
 
