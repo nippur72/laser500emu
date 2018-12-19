@@ -189,10 +189,20 @@ function parseQueryStringCommands() {
 }
 
 async function fetchProgramAll(name) {
-   if(await fetchProgram(name)) return;
-   if(await fetchProgram(name+".bin")) return;
-   if(await fetchProgram(name+"/"+name)) return;
-   if(await fetchProgram(name+"/"+name+".bin")) return;
+   const candidates = [
+      name,
+      `${name}.bin`,
+      `${name}/${name}`,
+      `${name}/${name}.bin`,      
+      `bin/${name}`,
+      `bin/${name}.bin`,
+      `bin/${name}/${name}`,
+      `bin/${name}/${name}.bin`      
+   ];
+
+   for(let t=0;t<candidates.length;t++) {
+      if(await fetchProgram(candidates[t])) return;   
+   }
 
    console.log(`cannot load "${name}"`);
 }
