@@ -4,19 +4,16 @@
 // im1: simple: call 0038H
 // im2: complex
 
-// TODO inverted waveform option and investigate real tape
+// TODO tape stereo trick https://retrocomputing.stackexchange.com/questions/773/loading-zx-spectrum-tape-audio-in-a-post-cassette-world
+// TODO inverted waveform option
 // TODO remove software from facebook group
 // TODO saturation control
 // TODO fix bug introduced with audioContext.resume
 // TODO experiment with keyboard buffer sync with frames
-// TODO autorun in exomizer
-// TODO exomizer standalone tool
-// TODO exomizer: standalone Z80 verify of decrunch
 // TODO screen writing emulation as browser support
 // TODO emulate true drive @300 RPM
 // TODO publish Jaime's disks
 // TODO turbotape check T-states, finalize 
-// TODO finalize exomizer
 // TODO finalize throttle / end of frame hook
 // TODO finalize Z80.js fuse tests
 // TODO disk drive sounds
@@ -25,7 +22,6 @@
 // TODO use interrupts to communicate with z80
 // TODO check t-states in Z80.js
 // TODO save emulator snapshots?
-// TODO no double scanline (options)
 // TODO slow mode, skip frames
 // TODO draw keyboard for mobile
 // TODO save to cloud ?
