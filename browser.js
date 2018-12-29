@@ -2,21 +2,32 @@
 
 function onResize(e) {
    const canvas = document.getElementById("canvas");   
+   const mask   = document.getElementById("rgbmask");
+
    if(window.innerWidth > (window.innerHeight*aspect))
    {
       canvas.style.width  = `${aspect*100}vmin`;
       canvas.style.height = "100vmin";
+      mask.style.width  = `${aspect*100}vmin`;
+      mask.style.height = "100vmin";
    }
    else if(window.innerWidth > window.innerHeight)
    {
       canvas.style.width  = "100vmax";
       canvas.style.height = `${(1/aspect)*100}vmax`;
+      mask.style.width  = "100vmax";
+      mask.style.height = `${(1/aspect)*100}vmax`;
    }
    else
    {
       canvas.style.width  = "100vmin";
       canvas.style.height = `${(1/aspect)*100}vmin`;
+      mask.style.width  = "100vmin";
+      mask.style.height = `${(1/aspect)*100}vmin`;
    }   
+   
+   mask.style.background = `repeating-linear-gradient(90deg, rgba(255,0,0,${rgbmask_opacity}),  rgba(0,255,0,${rgbmask_opacity}), rgba(0,0,255,${rgbmask_opacity}))`;
+   mask.style.backgroundSize = `${rgbmask_size}px`;
 
    const trueHeight = canvas.offsetHeight
    hide_scanlines = (trueHeight < 512);
@@ -183,6 +194,13 @@ function parseQueryStringCommands() {
       if(options.bb     !== undefined) border_bottom = Number(options.bb);
       if(options.bh     !== undefined) border_h      = Number(options.bh);
       if(options.aspect !== undefined) aspect        = Number(options.aspect);
+      calculateGeometry();
+      onResize();
+   }
+
+   if(options.rgbmaskopacity !== undefined || options.rgbmasksize !== undefined) {
+      if(options.rgbmaskopacity !== undefined) rgbmask_opacity = Number(options.rgbmaskopacity);
+      if(options.rgbmasksize    !== undefined) rgbmask_size    = Number(options.rgbmasksize);
       calculateGeometry();
       onResize();
    }

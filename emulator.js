@@ -132,7 +132,9 @@ let options = {
    charset: "english",
    bt: undefined,
    bb: undefined,
-   bh: undefined
+   bh: undefined,
+   rgbmaskopacity: 0.15,
+   rgbmasksize: 3
 };
 
 // scanline version

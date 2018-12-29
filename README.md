@@ -95,6 +95,8 @@ e.g. `https://nippur72.github.io/laser500emu?scanlines=false&nodisk=true`
 - `bt=value` vertical top border height in pixels (0-65)
 - `bb=value` vertical bottom border border height in pixels (0-55)
 - `aspect=value` aspect ratio (default 1.55)
+- `rgbmaskopacity=value` opacity of RGB mask effect (default 0.15)
+- `rgbmasksize=value` size in pixel of RGB mask effect (default 3)
 
 DEBUGGER
 ========

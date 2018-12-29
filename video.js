@@ -24,6 +24,9 @@ let canvas, canvasContext;
 let screenCanvas, screenContext;
 let imageData, bmp;
 
+let rgbmask_opacity = 0.15;
+let rgbmask_size = 3;
+
 function calculateGeometry() {
    BORDER_V        = (border_top    ? border_top    : 17);
    BORDER_V_BOTTOM = (border_bottom ? border_bottom : 23);
