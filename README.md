@@ -119,6 +119,7 @@ To enable "autoload":
 - in your compile chain (`make` etc..), copy the binary you want to execute in the emulator directory naming it `autoload.bin`
 - execute `node makeautoload`, this will turn `autoload.bin` into JavaScript code (`autoload.js`).
 - refresh the browser, the program will be loaded in memory and make it RUN
+
 When you no longer want the file to be autoloaded, delete `autoload.bin` and run again `node makeautoload`.
 
 EMULATOR FEATURES

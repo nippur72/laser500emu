@@ -70,7 +70,7 @@ window.addEventListener("visibilitychange", function() {
 
 // **** drag & drop ****
 
-const dropZone = document.getElementById('canvas');
+const dropZone = document.getElementById('screen');
 
 // Optional.   Show the copy icon when dragging over.  Seems to only work for chrome.
 dropZone.addEventListener('dragover', function(e) {
