@@ -4,6 +4,9 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO URLSearchParams()
+// TODO requestAnimationFrame ?
+// TODO gamepad api
 // TODO tape stereo trick https://retrocomputing.stackexchange.com/questions/773/loading-zx-spectrum-tape-audio-in-a-post-cassette-world
 // TODO inverted waveform option
 // TODO remove software from facebook group

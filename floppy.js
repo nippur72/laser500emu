@@ -6,18 +6,41 @@ function PHI3(n) { return (((n)>>3)&1); }
 const nic_track_size = 8192; // 327680 / 40
 const nic_sector_size = nic_track_size / 16;
 const nic_tracks = 40; 
-const FLOPPY_SIZE = nic_track_size * nic_tracks;
+const FLOPPY_SIDE = nic_track_size * nic_tracks;
+const FLOPPY_SIZE = 2 * FLOPPY_SIDE;
 const TRACKS_PER_FLOPPY = 80; // 80ish ? 
 
+let fdc_debug_move      = false;
+let fdc_debug_data_size = false;
+let fdc_debug_read      = false;
+let fdc_debug_write     = false;
+let fdc_debug_side      = false;
+
+let fdc_debug_read_buf = [];
+let fdc_debug_write_buf = [];
+
+function fdc_debug_flush() {
+    if(fdc_debug_read_buf.length > 0) {
+        console.log(`read: ${fdc_debug_read_buf.map(e=>hex(e)).join(" ")}`);
+        fdc_debug_read_buf = [];
+    }
+
+    if(fdc_debug_write_buf.length > 0) {
+        console.log(`write: ${fdc_debug_write_buf.map(e=>hex(e)).join(" ")}`);
+        fdc_debug_write_buf = [];
+    }
+}
+
 class Drive {
-   constructor(image) {
+   constructor(drive_num, image) {
+      this.drive_num = drive_num;       
       this.track_x2 = 80;
       this.track_offset = 0;
-      this.floppy = image === undefined ? new Uint8Array(FLOPPY_SIZE) : image;
+      this.floppy = image === undefined ? new Uint8Array(FLOPPY_SIZE) : this.resize(image);
       this.write_enabled = 0;
-      this.fdc_data = 0;  // latch
-      this.fdc_bits = 8;  // not used/implemented
-      this.side = 0;      // not used/implemented
+      this.fdc_data = 0;    // latch
+      this.fdc_bits = 255;  // not used/implemented
+      this.side = 0;        // not used/implemented
 
       this.WREQ = 0;
       this.ENBL = 0;
@@ -27,12 +50,14 @@ class Drive {
    read_byte() {   
       if(this.track_x2 % 2 == 1) return 0; // does not read on even tracks: TODO simulate 80 track disk
       const track = this.track_x2 / 2;   
-      const pos = track * nic_track_size + this.track_offset;
+      const pos = track * nic_track_size + this.track_offset + this.side * FLOPPY_SIDE;
       let data = this.fdc_data;
       if(this.ENBL) {
          data = this.floppy[pos];      
          this.track_offset = (this.track_offset + 1) % nic_track_size;   
-         //console.log(`${hex(data)} POS=${pos}, T=${hex(track)} TO=${hex(this.track_offset)}`);
+         if(fdc_debug_read) {
+            fdc_debug_read_buf.push(data);
+         }
       }
       return data;
    }
@@ -41,34 +66,51 @@ class Drive {
    {               
       if(this.track_x2 % 2 == 1) return 0; // does not read on even tracks: TODO simulate 80 track disk
       const track = this.track_x2 / 2;   
-      const pos = track * nic_track_size + this.track_offset;
+      const pos = track * nic_track_size + this.track_offset + this.side * FLOPPY_SIDE;
       this.fdc_data = data;
       if(this.ENBL) {
          this.floppy[pos] = data;      
          this.track_offset = (this.track_offset + 1) % nic_track_size;      
+         if(fdc_debug_write) {            
+            fdc_debug_write_buf.push(data);
+         }
       }
    }
 
    move_head(direction) {
+      fdc_debug_flush();
+
       if(this.ENBL) {         
          this.track_x2 += direction;
          if(this.track_x2 >= TRACKS_PER_FLOPPY) {
             this.track_x2 = TRACKS_PER_FLOPPY-1;
-            // console.log(`bump on track ${this.track_x2}/80`);
+            if(fdc_debug_move) {
+                console.log(`drive ${this.drive_num+1}: seek ${direction===1?'forward':'backward'}, BUMP on track ${this.track_x2/2} (${this.track_x2}/80)`);
+            }
          }
          else if(this.track_x2 < 0) {
             this.track_x2 = 0;
-            // console.log(`bump on track ${this.track_x2}/80`);
+            if(fdc_debug_move) {
+                console.log(`drive ${this.drive_num+1}: seek ${direction===1?'forward':'backward'}, BUMP on track ${this.track_x2/2} (${this.track_x2}/80)`);
+            }
          }
          else {
-            // console.log(`moving to track ${this.track_x2}/80    (${direction})`);
+            if(fdc_debug_move) {
+               console.log(`drive ${this.drive_num+1}: seek ${direction===1?'forward':'backward'}, track is now ${this.track_x2/2} (${this.track_x2}/80)`);
+            }
          }
       }
+   }
+   
+   resize(image) {
+      const new_image = new Uint8Array(FLOPPY_SIZE);
+      image.forEach((e,i)=>new_image[i]=e);
+      return new_image;
    }
 }
 
 // the actual floppy disks inserted in the drives
-const drives = [ new Drive(disk_image), new Drive() ];
+const drives = [ new Drive(0, disk_image), new Drive(1) ];
 let fdc_drive = -1;   // drive currently selected (0,1), -1 = none
 
 function floppy_read_port(port) {      
@@ -112,9 +154,16 @@ function write_10(data) {
    const ENBL = bit(data, 4); 
    const phase = data & 0b1111;
 
-   fdc_drive = drive;   
+   fdc_drive = drive;  
 
    const d = drives[fdc_drive];
+
+   if(d.side !== side && fdc_debug_side) {
+      fdc_debug_flush(); 
+      console.log(`drive ${fdc_drive+1} going on side ${side}`);
+   }
+
+   d.side = side;
 
    const old_phase = d.PHASE;
 
@@ -150,7 +199,11 @@ function write_10(data) {
 // 0	Data write mode: 0 = 8 bit
 // 	                 1 = 16 bit
 function write_11(data) {  
-   fdc_bits = data & 1 ? 16 : 8;
+   fdc_bits = data;
+   if(fdc_debug_data_size) {
+      fdc_debug_flush(); 
+      console.log(`data size is ${fdc_bits === 213 ? 'normal' : 'extended' } (${fdc_bits})`);
+   }
 }
 
 // 0x13: Data write register
