@@ -194,10 +194,8 @@ function write_10(data) {
 }
 
 // 0x11: Latch register 2
-// Bit(s)	Description
-// 7-1	Reserved
-// 0	Data write mode: 0 = 8 bit
-// 	                 1 = 16 bit
+// 213 = turn off self sync bytes 
+// 255 = turn on self sync bytes 
 function write_11(data) {  
    fdc_bits = data;
    if(fdc_debug_data_size) {
