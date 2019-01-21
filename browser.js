@@ -177,6 +177,13 @@ function parseQueryStringCommands() {
       buildPalette();   
    }
 
+   if(options.saturation !== undefined) {
+           if(options.saturation < 0) saturation = 0;
+      else if(options.saturation > 1) saturation = 1;
+      else saturation = options.saturation;   
+      buildPalette();   
+   }
+
    if(options.charset !== undefined) {
       if(options.charset == "english") charset_offset = 0;
       else if(options.charset == "bincode") charset_offset = 2048;

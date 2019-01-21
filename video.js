@@ -27,6 +27,8 @@ let imageData, bmp;
 let rgbmask_opacity = 0.15;
 let rgbmask_size = 3;
 
+let saturation = 1.0;
+
 function calculateGeometry() {
    BORDER_V        = (border_top    ? border_top    : 17);
    BORDER_V_BOTTOM = (border_bottom ? border_bottom : 23);
@@ -65,9 +67,18 @@ let show_scanlines = true;
 let charset_offset = 0;
 
 function buildPalette() {
+   function applySaturation(r,g,b, s) {      
+      const L = 0.3*r + 0.6*g + 0.1*b;
+      const new_r = r + (1.0 - s) * (L - r);
+      const new_g = g + (1.0 - s) * (L - g);
+      const new_b = b + (1.0 - s) * (L - b);
+      return { r: new_r, g: new_g, b: new_b };
+   }
+
    function setPalette(i,r,g,b) { 
-      palette[i] = 0xFF000000 | r | g << 8 | b << 16; 
-      halfpalette[i] = 0xFF000000 | ((r/1.2)|0) | ((g/1.2)|0) << 8 | ((b/1.2)|0) << 16; 
+      let color = applySaturation(r,g,b, saturation);
+      palette[i] = 0xFF000000 | color.r | color.g << 8 | color.b << 16; 
+      halfpalette[i] = 0xFF000000 | ((color.r/1.2)|0) | ((color.g/1.2)|0) << 8 | ((color.b/1.2)|0) << 16; 
       if(hide_scanlines || !show_scanlines) halfpalette[i] = palette[i];
    }
 

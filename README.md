@@ -91,6 +91,7 @@ e.g. `https://nippur72.github.io/laser500emu?scanlines=false&nodisk=true`
 - `notapemonitor=true` disables audio playback from tape (tape monitor)
 - `charset=english|german|french` modify the hardware switches used to address the charset ROM (default is english).  
 - `scanlines=false` turn off the scanlines effect (default is on)
+- `saturation=value` set color saturation between 0 (B/W) and 1 (full color)
 - `bh=value` horizontal border width in pixels (0-40)
 - `bt=value` vertical top border height in pixels (0-65)
 - `bb=value` vertical bottom border border height in pixels (0-55)
