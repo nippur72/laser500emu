@@ -209,6 +209,7 @@ function saveState() {
       banks: Array.from(banks),
       cassette_bit_in, 
       cassette_bit_out, 
+      cassette_bit_out_l, 
       vdc_graphic_mode_enabled,
       vdc_graphic_mode_number,
       vdc_page_7,
@@ -218,7 +219,9 @@ function saveState() {
       vdc_border_color,
       speaker_A,
       speaker_B,
-      joy0,
+      io_bit_7,
+      caps_lock_bit,
+      io_bit_4,
       joy1,
       emulate_fdc, 
       cpu: cpu.getState()  
@@ -253,6 +256,9 @@ function restoreState() {
       vdc_border_color        = s.vdc_border_color;
       speaker_A               = s.speaker_A;
       speaker_B               = s.speaker_B;
+      io_bit_7                = s.io_bit_7,
+      caps_lock_bit           = s.caps_lock_bit,
+      io_bit_4                = s.io_bit_4,
       joy0                    = s.joy0;
       joy1                    = s.joy1;  
       emulate_fdc             = s.emulate_fdc; 

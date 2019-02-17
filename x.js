@@ -283,3 +283,24 @@ let inv = false;
       }          
    }
 })();
+
+
+// logs when unknown io bits are changed
+(function() {
+   let old_io_bit_7; 
+   let old_caps_lock_bit;
+   let old_io_bit_4;
+
+   debugBefore = ()=> {      
+      old_io_bit_7      = io_bit_7;
+      old_caps_lock_bit = caps_lock_bit;
+      old_io_bit_4      = io_bit_4;
+   }
+   debugAfter = ()=> {                
+      let { pc } = cpu.getState();
+      if(old_io_bit_7 != io_bit_7)           console.log(`bit 7 changed from ${old_io_bit_7     } to ${io_bit_7     } at ${hex(pc,4)}`);
+      if(old_caps_lock_bit != caps_lock_bit) console.log(`bit 6 changed from ${old_caps_lock_bit} to ${caps_lock_bit} at ${hex(pc,4)}`);
+      if(old_io_bit_4 != io_bit_4)           console.log(`bit 4 changed from ${old_io_bit_4     } to ${io_bit_4     } at ${hex(pc,4)}`);
+   }
+})();
+

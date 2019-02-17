@@ -27,7 +27,8 @@ function mapped_io_read(address) {
 }
 
 /* on write 
-* 7-6  not assigned
+* 7    ?? not assigned
+* 6    caps lock state
 * 5    speaker B
 * 4    ???
 * 3    mode: 1 graphics, 0 text
@@ -37,9 +38,13 @@ function mapped_io_read(address) {
 */
 function mapped_io_write(address, value) {
    if(address>=0x2800 && address<=0x2FFF) {
-      speaker_B = (value & (1 << 5)) >> 5;
-      speaker_A = (value & (1 << 0)) >> 0;
-      vdc_graphic_mode_enabled = (value & (1<<3)) >> 3;
-      cassette_bit_out = (value & (1<<2)) >> 2;  // LSB is ignored
+      io_bit_7                 = bit(value,7);
+      caps_lock_bit            = bit(value,6);
+      speaker_B                = bit(value,5);
+      io_bit_4                 = bit(value,4);
+      vdc_graphic_mode_enabled = bit(value,3);
+      cassette_bit_out         = bit(value,2);  
+      cassette_bit_out_l       = bit(value,1); // this is ignored 
+      speaker_A                = bit(value,0);
    }
 }
