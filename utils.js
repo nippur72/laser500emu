@@ -74,6 +74,17 @@ function drag_drop_disk(diskname, bytes) {
    writeFile(diskname, bytes);
 }
 
+function pasteBasic(text) {
+   const lines = text.split("\n");   
+   for(let t=0; t<lines.length; t++) {
+      const linea = lines[t];
+      console.log(linea);
+      pasteLine(linea+"\r\n");
+      for(let k=0; k<20; k++) renderAllLines();
+   }
+   console.log("pasted!");
+}
+
 function pasteLine(text) {
    // keyboard buffer: 8289-838b  
    // key repeat address: 85F7
