@@ -56,8 +56,7 @@ function keyDown(e) {
 
    // RESET key is mapped as ALT+R or CTRL+Break or Pause
    if(key=="Cancel" || key=="Pause" || (e.code == "KeyR" && e.altKey)) {
-      cpu.reset();
-      is_pasting_text = false;
+      cpu.reset();      
       e.preventDefault(); 
       return;
    }

@@ -74,17 +74,6 @@ function drag_drop_disk(diskname, bytes) {
    writeFile(diskname, bytes);
 }
 
-function pasteBasic(text) {
-   const lines = text.split("\n");   
-   for(let t=0; t<lines.length; t++) {
-      const linea = lines[t];
-      console.log(linea);
-      pasteLine(linea+"\r\n");
-      for(let k=0; k<20; k++) renderAllLines();
-   }
-   console.log("pasted!");
-}
-
 function pasteLine(text) {
    // keyboard buffer: 8289-838b  
    // key repeat address: 85F7
@@ -98,66 +87,33 @@ function pasteLine(text) {
    cpu.reset();
 }
 
-let is_pasting_text = false;
-async function print_string(str) {   
-   is_pasting_text = true;
-   for(let t=0;t<str.length;t++) {
-      let c = str.charAt(t).toLowerCase();
-      if(c=='\n') c = "Enter";
-      await simulateKey(c);
-      if(!is_pasting_text) break;
-   }   
-   is_pasting_text = false;
-}
-
-async function wait_cursor_move_or_timeout(oldpos, maxtime, oldframe) {
-   let time_counter = 0;
-   const tick = 5;
-
-   function check(resolve) {
-      if(frames !== oldframe) {
-         if(mem_read_word(0x85e2)!==oldpos) resolve();
-         time_counter += tick;
-         if(time_counter > maxtime) resolve();
-      }
-      setTimeout(()=>check(resolve), tick);
+function pasteBasic(text) {   
+   const lines = text.split("\n");   
+   for(let t=0; t<lines.length; t++) {
+      const linea = lines[t];
+      console.log(linea);
+      pasteBasicLine(linea);      
    }
-
-   return new Promise((resolve,reject)=> {      
-      setTimeout(()=>check(resolve), tick);
-   });
+   console.log("pasted!");   
 }
 
-async function skip_frame(oldframe) {
-   const tick = 5;
-   function check(resolve) {
-      if(frames !== oldframe) resolve();
-      setTimeout(()=>check(resolve), tick);
+function pasteBasicLine(line) {
+   for(let t=0; t<line.length; t++) {
+      let char = line.charAt(t);
+      if(char === "§") char = "`";  // § is alias for ` to ease pasting from console
+      pasteBasicChar(char);
    }
-
-   return new Promise((resolve,reject)=> {      
-      setTimeout(()=>check(resolve), tick);
-   });
+   pasteBasicChar("Enter");
 }
 
-async function pause(time) {
-   return new Promise((resolve,reject)=> {
-      setTimeout(()=>resolve(), time);
-   });
-}
-
-async function simulateKey(pckey) {
-   await singleKey(pckey);
-}
-
-async function singleKey(pckey) {
+function pasteBasicChar(char) {
    const old_cursor_pos = mem_read_word(0x85e2);
-   const old_frames = frames;
-   keyDown(evkey(pckey));    
-   await wait_cursor_move_or_timeout(old_cursor_pos, 5*1000, old_frames); 
-   keyUp(evkey(pckey));
-   //await pause(25); 
-   await skip_frame(frames); 
+   const key = evkey(char);
+
+   keyDown(key);     
+   for(let t=1; t<50 && mem_read_word(0x85e2) === old_cursor_pos; t++) renderAllLines();   
+   keyUp(key);
+   renderAllLines();
 }
 
 function evkey(pcKey) {
@@ -178,8 +134,7 @@ function zap() {
    vdc_text80_background = 0;
    let state = cpu.getState();
    state.halted = true;
-   cpu.setState(state);
-   is_pasting_text = false;
+   cpu.setState(state);   
 }
 
 function power() {      
