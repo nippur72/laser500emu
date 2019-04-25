@@ -174,37 +174,6 @@ function renderLines(nlines, hidden) {
    }
 }
 
-/*
-// versione cycle exact
-function renderAllLines() {   
-   while(raster_y < SCREEN_H) 
-   {
-      const elapsed = cpu.run_instruction();
-      writeAudioSamples(elapsed);
-      cycle += elapsed * 720;
-      while(cycle > 0) {
-         drawEight();
-         cycle -= 1520;
-      }
-      //console.log(raster_y, SCREEN_H)   ;
-      //if(zz++ % 30590 === 0) break;
-   }
-   
-   cpu.interrupt(false, 0);                  
-
-   
-   //cycle += PAL_HIDDEN_LINES_VERY_BOTTOM * cyclesPerLine;
-   ////while(cycle > 0) 
-   //{
-   //   const elapsed = cpu.run_instruction();
-   //   writeAudioSamples(elapsed);
-   //   cycle -= elapsed;
-   //}
-      
-   raster_y = 0;
-}
-*/
-
 function renderAllLines() {   
    cpu.interrupt(false, 0);                         // generate VDC interrupt
    renderLines(HIDDEN_SCANLINES_TOP, true);               
