@@ -378,6 +378,7 @@ Referread as "GA1" on the schematics comes with the following chip labels:
 - "VTL-0390-00-00 MΔ52701" on the Laser 500
 - "VTL-0390-00-00 MΔ61800" on the Laser 700
 
+```
 PIN        PORT   Meaning
 -----------------------------------------------------
 MA[7:0]    OUT    memory address sent as ROW / COL via multiplexers
@@ -428,3 +429,4 @@ CBUST      OUT    color burst
 CASOUT     OUT    cassette output
 VSS        NC     connected to GND
 VSS        NC     connected to GND
+```
