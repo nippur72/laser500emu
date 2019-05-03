@@ -368,3 +368,63 @@ containts the following character sets:
 10 - 4096 ($1000) german
 11 - 6144 ($1800) french
 
+
+VLSI CHIP GA1
+=============
+The Laser has a custom VLSI chip that works as a video generator
+and as a controller of many other functions (memory, IO, CPU).
+
+Referread as "GA1" on the schematics comes with the following chip labels:
+- "VTL-0390-00-00 MΔ52701" on the Laser 500
+- "VTL-0390-00-00 MΔ61800" on the Laser 700
+
+PIN        PORT   Meaning
+-----------------------------------------------------
+MA[7:0]    OUT    memory address sent as ROW / COL via multiplexers
+A[15:14]   INOUT  address lines
+BA[17:14]  ?      ?bank address. [17:16] connected to pin [44,42] ?
+CVAM       OUT    ?cpu/video address multiplex; can disable the address multiplexer output
+AX         OUT    address multiplex, A[15:0] address bus down to the MA[7:0]
+D[7:0]     INOUT  data bus
+/ROMCS     OUT    ROM select
+F3M        ?      ? 3MHz signal?
+F14M       IN     14.77873 MHz input from HSYNC delay circuit
+F17M       IN     17.73447(5) MHz input from XTAL
+/TOPBK     ?      ?connected to pin 34?
+VDD        ?      ?connected to 5V?
+VDD        ?      ?connected to 5V?
+FRSEL      ?      ?connected to 5V?
+/GRESET    ?      ?connected to 5V?
+/IO        OUT    memory mapped IO, When 0 D[7:0] are from 74LS244 buffer (CASIN cassette input + keyboard KD[6:0])
+/WAIT      OUT    cpu wait (0=cpu waits)
+/MREQ      IN     cpu memory request
+/IORQ      IN     cpu I/O request
+/WR        IN     cpu write
+/RD        IN     cpu read
+CPUCK      OUT    3.6946825 MHz cpu clock (F14M/4)
+RD[7:0]    OUT    character to read from charset ROM. Controlled by CGS. 
+REMOTE     OUT    remote control, tape motor (not connected)
+CAPLK      OUT    caps lock led
+BUZZER     OUT    buzzer, the internal speaker output
+CGS        OUT    character graphics select. When 1 RD[7:0] forms the charset ROM address (via a 74LS273 register)
+/RAS       OUT    RAM row access strobe
+/RAMW      OUT    RAM write
+/CAS1      OUT    RAM column address strobe
+/CAS4      OUT    ?not connected (column address strobe?) 
+/CAS5      OUT    ?not connected (column address strobe?)
+VA         OUT    selects the 0-7 row of the character in the charset ROM (connected to CGA[2])
+VB         OUT    selects the 0-7 row of the character in the charset ROM (connected to CGA[1])
+VC         OUT    selects the 0-7 row of the character in the charset ROM (connected to CGA[0])
+CGD[7:0]   IN     character graphic data. The character bitmap read form the charset ROM.
+GT         OUT    graphic table. Selects (ENG/GER/FRA) on the charset ROM via CGA[12:11] (how?)
+R          OUT    red 
+G          OUT    green 
+B          OUT    blue
+L          OUT    luminosity (0=dark colors, 1=light colors)
+/HSYNC     OUT    horizontal sync
+/VSYNC     OUT    vertical sync, triggers also CPU interrupt via /INT
+CHROMA     OUT    chroma signal
+CBUST      OUT    color burst
+CASOUT     OUT    cassette output
+VSS        NC     connected to GND
+VSS        NC     connected to GND
