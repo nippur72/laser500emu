@@ -383,7 +383,7 @@ PIN        PORT   Meaning
 -----------------------------------------------------
 MA[7:0]    OUT    memory address sent as ROW / COL via multiplexers
 A[15:14]   INOUT  address lines
-BA[17:14]  ?      ?bank address. [17:16] connected to pin [44,42] ?
+BA[17:14]  OUT    bank address. [17:16] connected to pin [44,42]
 CVAM       OUT    ?cpu/video address multiplex; can disable the address multiplexer output
 AX         OUT    address multiplex, A[15:0] address bus down to the MA[7:0]
 D[7:0]     INOUT  data bus
@@ -392,10 +392,10 @@ F3M        ?      ? 3MHz signal?
 F14M       IN     14.77873 MHz input from HSYNC delay circuit
 F17M       IN     17.73447(5) MHz input from XTAL
 /TOPBK     ?      ?connected to pin 34?
-VDD        ?      ?connected to 5V?
-VDD        ?      ?connected to 5V?
+VDD        IN     5V supply voltage
+VDD        IN     5V supply voltage
 FRSEL      ?      ?connected to 5V?
-/GRESET    ?      ?connected to 5V?
+/GRESET    IN     Power-on RESET input. Connected to 5V through RC circuit.
 /IO        OUT    memory mapped IO, When 0 D[7:0] are from 74LS244 buffer (CASIN cassette input + keyboard KD[6:0])
 /WAIT      OUT    cpu wait (0=cpu waits)
 /MREQ      IN     cpu memory request
