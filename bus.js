@@ -56,7 +56,6 @@ function io_read(port) {
       console.log(`port read ${hex(port & 0xFF)} hi byte set to ${hex(hi)}`);
    }
    */
-   bus_ops++;
    switch(port & 0xFF) {
       case 0x40: return banks[0];
       case 0x41: return banks[1];
@@ -84,8 +83,7 @@ function io_write(port, value) {
    if(hi>0 && (p>=0x10 && p<=0x1f)) {
       console.log(`port write ${hex(port & 0xFF)} hi byte set to ${hex(hi)}, value=${hex(value)}`);
    }
-   */
-   bus_ops++;
+   */   
    // console.log(`io write ${hex(port)} ${hex(value)}`)  
    switch(port & 0xFF) {
       case 0x40: banks[0] = value & 0xF; break;
