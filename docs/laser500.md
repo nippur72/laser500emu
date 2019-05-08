@@ -391,10 +391,10 @@ D[7:0]     INOUT  data bus
 F3M        ?      ? 3MHz signal?
 F14M       IN     14.77873 MHz input from HSYNC delay circuit
 F17M       IN     17.73447(5) MHz input from XTAL
-/TOPBK     ?      ?connected to pin 34?
+/TOPBK     IN     tells if there is any ROM in the expansion port (connected to pin 34)
 VDD        IN     5V supply voltage
 VDD        IN     5V supply voltage
-FRSEL      ?      ?connected to 5V?
+FRSEL      IN     50/60Hz select(PAL/NTSC?), connected to +5V in the schematic
 /GRESET    IN     Power-on RESET input. Connected to 5V through RC circuit.
 /IO        OUT    memory mapped IO, When 0 D[7:0] are from 74LS244 buffer (CASIN cassette input + keyboard KD[6:0])
 /WAIT      OUT    cpu wait (0=cpu waits)
@@ -429,4 +429,61 @@ CBUST      OUT    color burst
 CASOUT     OUT    cassette output
 VSS        NC     connected to GND
 VSS        NC     connected to GND
+```
+
+/*
+-------XRRRY----XRRRY----XRRRY----XRRRY----XRRRY  <-- reading character from RAM
+T=7     (X) The video controller calculates the RAM address of the character to read (&HF800)
+            and puts it on the address bus at the start of next CPU cycle.
+T=0     (R) RAM reading starts
+T=1,2   (R) ram is reading
+T=3     (Y) 67ns*3 = 203ns seconds passed, RAM data is ready. 
+            RAM is read and transferred into a register for displaying on 
+            the successive screen cell when T=0,1,2,3,4,5,6,7
+*/
+
+VIDEO VS CPU TIMING
+===================
+```
+(The VDC reads characters ahead of time, 1 column before they get actually displayed.)
+
+Raster is at Y=0 and X=-16 in screen coordinates
+
+|BORDER |BORDER |COL0   |COL1   |COL2   |       
+012345670123456701234567012345670123456701234567  <-- time slot T=F14M mod 8
+VVVV----VVVV----VVVV----VVVV----VVVV----VVVV----  <-- V = video has bus
+----CCCC----CCCC----CCCC----CCCC----CCCC----CCCC  <-- C = CPU has bus
+|||||||| 
+|||||||+--- video calculates the new RAM address
+||||||+---- /CAS = 1, /AX = 1, read from DRAM
+|||||+----- /RAS = 1
+||||+------ nothing
+|||+------- nothing 
+||+-------- /CAS = 0, col bits into DRAM
+|+--------- /AX  = 0, MX outputs col bits
++---------- /RAS = 0, row bits into DRAM
+
+T=0 (A): Assume that MA7:0 outputs are stable and hold the video ROW bits.
+         *RAS goes low, clocking the ROW bits into the DRAMs.
+         Access time for the DRAMs begins now.
+
+T=1 (B): *AX goes low. MA7:0 are now outputting the COLUMN data bits
+
+T=2 (C): *CAS goes low, clocking the column data into the DRAMs.
+         Difficult to tell from the diagram whether CAS is generated from clock edge 2, 
+         or by a delay line attached to clock edge #1. Either would suffice.
+
+T=3 (D): do nothing, maintain state
+
+T=4 (D): do nothing, maintain state
+
+T=5 (E): *RAS goes high
+
+T=6 (F): *CAS and *AX both go high. Video section will most likely sample RAM data here. 
+         (approx 201ns after the falling egde of *RAS)
+         *MREQ from the Z80 may go low here if the CPU is trying to initiate a read cycle.
+         With AX high, the multiplexers will be selecting the ROW data of the Z80 address bus in readiness for the CPU cycle.
+
+T=7 (D): do nothing, maintain state            
+
 ```
