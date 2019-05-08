@@ -48,7 +48,7 @@ function mem_write(address, value) {
    }
 }
 
-function io_read(port) {  
+function io_read(ioport) {  
    /*
    const hi = (port & 0xFF00) >> 8;
    const p = port & 0xFF;
@@ -56,24 +56,21 @@ function io_read(port) {
       console.log(`port read ${hex(port & 0xFF)} hi byte set to ${hex(hi)}`);
    }
    */
-   switch(port & 0xFF) {
-      case 0x40: return banks[0];
-      case 0x41: return banks[1];
-      case 0x42: return banks[2];
-      case 0x43: return banks[3];
+   const port = ioport & 0xFF;
+   switch(port) {
       case 0x2b: return joy0;  // joystick 8 directions
-      case 0x27: return joy1;  // joystick fire buttons      
-      case 0x00: return printerReady;                  
-      case 0x2e: return 0x00;  // joystick 2 not emulated yet
-      case 0x10:
-      case 0x11:
-      case 0x12:
-      case 0x13:
+      case 0x27: return joy1;  // joystick fire buttons
+      case 0x00: return printerReady;
+      //case 0x2e: return 0x00;  // joystick 2 not emulated yet
+      //case 0x10:
+      //case 0x11:
+      //case 0x12:
+      //case 0x13:
       case 0x14:
-         return emulate_fdc ? floppy_read_port(port & 0xFF) : 0xFF;   
+         return emulate_fdc ? floppy_read_port(port) : (port | 1);   
    }
    console.warn(`read from unknown port ${hex(port)}h`);
-   return 0x00;
+   return port | 1; // this is the value returned from unused ports
 }
 
 function io_write(port, value) { 
