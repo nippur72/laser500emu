@@ -1,23 +1,13 @@
 // TODO joystick, caps lock, port 13 OUT(13),AA ?
 
 function mapped_io_read(address) {   
-   // TODO rewrite in negated logic?
-   
    // filtra indirizzi
    if(address<0x2800 || address>0x2fff) return 0x7f;
    
    const row = address & 0x00FF;
-   const hi  = (address & 0xFF00) >> 8;
+   const hi  = ((address & 0xFF00) >> 8 & 0b1111);
   
-   let sum = 0;   
-
-   switch(hi) 
-   {
-      case 0x28: sum = keyboard_matrix[11]; break;
-      case 0x29: sum = keyboard_matrix[12]; break;
-      case 0x2a: sum = keyboard_matrix[10]; break;
-      case 0x2b: sum = keyboard_matrix[9];  break;         
-   }
+   let sum = keyboard_matrix[9+hi];   
 
    for(let t=0;t<8;t++) {
       if((row & (1<<t)) == 0 ) sum |= keyboard_matrix[t+1];      

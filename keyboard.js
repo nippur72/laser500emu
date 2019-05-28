@@ -109,7 +109,7 @@ function keyDown(e) {
 
    // does laser key needs shift pressed or unpressed?
    const shift = needsShift(key);      
-         if(shift === true)  keyPress(1, 0x40);      
+         if(shift === true) keyPress(1, 0x40);      
    else if(shift === false) keyRelease(1, 0x40);      
 
    e.preventDefault();         
