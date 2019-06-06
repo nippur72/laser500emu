@@ -81,18 +81,19 @@ const KEY_CAP_LOCK = 73;
 const KEY_SPACE = 74;
 const KEY_DOWN = 75;
 
-const ROW0 =  1;
-const ROW1 =  2;
-const ROW2 =  3;
-const ROW3 =  4;
-const ROW4 =  5;
-const ROW5 =  6;
-const ROW6 =  7;
-const ROW7 =  8;
-const ROWA =  9;
-const ROWB = 10;
-const ROWC = 11;
-const ROWD = 12;
+const ROW0 =  0;
+const ROW1 =  1;
+const ROW2 =  2;
+const ROW3 =  3;
+const ROW4 =  4;
+const ROW5 =  5;
+const ROW6 =  6;
+const ROW7 =  7;
+
+const ROWA = 11; 
+const ROWB = 10; 
+const ROWC = 8;  
+const ROWD = 9;  
 
 map(KEY_SHIFT        , ROW0, 0x40);
 map(KEY_Z            , ROW0, 0x20); 

@@ -7,10 +7,12 @@ function mapped_io_read(address) {
    const row = address & 0x00FF;
    const hi  = ((address & 0xFF00) >> 8 & 0b1111);
   
-   let sum = keyboard_matrix[9+hi];   
+   let sum = 0;   
+
+   if(hi>=0x8 && hi<=0xb) sum = keyboard_matrix[hi];   
 
    for(let t=0;t<8;t++) {
-      if((row & (1<<t)) == 0 ) sum |= keyboard_matrix[t+1];      
+      if((row & (1<<t)) === 0 ) sum |= keyboard_matrix[t];      
    }      
    
    return (cassette_bit_in << 7) | (~sum & 0b01111111);

@@ -109,8 +109,8 @@ function keyDown(e) {
 
    // does laser key needs shift pressed or unpressed?
    const shift = needsShift(key);      
-         if(shift === true) keyPress(1, 0x40);      
-   else if(shift === false) keyRelease(1, 0x40);      
+         if(shift === true) keyPress(ROW0, 0x40);      
+   else if(shift === false) keyRelease(ROW0, 0x40);      
 
    e.preventDefault();         
 }
@@ -143,7 +143,7 @@ function keyUp(e) {
    laser_key = pckey_to_laserkey(pressedKey);
    if(laser_key !== undefined) {
       keyRelease(laser_key.row, laser_key.col); // release key  
-      keyRelease(1, 0x40);                      // always release shift
+      keyRelease(ROW0, 0x40);                      // always release shift
    }
          
    e.preventDefault();
