@@ -1,10 +1,19 @@
-// PAL Standard: 720 x 576
-// 192 righe video + 96 bordo (48 sopra e 48 sotto) = 192+96 = 288 ; x2 = 576
+// Laser 500 screen geometry: 720 x 312
+// Active area: 640 x 192
+// Horizontal: 40 + 640 + 40 = 720
+// Vertical: 65 + 192 + 55 = 312
+// Pal frequency = 17.734475 Mhz
+// Cpu frequency = 3.6702 Mhz extimated (3.6947 Mhz nominal, from 14.77873/4 -- CPAL is 17.73447(5?))
+// Pal line period: 64 us
+// Pixel frequency (nominal):   720 / 64 = 11.25 Mhz
+// Pixel frequency (actual):  3.6702 x 3 = 11.0106 Mhz
 
 let border_top = undefined;
 let border_bottom = undefined;
 let border_h = undefined;
 let aspect = 1.55;
+
+let hardware_screen = false;
 
 const TEXT_W = 640; 
 const TEXT_H = 192;
@@ -15,9 +24,9 @@ let HIDDEN_SCANLINES_BOTTOM;
 let BORDER_V;
 let BORDER_V_BOTTOM;
 let BORDER_H;    
-let SCREEN_W = BORDER_H + TEXT_W + BORDER_H;
-let SCREEN_H = BORDER_V + TEXT_H + BORDER_V_BOTTOM;
-let DOUBLE_SCANLINES = 2;
+let SCREEN_W;
+let SCREEN_H;
+let DOUBLE_SCANLINES;
 let TOTAL_SCANLINES = HIDDEN_SCANLINES_TOP + BORDER_V + TEXT_H + BORDER_V_BOTTOM + HIDDEN_SCANLINES_BOTTOM;
 
 let canvas, canvasContext;
@@ -30,29 +39,38 @@ let rgbmask_size = 3;
 let saturation = 1.0;
 
 function calculateGeometry() {
-   BORDER_V        = (border_top    ? border_top    : 17);
-   BORDER_V_BOTTOM = (border_bottom ? border_bottom : 23);
+   if(border_top    !== undefined && (border_top    > 65 || border_top    < 0)) border_top    = undefined;
+   if(border_bottom !== undefined && (border_bottom > 55 || border_bottom < 0)) border_bottom = undefined;
+   if(border_h      !== undefined && (border_h      > 40 || border_h      < 0)) border_h      = undefined;
+
+   BORDER_V        = (border_top    !== undefined ? border_top    : 17);
+   BORDER_V_BOTTOM = (border_bottom !== undefined ? border_bottom : 23);   
    HIDDEN_SCANLINES_TOP    = 65 - BORDER_V; 
    HIDDEN_SCANLINES_BOTTOM = 55 - BORDER_V_BOTTOM;   
-   BORDER_H = border_h !== undefined ? border_h : 5*8;    
+   BORDER_H = border_h !== undefined ? border_h : 40;    
    SCREEN_W = BORDER_H + TEXT_W + BORDER_H;
    SCREEN_H = BORDER_V + TEXT_H + BORDER_V_BOTTOM;
-   DOUBLE_SCANLINES = 2;
-   TOTAL_SCANLINES = HIDDEN_SCANLINES_TOP + BORDER_V + TEXT_H + BORDER_V_BOTTOM + HIDDEN_SCANLINES_BOTTOM;
+   DOUBLE_SCANLINES = true;
+   TOTAL_SCANLINES = HIDDEN_SCANLINES_TOP + BORDER_V + TEXT_H + BORDER_V_BOTTOM + HIDDEN_SCANLINES_BOTTOM; // must be 312
+
+   if(hardware_screen) {
+      SCREEN_W = 946;
+      SCREEN_H = 312;
+   }
 
    // canvas is the outer canvas where the aspect ratio is corrected
    canvas = document.getElementById("canvas");
    canvas.width = SCREEN_W;
-   canvas.height = SCREEN_H * DOUBLE_SCANLINES;
+   canvas.height = SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1);
    canvasContext = canvas.getContext('2d');
 
    // screen is the inner canvas that contains the emulated PAL screen
    screenCanvas = document.createElement("canvas");
    screenCanvas.width = SCREEN_W;
-   screenCanvas.height = SCREEN_H * DOUBLE_SCANLINES;
+   screenCanvas.height = SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1);
    screenContext = screenCanvas.getContext('2d');
 
-   imageData = screenContext.getImageData(0, 0, SCREEN_W, SCREEN_H * DOUBLE_SCANLINES);
+   imageData = screenContext.getImageData(0, 0, SCREEN_W, SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
    
    bmp = new Uint32Array(imageData.data.buffer);   
 }
@@ -100,14 +118,14 @@ function buildPalette() {
    setPalette(15, 0xff, 0xff, 0xff);  /* white */
 }
 
-
-// #region rendeding at the cycle level
+// #region rendering at the cycle level
 
 let raster_y = 0;        // 0 to TOTAL SCANLINES (0-311)
 let raster_x = 0;        // 0 to SCREEN_W (720)
 let raster_y_text = 0;   // y relative to display area
 let raster_x_text = 0;   // x relative to display area
 
+/*
 // draws 8 pixel horizontally on the beam
 function drawEight() {
    const inside = raster_y>=BORDER_V && raster_y<(BORDER_V+TEXT_H) && raster_x>=BORDER_H && raster_x<BORDER_H+TEXT_W;
@@ -132,8 +150,10 @@ function drawEight() {
       }
    }
 }
+*/
 
 // draws 8 pixel horizontally on the display area and advances raster_x and raster_x_text
+/*
 function drawEight_text() 
 {  
    let video = vdc_page_7 ? bank7 : bank3;
@@ -238,7 +258,7 @@ function drawEight_text()
             setPixel640(x*8+xx, y, pixel_color);
          }
       }
-      */
+      * /
    }
    else
    {
@@ -274,8 +294,171 @@ function drawEight_text()
    }
    
 }
+*/
+
+// #endregion 
 
 
+// #region rendering at pixel level
+/*
+const TEXT_V_START = 65;                   // line number (0-based) where the active area starts
+const TEXT_V_END   = TEXT_V_START + 192;   // line number (0-based) where the active area ends
+const TEXT_H_START = 40;                   // pixel number (0-based) where the active area starts horizontally
+const TEXT_H_END   = TEXT_H_START + 640;   // pixel number (0-based) where the active area starts horizontally
+
+function drawCycle() {
+   hcnt++;
+   if(hcnt === 720) {
+      hcnt = 0;
+      vcnt++;
+      if(vcnt === 312) {
+         vcnt = 0;
+         vdc_interrupt = 1;
+      }        
+   }  
+   
+   const border_up_down    = vcnt < TEXT_V_START || vcnt > TEXT_V_END;
+   const border_left_right = hcnt < TEXT_H_START || hcnt > TEXT_H_END;
+   
+   const border = border_up_down || border_left_right;   
+
+   if(border) 
+   {
+      setPixelBorder(hcnt, vcnt, vdc_border_color);
+      return;
+   }
+
+   // active area
+
+   let x = (hcnt - TEXT_H_START)/16;
+   let y = vcnt - TEXT_V_START;
+
+   let video = vdc_page_7 ? bank7 : bank3;
+
+   if(vdc_graphic_mode_enabled) 
+   {
+      let offs;
+      switch(vdc_graphic_mode_number) {            
+         case 5: // GR 5 640x192 1bpp            
+            offs = offs_2[y];
+            for(let x=0; x<80; x++, offs++) {
+               const row = video[offs]; 
+               for(let xx=0;xx<8;xx++) {                     
+                  const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
+                  setPixel640(x*8+xx, y, pixel_color);
+               }
+            }
+            break;
+         case 4: // GR 4 320x192 2 colors per 8 pixels
+            offs = offs_2[y];
+            for(let x=0; x<40; x++, offs += 2) {
+               const row = video[offs];
+               const color = video[offs+1];
+               const fg = (color & 0xF0) >> 4;
+               const bg = (color & 0x0F);
+               for(let xx=0;xx<8;xx++) {                     
+                  const pixel_color = (row & (1<<xx)) > 0 ? fg : bg;                                                   
+                  setPixel320(x*8+xx, y, pixel_color);
+               }
+            }
+            break;
+         case 3: // GR 3 160x192 4bpp			
+            offs = offs_2[y];
+            for(let x=0; x<80; x++, offs++) {
+               const code = video[offs];
+               const left_pixel_color = (code & 0x0F);
+               const right_pixel_color = (code & 0xF0) >> 4;
+               setPixel160(x*2+0, y, left_pixel_color);
+               setPixel160(x*2+1, y, right_pixel_color);
+            }               
+            break;      
+         case 2: // GR 2 320x192 1bpp
+            offs = offs_1[y];
+            for(let x=0; x<40; x++, offs++) {                  
+               const row = video[offs];
+               for(let xx=0;xx<8;xx++) {                     
+                  const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
+                  setPixel320(x*8+xx, y, pixel_color);
+               }
+            }
+            break;
+         case 1: // GR 1 160x192 1bpp with two colors per 8 pixels			
+            offs = offs_1[y];
+            for(let x=0; x<20; x++, offs += 2) {
+               const code = video[offs];
+               const color = video[offs+1];
+               const fg = (color & 0xF0) >> 4;
+               const bg = (color & 0x0F);
+               for(let xx=0;xx<8;xx++) {                     
+                  const pixel_color = (code & (1<<xx)) > 0 ? fg : bg;                                                   
+                  setPixel160(x*8+xx, y, pixel_color);
+               }                  
+            }
+            break;
+         case 0: // GR 0 160x96 4bpp 
+            if(y % 2 == 0) { 
+               let by = y>>1;
+               offs = offs_0[by];
+               for(let x=0; x<80; x++, offs++) {                  
+                  const code = video[offs];
+                  const left_pixel_color = (code & 0x0F);
+                  const right_pixel_color = (code & 0xF0) >> 4;
+                  setPixel96(x*2+0, by, left_pixel_color);
+                  setPixel96(x*2+1, by, right_pixel_color);
+               }
+            }
+            break;
+      }      
+   }
+   // text modes 
+   else if(vdc_text80_enabled)
+   {      
+      // 80 columns text mode          
+      const by = y >> 3;
+      const oy = y & 0b111;
+
+      let offs = ((by & 7) << 8) + ((by >> 3) * 80);
+      for(let x=0; x<80; x++, offs++)
+      {
+         const code = video[0x3800+offs];  
+         
+         const startchar = code*8;
+         
+         const row  = charset[charset_offset+startchar+oy];
+         for(let xx=0;xx<8;xx++) {
+            const pixel_color = (row & (1<<xx)) > 0 ? vdc_text80_foreground : vdc_text80_background;                                                   
+            setPixel640(x*8+xx, y, pixel_color);
+         }
+      }
+   }
+   else
+   {
+      // 40 columns text mode 
+      const by = y >> 3;
+      const oy = y & 0b111;
+
+      let offs = ((by & 7) << 8) + ((by >> 3) * 80);
+      offs = offs + x*2;
+
+      const code = video[0x3800+offs];
+      const color = video[0x3801+offs];
+      
+      const bg = color & 0xF;
+      const fg = color >> 4;
+
+      const startchar = code*8;
+      
+      const row  = charset[charset_offset+startchar+oy];
+      for(let xx=0;xx<8;xx++) {
+         const pixel_color = (row & (1<<xx)) > 0 ? fg : bg;                  
+         const c = palette[pixel_color]; 
+         const c1 = halfpalette[pixel_color];                   
+         setPixel320(x*8+xx, y, pixel_color);
+      }
+      
+   }     
+}   
+*/
 // #endregion 
 
 // #region rendeding at scanline level
@@ -293,10 +476,14 @@ function drawFrame_y()
    drawFrame_y_border(raster_y);
    raster_y++;
    if(raster_y >= SCREEN_H) {
-      raster_y = 0;      
-      canvasContext.putImageData(imageData, 0, 0);
-      canvasContext.drawImage(screenCanvas, 0, 0, canvas.width, canvas.height);
+      raster_y = 0; 
+      updateCanvas();     
    }
+}
+
+function updateCanvas() {
+   canvasContext.putImageData(imageData, 0, 0);
+   canvasContext.drawImage(screenCanvas, 0, 0, canvas.width, canvas.height);
 }
 
 function drawFrame_y_border(y) 
@@ -442,7 +629,7 @@ function drawFrame_y_text(y)
 // #endregion 
 
 // #region rendering at the page level
-
+/*
 function _drawFrame() 
 {  
    if(vdc_page_7) 
@@ -597,7 +784,7 @@ function _drawFrame()
    canvasContext.putImageData(imageData, 0, 0);
 	canvasContext.drawImage(screenCanvas, 0, 0, canvas.width, canvas.height);
 }
-
+*/
 // #endregion 
 
 /*
@@ -641,60 +828,99 @@ function setPixel96(x, y, color) {
 
 // double scanline drawing routines
 
-function setPixelBorder(x, y, color) {      
-   const c0 = palette[color];   
-   const c1 = halfpalette[color];   
-   const ptr0 = ((y*2)+0) * SCREEN_W + x;   
-   const ptr1 = ((y*2)+1) * SCREEN_W + x;      
-   bmp[ ptr0 ] = c0;      
-   bmp[ ptr1 ] = c1;      
+function setPixelBorder(x, y, color) {  
+   if(DOUBLE_SCANLINES) {    
+      const c0 = palette[color];   
+      const c1 = halfpalette[color];   
+      const ptr0 = ((y*2)+0) * SCREEN_W + x;   
+      const ptr1 = ((y*2)+1) * SCREEN_W + x;      
+      bmp[ ptr0 ] = c0;      
+      bmp[ ptr1 ] = c1;      
+   } else {
+      const c0 = palette[color];   
+      const ptr0 = y * SCREEN_W + x;         
+      bmp[ ptr0 ] = c0;            
+   }
 }
 
 function setPixel640(x, y, color) {
-   const c0 = palette[color];   
-   const c1 = halfpalette[color];   
-   const xx = x + BORDER_H;
-   const yy = (y + BORDER_V)*2;
-   const ptr0 = (yy+0) * SCREEN_W + xx;
-   const ptr1 = (yy+1) * SCREEN_W + xx;
-   bmp[ ptr0 ] = c0;
-   bmp[ ptr1 ] = c1;
+   if(DOUBLE_SCANLINES) {    
+      const c0 = palette[color];   
+      const c1 = halfpalette[color];   
+      const xx = x + BORDER_H;
+      const yy = (y + BORDER_V)*2;
+      const ptr0 = (yy+0) * SCREEN_W + xx;
+      const ptr1 = (yy+1) * SCREEN_W + xx;
+      bmp[ ptr0 ] = c0;
+      bmp[ ptr1 ] = c1;
+   } else {
+      const c0 = palette[color];      
+      const xx = x + BORDER_H;
+      const yy = (y + BORDER_V);
+      const ptr0 = (yy+0) * SCREEN_W + xx;      
+      bmp[ ptr0 ] = c0;      
+   }
 }
 
 function setPixel320(x, y, color) {   
-   const c0 = palette[color];   
-   const c1 = halfpalette[color];   
-   const yy = (y + BORDER_V) * 2;
-   let ptr0 = (yy+0) * SCREEN_W + x*2 + BORDER_H;
-   let ptr1 = (yy+1) * SCREEN_W + x*2 + BORDER_H;
-   bmp[ ptr0++ ] = c0;
-   bmp[ ptr0   ] = c0;
-   bmp[ ptr1++ ] = c1;
-   bmp[ ptr1   ] = c1;
+   if(DOUBLE_SCANLINES) {    
+      const c0 = palette[color];   
+      const c1 = halfpalette[color];   
+      const yy = (y + BORDER_V) * 2;
+      let ptr0 = (yy+0) * SCREEN_W + x*2 + BORDER_H;
+      let ptr1 = (yy+1) * SCREEN_W + x*2 + BORDER_H;
+      bmp[ ptr0++ ] = c0;
+      bmp[ ptr0   ] = c0;
+      bmp[ ptr1++ ] = c1;
+      bmp[ ptr1   ] = c1;
+   } else {
+      const c0 = palette[color];         
+      const yy = (y + BORDER_V);
+      let ptr0 = (yy+0) * SCREEN_W + x*2 + BORDER_H;      
+      bmp[ ptr0++ ] = c0;
+      bmp[ ptr0   ] = c0;
+   }
 }
 
 function setPixel160(x, y, color) {   
-   const c0 = palette[color];   
-   const c1 = halfpalette[color];   
-   
-   const yy = (y + BORDER_V)*2;
+   if(DOUBLE_SCANLINES) {    
+      const c0 = palette[color];   
+      const c1 = halfpalette[color];   
+      
+      const yy = (y + BORDER_V)*2;
 
-   let ptr0 = (yy+0) * SCREEN_W + x*4 + BORDER_H;
-   let ptr1 = (yy+1) * SCREEN_W + x*4 + BORDER_H;
-   
-   bmp[ ptr0++ ] = c0;
-   bmp[ ptr0++ ] = c0;
-   bmp[ ptr0++ ] = c0;
-   bmp[ ptr0   ] = c0;
-   bmp[ ptr1++ ] = c1;
-   bmp[ ptr1++ ] = c1;
-   bmp[ ptr1++ ] = c1;
-   bmp[ ptr1   ] = c1;
+      let ptr0 = (yy+0) * SCREEN_W + x*4 + BORDER_H;
+      let ptr1 = (yy+1) * SCREEN_W + x*4 + BORDER_H;
+      
+      bmp[ ptr0++ ] = c0;
+      bmp[ ptr0++ ] = c0;
+      bmp[ ptr0++ ] = c0;
+      bmp[ ptr0   ] = c0;
+      bmp[ ptr1++ ] = c1;
+      bmp[ ptr1++ ] = c1;
+      bmp[ ptr1++ ] = c1;
+      bmp[ ptr1   ] = c1;
+   } else {
+      const c0 = palette[color];   
+      
+      const yy = (y + BORDER_V);
+
+      let ptr0 = (yy+0) * SCREEN_W + x*4 + BORDER_H;   
+      
+      bmp[ ptr0++ ] = c0;
+      bmp[ ptr0++ ] = c0;
+      bmp[ ptr0++ ] = c0;
+      bmp[ ptr0   ] = c0;
+   }
 }
 
 function setPixel96(x, y, color) {   
-   setPixel160(x,y*2+0,color);
-   setPixel160(x,y*2+1,color);
+   if(DOUBLE_SCANLINES) {    
+      setPixel160(x,y*2+0,color);
+      setPixel160(x,y*2+1,color);
+   } else {
+      setPixel160(x,y,color);      
+   }
 }
 
 // Courtesy of MAME/MESS emulator
@@ -767,3 +993,393 @@ const offs_0 = new Uint16Array([
 	0x24a0,0x2ca0,0x34a0,0x3ca0,0x25a0,0x2da0,0x35a0,0x3da0,
 	0x26a0,0x2ea0,0x36a0,0x3ea0,0x27a0,0x2fa0,0x37a0,0x3fa0
 ]);
+
+
+// **************** hardware rendering **********************
+
+function setPixelHardware(x, y, color) {
+   const yy = y*2;
+   const ptr0 = (yy+0) * SCREEN_W + x;
+   const ptr1 = (yy+1) * SCREEN_W + x;
+   bmp[ ptr0 ] = color;
+   bmp[ ptr1 ] = color;
+}
+
+const hfp = 10;         // horizontal front porch, unused time before hsync
+const hsw = 66;         // hsync width
+const hbp = 78;         // horizontal back porch, unused time after hsync
+
+const HEIGHT              = 192;  // height of active area  
+const TOP_BORDER_WIDTH    =  68;  // top border
+const BOTTOM_BORDER_WIDTH =  52;  // bottom
+const V                   = 312;  // number of lines
+
+const WIDTH               = 640;  // width of active area  
+const LEFT_BORDER_WIDTH   =  72;  // left border
+const RIGHT_BORDER_WIDTH  =  86;  // right border
+const H                   = 798;  // width of visible area
+
+// 14778730 / (row_length * 312) =~49.7 => row_length = 952
+
+let hsync = 0;
+let vsync = 0;
+
+let hcnt; // horizontal counter 
+let vcnt; // vertical counter 
+let xcnt; 
+let ycnt; 
+let char;
+let fgbg;
+let ramDataD;
+let ramData;
+let ramAddress;
+let charsetData;
+let charsetAddress;
+let charsetQ;
+let CGS;
+
+let _hcnt  = 0; // horizontal counter 
+let _vcnt  = 0; // vertical counter 
+let _xcnt  = 0; 
+let _ycnt  = 0; 
+let _pixel = 0;
+let _char  = 0;
+let _ramDataD = 0;
+let _ramData = 0;
+let _charsetData = 0;
+let _fgbg  = 0;
+let _ramAddress = 0;
+let _charsetAddress = 0;
+let _CGS = 0;
+let _ramQ = 0;
+
+const color_vsync = 0xFF8aff69;
+const color_hsync = 0xFFd64de2;
+const color_blank = 0xFF331e38;
+
+let load_column = 0;
+
+let vdc_interrupt = 0;
+let ppp=0;
+
+// wires
+let fg = 0;
+let bg = 0;
+
+
+function clockF14M() {
+   
+   // external ports
+   //ramQ = vdc_page_7 ? bank7[_ramAddress & 0x3FFF] : bank3[_ramAddress & 0x3FFF];   
+
+   ramQ = _ramQ;
+
+   /*
+   if(_CGS === 1) _charsetAddress = (ramQ << 3) | (_ycnt & 0b111); // TODO eng/ger/fra
+   */
+
+   charsetQ = charset[_charsetAddress];
+
+   // simulate @posedge
+   hcnt = _hcnt;
+   vcnt = _vcnt;
+   xcnt = _xcnt;
+   ycnt = _ycnt;
+   char = _char;
+   ramData = _ramData;
+   ramDataD = _ramDataD;   
+   charsetData = _charsetData;   
+   fgbg = _fgbg;   
+   ramAddress = _ramAddress;   
+   charsetAddress = _charsetAddress;
+   CGS = _CGS;
+
+   // x counter
+   xcnt = hcnt - (hsw+hbp+LEFT_BORDER_WIDTH);      
+
+   // ram data is not available during the CPU slot
+   if((xcnt % 8) >= 4) ramQ = 0xFE; // junk data 
+
+   // ROM only during T=7
+   if((xcnt & 7) !== 7) charsetQ = 0xFE; // junk data 
+   
+   // @end posedge
+
+   // ******** assign block
+   // generate negative hsync and vsync signals
+   hsync = (hcnt < hsw) ? 0 : 1; 
+   vsync = (vcnt <   2) ? 0 : 1;
+
+   // set row address loading colum
+   load_column =   vdc_graphic_mode_enabled && vdc_graphic_mode_number === 5 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(1*8)
+                 : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 4 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(2*8)
+                 : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 3 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(1*8)
+                 : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 2 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(2*8)
+                 : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 1 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(4*8)
+                 : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 0 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(1*8)
+                 : vdc_text80_enabled ?                                        hsw+hbp+LEFT_BORDER_WIDTH-1-(1*8)
+                 :                                                             hsw+hbp+LEFT_BORDER_WIDTH-1-(2*8);
+
+   fg = (vdc_graphic_mode_enabled && (vdc_graphic_mode_number === 5 || vdc_graphic_mode_number === 2)) || vdc_text80_enabled ? palette[vdc_text80_foreground] : palette[fgbg >> 4];
+   bg = (vdc_graphic_mode_enabled && (vdc_graphic_mode_number === 5 || vdc_graphic_mode_number === 2)) || vdc_text80_enabled ? palette[vdc_text80_background] : palette[fgbg & 0x0F];
+
+   // ******** end assign block
+
+   // simulate VGA output
+        if(vsync === 0) setPixelHardware(hcnt, vcnt, color_vsync);
+   else if(hsync === 0) setPixelHardware(hcnt, vcnt, color_hsync);
+   else                 setPixelHardware(hcnt, vcnt, _pixel);   
+
+   // horizontal and vertical counters
+   if(hcnt === hsw+hbp+H+hfp-1) 
+   {
+      _hcnt = 0;
+      if(vcnt === V-1) {
+         _vcnt = 0; 
+         vdc_interrupt = 1;
+      }
+      else {
+         _vcnt = vcnt + 1;         
+      }
+
+      if(vcnt === TOP_BORDER_WIDTH-1) _ycnt = 0;
+      else _ycnt = ycnt + 1;
+   }
+   else _hcnt = hcnt + 1;
+
+   // simulate ram data
+   if((xcnt & 15) === 14) {
+      _ramQ = ((xcnt >> 4) + 35 + (ycnt >> 3)) & 0xFF;
+   }   
+   else if((xcnt & 15) === 6) {
+      _ramQ = 0xf1;      
+   }   
+
+   // draw pixel at hcnt,bcnt
+   if(hcnt < hsw+hbp || vcnt < 2 || hcnt >= hsw+hbp+H) {
+      _pixel = color_blank;  // blanking zone      
+   }   
+   else if( (vcnt < TOP_BORDER_WIDTH || vcnt >= TOP_BORDER_WIDTH + HEIGHT) || 
+            (hcnt < hsw+hbp + LEFT_BORDER_WIDTH || hcnt >= hsw+hbp + LEFT_BORDER_WIDTH + WIDTH)) {
+      _pixel = palette[vdc_border_color];  // border color
+   }
+   else {      
+      if(vdc_graphic_mode_enabled) {
+         if(vdc_graphic_mode_number === 5) {
+            // GR 5 640x192x1
+            _pixel = (char & 1) === 1 ? fg : bg;
+            _char = char >> 1;         
+         } else if(vdc_graphic_mode_number === 4) {
+            // GR 4 320x192x2
+            if((xcnt & 1) === 0) {
+               _pixel = (char & 1) === 1 ? fg : bg;
+               _char = char >> 1;
+            }               
+         } else if(vdc_graphic_mode_number === 3 || vdc_graphic_mode_number === 0) {
+            // GR 3 160x192x16, GR 0 160x96
+            if((xcnt & 3) === 0) {
+               _pixel = palette[char & 0xF];
+               _char = char >> 4;
+            }               
+         } else if(vdc_graphic_mode_number === 2) {
+            // GR 2 320x196x1
+            if((xcnt & 1) === 0) {
+               _pixel = (char & 1) === 1 ? fg : bg;
+               _char = char >> 1;
+            }               
+         } else if(vdc_graphic_mode_number === 1) {
+            // GR 1 160x192x2
+            if((xcnt & 3) === 0) {
+               _pixel = (char & 1) === 1 ? fg : bg;
+               _char = char >> 1;
+            }               
+         }            
+      }
+      else if(vdc_text80_enabled) {
+         // TEXT 80
+         _pixel = (char & 1) === 1 ? fg : bg;
+         _char = char >> 1;         
+      }
+      else {
+         // TEXT 40
+         if((xcnt & 1) === 0) {
+            _pixel = (char & 1) === 1 ? fg : bg;
+            _char = char >> 1;
+         }
+      }
+   }
+
+   /*
+   // T=2 enable charset graphic ROM reading
+   if((xcnt & 7) === 2) {
+      _CGS = 1;
+   }
+   else {
+      _CGS = 0;
+   }
+   */
+   
+   // T=3 read character from RAM and stores into latch, starts ROM reading   
+   if((xcnt & 7) === 3) {
+      _ramData = ramQ;
+      _charsetAddress = (ramQ << 3) | (ycnt & 0b111); // TODO eng/ger/fra
+   }
+
+   // T=7 calculate RAM address of character/byte (ram reading starts)
+   if((xcnt & 7) === 7) {
+      // load start row address on the leftmost column
+      if(hcnt === load_column) {
+         if(vdc_graphic_mode_enabled) {
+            if(vdc_graphic_mode_number === 5 || vdc_graphic_mode_number === 4 || vdc_graphic_mode_number === 3) {
+               // GR 5, GR 4, GR 3                                                   
+               _ramAddress = 
+                  (((ycnt & (1<<2))>>2)<<13) |   // address[13] = ycnt[2]
+                  (((ycnt & (1<<1))>>1)<<12) |   // address[12] = ycnt[1]
+                  (((ycnt & (1<<0))>>0)<<11) |   // address[11] = ycnt[0]
+                  (((ycnt & (1<<5))>>5)<<10) |   // address[10] = ycnt[5]
+                  (((ycnt & (1<<4))>>4)<< 9) |   // address[ 9] = ycnt[4]
+                  (((ycnt & (1<<3))>>3)<< 8) |   // address[ 8] = ycnt[3]
+                  (((ycnt & (1<<7))>>7)<< 7) |   // address[ 7] = ycnt[7]
+                  (((ycnt & (1<<6))>>6)<< 6) |   // address[ 6] = ycnt[6]
+                  (((ycnt & (1<<7))>>7)<< 5) |   // address[ 5] = ycnt[7]
+                  (((ycnt & (1<<6))>>6)<< 4) ;   // address[ 4] = ycnt[6]
+            } else if(vdc_graphic_mode_number === 2 || vdc_graphic_mode_number === 1) {
+               // GR 2            
+               _ramAddress = (1<<13) +
+                  (((ycnt & (1<<2))>>2)<<12) |   // address[12] <= ycnt[2]
+                  (((ycnt & (1<<1))>>1)<<11) |   // address[11] <= ycnt[1]
+                  (((ycnt & (1<<5))>>5)<<10) |   // address[10] <= ycnt[5]
+                  (((ycnt & (1<<4))>>4)<< 9) |   // address[ 9] <= ycnt[4]
+                  (((ycnt & (1<<3))>>3)<< 8) |   // address[ 8] <= ycnt[3]
+                  (((ycnt & (1<<0))>>0)<< 7) |   // address[ 7] <= ycnt[0]
+                  (((ycnt & (1<<7))>>7)<< 6) |   // address[ 6] <= ycnt[7]
+                  (((ycnt & (1<<6))>>6)<< 5) |   // address[ 5] <= ycnt[6]
+                  (((ycnt & (1<<7))>>7)<< 4) |   // address[ 4] <= ycnt[7]
+                  (((ycnt & (1<<6))>>6)<< 3) ;   // address[ 3] <= ycnt[6]         
+            } else if(vdc_graphic_mode_number === 0) {
+               // GR 0            
+               _ramAddress = (1<<13) +
+                  (((ycnt & (1<<2))>>2)<<12) |   // address[12] = ycnt[2]
+                  (((ycnt & (1<<1))>>1)<<11) |   // address[11] = ycnt[1]
+                  (((ycnt & (1<<5))>>5)<<10) |   // address[10] = ycnt[5]
+                  (((ycnt & (1<<4))>>4)<< 9) |   // address[ 9] = ycnt[4]
+                  (((ycnt & (1<<3))>>3)<< 8) |   // address[ 8] = ycnt[3]
+                  (((ycnt & (1<<7))>>7)<< 7) |   // address[ 7] = ycnt[7]
+                  (((ycnt & (1<<6))>>6)<< 6) |   // address[ 6] = ycnt[6]
+                  (((ycnt & (1<<7))>>7)<< 5) |   // address[ 5] = ycnt[7]
+                  (((ycnt & (1<<6))>>6)<< 4) ;   // address[ 4] = ycnt[6]
+            }
+         }
+         else {
+            // TEXT 80 and TEXT 40      
+            const by = ycnt >> 3;               
+            let offs = ((by & 7) << 8) + ((by >> 3) << 6) + ((by >> 3) << 4);         
+            _ramAddress = 0x3800+offs;                               
+
+            _ramAddress = 0x3800+
+               (((ycnt & (1<<5))>>5)<<10) |   // address[10] = ycnt[5]
+               (((ycnt & (1<<4))>>4)<< 9) |   // address[ 9] = ycnt[4]
+               (((ycnt & (1<<3))>>3)<< 8) |   // address[ 8] = ycnt[3]
+               (((ycnt & (1<<7))>>7)<< 7) |   // address[ 7] = ycnt[7]
+               (((ycnt & (1<<6))>>6)<< 6) |   // address[ 6] = ycnt[6]
+               (((ycnt & (1<<7))>>7)<< 5) |   // address[ 5] = ycnt[7]
+               (((ycnt & (1<<6))>>6)<< 4) ;   // address[ 4] = ycnt[6]
+         }
+      }
+      else {
+         _ramAddress = ramAddress + 1;   
+      }
+   }
+
+   // T=7 move saved latch to the pixel register 
+   if(vdc_graphic_mode_enabled) {
+      // gr modes
+      if(vdc_graphic_mode_number === 5) {
+         if((xcnt & 7) === 7) {
+            _char = ramData;             
+         }
+      } else if(vdc_graphic_mode_number === 4) {
+         // GR 4
+         if((xcnt & 15) === 7) {
+            _ramDataD = ramData;             
+         }   
+         else if((xcnt & 15) === 15) {
+            _char = ramDataD;
+            _fgbg = ramData;             
+         }   
+      } else if(vdc_graphic_mode_number === 3 || vdc_graphic_mode_number === 0) {
+         // GR 3
+         if((xcnt & 7) === 7) {
+            _char = ramData;             
+         }
+      } else if(vdc_graphic_mode_number === 2) {
+         if((xcnt & 15) === 15) {
+            _char = ramData;             
+         }
+      } else if(vdc_graphic_mode_number === 1) {
+         if((xcnt & 31) === 15) {
+            _ramDataD = ramData;             
+         }   
+         else if((xcnt & 31) === 31) {
+            _char = ramDataD;
+            _fgbg = ramData;             
+         }   
+      }            
+   }
+   else if(vdc_text80_enabled) {
+      // TEXT 80
+      if((xcnt & 7) === 7) {
+         _char = charsetQ;
+      }   
+   }
+   else {
+      // TEXT 40
+      if((xcnt & 15) === 7) {
+         _ramDataD = charsetQ;
+      }   
+      else if((xcnt & 15) === 15) {
+         _char = ramDataD;
+         _fgbg = ramData;          
+      }   
+   }   
+}
+
+// _char = vdc_graphic_mode_enabled ? ramData : charset[(ramData * 8) + (ycnt & 7)]; // todo charset offset
+/*
+
+ndots * 15625 = pixel clock
+
+VIC20 284 @4.435
+-- hsync blank picture blank
+-- 20    24    228     12     total 284 clock
+   7%    8%    80%     4%
+
+C64 496 @4.435
+-- hsync blank picture blank
+-- 38    46    402     10     total 496 clock
+   7%    9%    81%     2%
+
+Laser: 946 @14.77873
+-- hsync blank picture blank
+-- 67    71    798     10     total 946 clocks
+   7%    7%    84%     1%
+
+
+VDC / CPU slot
+
+|BORDER |BORDER |COL0   |COL1   |COL2   |       
+012345670123456701234567012345670123456701234567  <-- time slot T=F14M mod 8
+VVVV----VVVV----VVVV----VVVV----VVVV----VVVV----  <-- V = video has bus
+----CCCC----CCCC----CCCC----CCCC----CCCC----CCCC  <-- C = cpu has bus
+
+T=7  CPU    calculate next character RAM address start reading ram           
+T=0  VIDEO  ram is reading,  67ns at the end of this clock cyle
+T=1  VIDEO  ram is reading, 134ns at the end of this clock cyle
+T=2  VIDEO  ram is reading, 201ns at the end of this clock cyle, enable rom reading
+T=3  VIDEO  read character from RAM and stores into latch, read rom 67ns at the end of this clock cyle
+T=4  CPU    charset rom is reading, 134ns at the end of this clock cyle
+T=5  CPU    charset rom is reading, 201ns at the end of this clock cyle
+T=6  CPU    charset rom is reading, 268ns at the end of this clock cyle
+T=7  CPU    read charset rom, move saved latch to the pixel register
+
+*/

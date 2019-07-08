@@ -111,7 +111,14 @@ function pasteBasicChar(char) {
    const key = evkey(char);
 
    keyDown(key);     
-   for(let t=1; t<50 && mem_read_word(0x85e2) === old_cursor_pos; t++) renderAllLines();   
+   for(let t=1; mem_read_word(0x85e2) === old_cursor_pos; t++) {
+      renderAllLines();
+      if(t>5000) {
+         console.warn("paste fail");
+         break;
+      }      
+   }
+   renderAllLines();   
    keyUp(key);
    renderAllLines();
 }

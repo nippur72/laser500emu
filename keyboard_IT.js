@@ -1,3 +1,4 @@
+/*
 // Italian keyboard layout
 
 assignKey('Control', KEY_CONTROL);
@@ -91,3 +92,4 @@ assignKey('ArrowUp'    , KEY_UP);
 assignKey('ArrowLeft'  , KEY_LEFT); 
 assignKey('ArrowRight' , KEY_RIGHT); 
 assignKey('ArrowDown'  , KEY_DOWN); 
+*/

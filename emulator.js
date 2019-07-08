@@ -4,6 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO 1x1 pixel rendering
 // TODO RGB mask does not survive F11 Zoom full screen
 // TODO URLSearchParams()
 // TODO requestAnimationFrame ?
@@ -112,9 +113,11 @@ let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
 const frameRate = 49.7; // 50 Hz PAL standard
 const frameDuration = 1000/frameRate; // duration of 1 frame in msec
-const cpuSpeed = 3670200 /*3672000 for 312 */ //3694700; // Z80 speed 3.6947 MHz (NEC D780c)
+const cpuSpeed = /*3694682.5;*/ 3672000;  /*for 312 */ //3694700; // Z80 speed 3.6947 MHz (NEC D780c)
 const cyclesPerLine = (cpuSpeed / frameRate / TOTAL_SCANLINES); // 188.5=basic OK; 196=sound OK;
 const HIDDEN_LINES = 2;
+
+// 3694682.5 - 192 * 80 - 312 * 20
 
 let stopped = false; // allows to stop/resume the emulation
 
@@ -144,8 +147,22 @@ let options = {
    bb: undefined,
    bh: undefined,
    rgbmaskopacity: 0.15,
-   rgbmasksize: 3
+   rgbmasksize: 3   
 };
+
+function cpuCycle() {
+   if(debugBefore !== undefined) debugBefore();
+   bus_ops = 0;
+   let elapsed = cpu.run_instruction();         
+   elapsed += bus_ops;
+   if(debugAfter !== undefined) debugAfter(elapsed);
+   cycle += elapsed;
+   cycles += elapsed;
+   writeAudioSamples(elapsed);
+   cloadAudioSamples(elapsed); 
+   if(csaving) csaveAudioSamples(elapsed);       
+   return elapsed;
+}
 
 // scanline version
 function renderLines(nlines, hidden) {
@@ -175,10 +192,29 @@ function renderLines(nlines, hidden) {
 }
 
 function renderAllLines() {   
-   cpu.interrupt(false, 0);                         // generate VDC interrupt
-   renderLines(HIDDEN_SCANLINES_TOP, true);               
-   renderLines(SCREEN_H, false);                    
-   renderLines(HIDDEN_SCANLINES_BOTTOM, true);               
+   if(hardware_screen) 
+   {
+      for(;;)
+      {
+         let elapsed = cpuCycle() * 4;
+         for(let t=0;t<elapsed;t++) clockF14M();
+
+         if(vdc_interrupt === 1) 
+         {
+            vdc_interrupt = 0;
+            cpu.interrupt(false, 0);                   
+            updateCanvas();
+            break;
+         }
+      }
+   }
+   else
+   {
+      cpu.interrupt(false, 0);                         // generate VDC interrupt   
+      renderLines(HIDDEN_SCANLINES_TOP, true);               
+      renderLines(SCREEN_H, false);                    
+      renderLines(HIDDEN_SCANLINES_BOTTOM, true);               
+   }
 }
 
 let nextFrame;
