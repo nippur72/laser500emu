@@ -156,6 +156,22 @@ function keyDown(e) {
       e.preventDefault();
       return;
    }
+
+   /*
+   // disabled feature: sync laser caps lock state with PC caps lock state
+   if(e.code === "Capslock") return;
+   else 
+   {
+      const pc_capslock = event.getModifierState("CapsLock");
+      const laser_capslock = (mem_read(0x85FB) & 8) > 0;
+      //console.log(`pc=${pc_capslock} laser=${laser_capslock}`);
+      if(pc_capslock != laser_capslock) {
+         let loc = mem_read(0x85FB) & (255-8);
+         mem_write(0x85FB, loc | (pc_capslock ? 8 : 0));
+      }
+   }
+   */
+   
    
    // remap shift+home into Cls
    const laser_key = pckey_to_laserkey(e.code);   
