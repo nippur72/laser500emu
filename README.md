@@ -16,7 +16,7 @@ The emulator is written in JavaScript and runs fine in Chrome and FireFox.
 
 KEYBOARD
 ========
-Currently only the italian keyboard layout is supported.
+Laser native UK/US keyboard is emulated, regardless of the actual keyboard layout.
 
 Special keys:
 - `Pause`: Laser's Reset key (it acts like a more powerful CTRL+Break)
@@ -26,10 +26,11 @@ Special keys:
 - `Shift`+`Home`: CLS key (clear screen)
 - `End`: DEL LINE key
 - `Del`: DEL key 
-- `§`: GRAPH key 
-- Cursor Left: rewinds and plays the tape
-- Cursor Up: stops the tape
-- Numpad + `0` + right `Ctrl`: Joystick 1
+- `Page Up`: GRAPH key 
+- `Page Down`: mu/£ key 
+- `Alt`+`Cursor Left`: rewinds and plays the tape
+- `Alt`+`Cursor Up`: stops the tape
+- Joystick: numeric keypad; `0` is fire 1, `Right Ctrl` is fire 2
 
 EMULATION SPEED
 ===============

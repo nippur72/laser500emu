@@ -11,9 +11,9 @@ function keyRelease(row, col) {
 function pckey_to_laserkey(pckey) {
    let laser_key;   
    
-   if(pckey === "F1")  laser_key = KEY_F2 ; 
-   if(pckey === "F2")  laser_key = KEY_F3 ; 
-   if(pckey === "F3")  laser_key = KEY_F1 ; 
+   if(pckey === "F1")  laser_key = KEY_F1 ; 
+   if(pckey === "F2")  laser_key = KEY_F2 ; 
+   if(pckey === "F3")  laser_key = KEY_F3 ; 
    if(pckey === "F4")  laser_key = KEY_F4 ; 
    if(pckey === "F5")  laser_key = KEY_F5 ; 
    if(pckey === "F6")  laser_key = KEY_F6 ; 
@@ -59,6 +59,7 @@ function pckey_to_laserkey(pckey) {
    if(pckey === "BracketLeft")  laser_key = KEY_OPEN_BRACKET; 
    if(pckey === "BracketRight") laser_key = KEY_CLOSE_BRACKET; 
    if(pckey === "Enter")        laser_key = KEY_RETURN; 
+   if(pckey === "NumpadEnter")        laser_key = KEY_RETURN; 
    if(pckey === "ControlLeft")  laser_key = KEY_CONTROL; 
    if(pckey === "ControlRight") laser_key = KEY_CONTROL; 
 
