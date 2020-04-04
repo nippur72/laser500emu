@@ -1,8 +1,4 @@
-const keys = new Array(75); // hardware keys row and col info
-
-function mapKey(key, row, col) {
-   keys[key] = { row, col };
-}
+// all 76 keys on the real LASER 500
 
 const KEY_RESET = 0; // not mapped on the I/O but directly on the /RES line to the CPU
 const KEY_F1  = 1;
@@ -81,92 +77,176 @@ const KEY_CAP_LOCK = 73;
 const KEY_SPACE = 74;
 const KEY_DOWN = 75;
 
-const ROW0 =  0;
-const ROW1 =  1;
-const ROW2 =  2;
-const ROW3 =  3;
-const ROW4 =  4;
-const ROW5 =  5;
-const ROW6 =  6;
-const ROW7 =  7;
+// circuit lines that map on the address bus
+const KA0 =  0;
+const KA1 =  1;
+const KA2 =  2;
+const KA3 =  3;
+const KA4 =  4;
+const KA5 =  5;
+const KA6 =  6;
+const KA7 =  7;
+const KA_xA = 8;  
+const KA_xB = 9;  
+const KA_xC = 10; 
+const KA_xD = 11; 
 
-const ROWA = 11; 
-const ROWB = 10; 
-const ROWC = 8;  
-const ROWD = 9;  
+// circuit lines that map on the data bus
+const KD0 = 0; 
+const KD1 = 1; 
+const KD2 = 2; 
+const KD3 = 3; 
+const KD4 = 4; 
+const KD5 = 5; 
+const KD6 = 6; 
 
-mapKey(KEY_SHIFT        , ROW0, 0x40);
-mapKey(KEY_Z            , ROW0, 0x20); 
-mapKey(KEY_X            , ROW0, 0x10); 
-mapKey(KEY_C            , ROW0, 0x08); 
-mapKey(KEY_V            , ROW0, 0x04); 
-mapKey(KEY_B            , ROW0, 0x02); 
-mapKey(KEY_N            , ROW0, 0x01); 
-mapKey(KEY_CONTROL      , ROW1, 0x40);
-mapKey(KEY_A            , ROW1, 0x20);   
-mapKey(KEY_S            , ROW1, 0x10);   
-mapKey(KEY_D            , ROW1, 0x08);   
-mapKey(KEY_F            , ROW1, 0x04);   
-mapKey(KEY_G            , ROW1, 0x02);   
-mapKey(KEY_H            , ROW1, 0x01);   
-mapKey(KEY_TAB          , ROW2, 0x40);
-mapKey(KEY_Q            , ROW2, 0x20);      
-mapKey(KEY_W            , ROW2, 0x10);      
-mapKey(KEY_E            , ROW2, 0x08);      
-mapKey(KEY_R            , ROW2, 0x04);      
-mapKey(KEY_T            , ROW2, 0x02);      
-mapKey(KEY_Y            , ROW2, 0x01);      
-mapKey(KEY_ESC          , ROW3, 0x40);
-mapKey(KEY_1            , ROW3, 0x20); 
-mapKey(KEY_2            , ROW3, 0x10); 
-mapKey(KEY_3            , ROW3, 0x08); 
-mapKey(KEY_4            , ROW3, 0x04); 
-mapKey(KEY_5            , ROW3, 0x02); 
-mapKey(KEY_6            , ROW3, 0x01); 
-mapKey(KEY_EQUAL        , ROW4, 0x20); 
-mapKey(KEY_MINUS        , ROW4, 0x10); 
-mapKey(KEY_0            , ROW4, 0x08); 
-mapKey(KEY_9            , ROW4, 0x04); 
-mapKey(KEY_8            , ROW4, 0x02); 
-mapKey(KEY_7            , ROW4, 0x01); 
-mapKey(KEY_BS           , ROW5, 0x40); 
-mapKey(KEY_P            , ROW5, 0x08); 
-mapKey(KEY_O            , ROW5, 0x04); 
-mapKey(KEY_I            , ROW5, 0x02); 
-mapKey(KEY_U            , ROW5, 0x01); 
-mapKey(KEY_RETURN       , ROW6, 0x40);                        
-mapKey(KEY_QUOTE        , ROW6, 0x10);
-mapKey(KEY_SEMICOLON    , ROW6, 0x08);
-mapKey(KEY_L            , ROW6, 0x04);
-mapKey(KEY_K            , ROW6, 0x02);
-mapKey(KEY_J            , ROW6, 0x01);                                                       
-mapKey(KEY_GRAPH        , ROW7, 0x40); 
-mapKey(KEY_BACK_QUOTE   , ROW7, 0x20); 
-mapKey(KEY_SPACE        , ROW7, 0x10);
-mapKey(KEY_SLASH        , ROW7, 0x08); 
-mapKey(KEY_DOT          , ROW7, 0x04); 
-mapKey(KEY_COMMA        , ROW7, 0x02); 
-mapKey(KEY_M            , ROW7, 0x01); 
-mapKey(KEY_BACKSLASH    , ROWA, 0x20); 
-mapKey(KEY_CLOSE_BRACKET, ROWA, 0x10); 
-mapKey(KEY_OPEN_BRACKET , ROWA, 0x08); 
-mapKey(KEY_MU           , ROWA, 0x04); 
-mapKey(KEY_DEL          , ROWA, 0x02); 
-mapKey(KEY_INS          , ROWA, 0x01);  
-mapKey(KEY_CAP_LOCK     , ROWB, 0x40); 
-mapKey(KEY_DEL_LINE     , ROWB, 0x20); 
-mapKey(KEY_CLS_HOME     , ROWB, 0x10); 
-mapKey(KEY_UP           , ROWB, 0x08); 
-mapKey(KEY_LEFT         , ROWB, 0x04); 
-mapKey(KEY_RIGHT        , ROWB, 0x02); 
-mapKey(KEY_DOWN         , ROWB, 0x01); 
-mapKey(KEY_F1           , ROWC, 0x20); 
-mapKey(KEY_F2           , ROWC, 0x10); 
-mapKey(KEY_F3           , ROWC, 0x08); 
-mapKey(KEY_F4           , ROWC, 0x04);    
-mapKey(KEY_F10          , ROWD, 0x20);   
-mapKey(KEY_F9           , ROWD, 0x10);   
-mapKey(KEY_F8           , ROWD, 0x08);   
-mapKey(KEY_F7           , ROWD, 0x04); 
-mapKey(KEY_F6           , ROWD, 0x02); 
-mapKey(KEY_F5           , ROWD, 0x01);
+const key_row_col = new Array(75); // hardware keys row and col info
+
+function mapKey(key, row, col) {
+   key_row_col[key] = { row, col };
+}
+
+mapKey(KEY_SHIFT        , KA0, KD6);
+mapKey(KEY_Z            , KA0, KD5); 
+mapKey(KEY_X            , KA0, KD4); 
+mapKey(KEY_C            , KA0, KD3); 
+mapKey(KEY_V            , KA0, KD2); 
+mapKey(KEY_B            , KA0, KD1); 
+mapKey(KEY_N            , KA0, KD0); 
+mapKey(KEY_CONTROL      , KA1, KD6);
+mapKey(KEY_A            , KA1, KD5);   
+mapKey(KEY_S            , KA1, KD4);   
+mapKey(KEY_D            , KA1, KD3);   
+mapKey(KEY_F            , KA1, KD2);   
+mapKey(KEY_G            , KA1, KD1);   
+mapKey(KEY_H            , KA1, KD0);   
+mapKey(KEY_TAB          , KA2, KD6);
+mapKey(KEY_Q            , KA2, KD5);      
+mapKey(KEY_W            , KA2, KD4);      
+mapKey(KEY_E            , KA2, KD3);      
+mapKey(KEY_R            , KA2, KD2);      
+mapKey(KEY_T            , KA2, KD1);      
+mapKey(KEY_Y            , KA2, KD0);      
+mapKey(KEY_ESC          , KA3, KD6);
+mapKey(KEY_1            , KA3, KD5); 
+mapKey(KEY_2            , KA3, KD4); 
+mapKey(KEY_3            , KA3, KD3); 
+mapKey(KEY_4            , KA3, KD2); 
+mapKey(KEY_5            , KA3, KD1); 
+mapKey(KEY_6            , KA3, KD0); 
+mapKey(KEY_EQUAL        , KA4, KD5); 
+mapKey(KEY_MINUS        , KA4, KD4); 
+mapKey(KEY_0            , KA4, KD3); 
+mapKey(KEY_9            , KA4, KD2); 
+mapKey(KEY_8            , KA4, KD1); 
+mapKey(KEY_7            , KA4, KD0); 
+mapKey(KEY_BS           , KA5, KD6); 
+mapKey(KEY_P            , KA5, KD3); 
+mapKey(KEY_O            , KA5, KD2); 
+mapKey(KEY_I            , KA5, KD1); 
+mapKey(KEY_U            , KA5, KD0); 
+mapKey(KEY_RETURN       , KA6, KD6);                        
+mapKey(KEY_QUOTE        , KA6, KD4);
+mapKey(KEY_SEMICOLON    , KA6, KD3);
+mapKey(KEY_L            , KA6, KD2);
+mapKey(KEY_K            , KA6, KD1);
+mapKey(KEY_J            , KA6, KD0);                                                       
+mapKey(KEY_GRAPH        , KA7, KD6); 
+mapKey(KEY_BACK_QUOTE   , KA7, KD5); 
+mapKey(KEY_SPACE        , KA7, KD4);
+mapKey(KEY_SLASH        , KA7, KD3); 
+mapKey(KEY_DOT          , KA7, KD2); 
+mapKey(KEY_COMMA        , KA7, KD1); 
+mapKey(KEY_M            , KA7, KD0); 
+mapKey(KEY_BACKSLASH    , KA_xD, KD5); 
+mapKey(KEY_CLOSE_BRACKET, KA_xD, KD4); 
+mapKey(KEY_OPEN_BRACKET , KA_xD, KD3); 
+mapKey(KEY_MU           , KA_xD, KD2); 
+mapKey(KEY_DEL          , KA_xD, KD1); 
+mapKey(KEY_INS          , KA_xD, KD0);  
+mapKey(KEY_CAP_LOCK     , KA_xC, KD6); 
+mapKey(KEY_DEL_LINE     , KA_xC, KD5); 
+mapKey(KEY_CLS_HOME     , KA_xC, KD4); 
+mapKey(KEY_UP           , KA_xC, KD3); 
+mapKey(KEY_LEFT         , KA_xC, KD2); 
+mapKey(KEY_RIGHT        , KA_xC, KD1); 
+mapKey(KEY_DOWN         , KA_xC, KD0); 
+mapKey(KEY_F1           , KA_xA, KD5); 
+mapKey(KEY_F2           , KA_xA, KD4); 
+mapKey(KEY_F3           , KA_xA, KD3); 
+mapKey(KEY_F4           , KA_xA, KD2);    
+mapKey(KEY_F10          , KA_xB, KD5);   
+mapKey(KEY_F9           , KA_xB, KD4);   
+mapKey(KEY_F8           , KA_xB, KD3);   
+mapKey(KEY_F7           , KA_xB, KD2); 
+mapKey(KEY_F6           , KA_xB, KD1); 
+mapKey(KEY_F5           , KA_xB, KD0);
+
+// keyboard matrix
+const KM = [];
+for(let t=0;t<=KA_xD;t++) KM[t] = [ 1,1,1,1,1,1,1 ];
+
+function keyPress(laserkey) {   
+   const { row, col } = key_row_col[laserkey];
+   KM[row][col] = 0;    
+   update_lines();
+}
+
+function keyRelease(laserkey) {
+   const { row, col } = key_row_col[laserkey];
+   KM[row][col] = 1;
+   update_lines();
+}
+
+let KA = 0b111111111111;
+let KD = 0b1111111;
+
+function update_lines() {
+   // sum all 7 KD lines
+   KD = 0b1111111;
+   for(let row=0; row<=KA_xD; row++) {
+      KD = KD & ( 
+         (KM[row][KD0]<<0) + 
+         (KM[row][KD1]<<1) + 
+         (KM[row][KD2]<<2) + 
+         (KM[row][KD3]<<3) + 
+         (KM[row][KD4]<<4) + 
+         (KM[row][KD5]<<5) + 
+         (KM[row][KD6]<<6)
+      );   
+   }   
+          
+   // sum all 12 KA lines
+   KA = 0b111111111111;
+   for(let col=0; col<=6; col++) {
+      KA = KA & ( 
+         (KM[KA0  ][col]<< 0) + 
+         (KM[KA1  ][col]<< 1) + 
+         (KM[KA2  ][col]<< 2) + 
+         (KM[KA3  ][col]<< 3) + 
+         (KM[KA4  ][col]<< 4) + 
+         (KM[KA5  ][col]<< 5) + 
+         (KM[KA6  ][col]<< 6) +
+         (KM[KA7  ][col]<< 7) + 
+         (KM[KA_xA][col]<< 8) + 
+         (KM[KA_xB][col]<< 9) + 
+         (KM[KA_xC][col]<<10) + 
+         (KM[KA_xD][col]<<11)
+      );   
+   } 
+
+   // reduce 12 KA' lines into 11 KA lines via LS138 multiplexer
+                   
+   let ABCD = (KA & 0b111100000000) >> 8;
+   let KA8_10 = 0b0101000 | 0b111;
+   let prefix = 0b0101 << 11;
+   
+        if(ABCD === 0b1110) KA8_10 = 0b000;
+   else if(ABCD === 0b1101) KA8_10 = 0b001;
+   else if(ABCD === 0b1011) KA8_10 = 0b010;
+   else if(ABCD === 0b0111) KA8_10 = 0b011;   
+
+   KA = prefix | (KA & 0b11111111) | (KA8_10 << 8);
+
+   // console.log(`ABCD=${bin(ABCD,4)} KA8_11=${bin(KA8_10,3)} KA=${bin(KA,11)} KD=${bin(KD,7)} hex=${hex(KA,4)}`);
+}

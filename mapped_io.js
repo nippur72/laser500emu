@@ -1,21 +1,14 @@
 // TODO joystick, caps lock, port 13 OUT(13),AA ?
 
 function mapped_io_read(address) {   
-   // filtra indirizzi
-   if(address<0x2800 || address>0x2fff) return 0x7f;
-   
-   const row = address & 0x00FF;
-   const hi  = ((address & 0xFF00) >> 8 & 0b1111);
-  
-   let sum = 0;   
-
-   if(hi>=0x8 && hi<=0xb) sum = keyboard_matrix[hi];   
-
-   for(let t=0;t<8;t++) {
-      if((row & (1<<t)) === 0 ) sum |= keyboard_matrix[t];      
-   }      
-   
-   return (cassette_bit_in << 7) | (~sum & 0b01111111);
+   // KA and KD are lines coming from keyboard 
+   // mapped respectively on address and data bus      
+   if(address>=0x2800 && address<=0x2FFF) {
+      let DO = 0x7f;
+      if(address === KA) DO = KD;
+      return (cassette_bit_in << 7) | DO;   
+   }
+   return 0x7f;
 }
 
 /* on write 

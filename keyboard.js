@@ -1,12 +1,3 @@
-const keyboard_matrix = new Uint8Array(13); 
-
-function keyPress(row, col) {   
-   keyboard_matrix[row] |= col;
-}
-
-function keyRelease(row, col) {
-   keyboard_matrix[row] &= (~col);
-}
 
 function pckey_to_laserkey(pckey) {
    let laser_key;   
@@ -104,11 +95,11 @@ function pckey_to_laserkey(pckey) {
    if(pckey === "ArrowDown")  laser_key = KEY_DOWN; 
 
    if(laser_key === undefined) {
-      //console.log(pckey);
+      // console.log(pckey);
       return undefined;
    }
    
-   return keys[laser_key];
+   return laser_key;
 }
 
 function keyDown(e) { 
@@ -186,7 +177,7 @@ function keyDown(e) {
    }
 
    // do the keypress on the laser keyboard matrix
-   keyPress(laser_key.row, laser_key.col);   
+   keyPress(laser_key);   
 
    e.preventDefault();         
 }
@@ -203,7 +194,7 @@ function keyUp(e) {
 
    if(laser_key === undefined) return;
 
-   keyRelease(laser_key.row, laser_key.col); 
+   keyRelease(laser_key); 
          
    e.preventDefault();
 }
