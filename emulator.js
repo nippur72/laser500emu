@@ -4,6 +4,7 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO save/load state does not save banks?
 // TODO 1x1 pixel rendering
 // TODO RGB mask does not survive F11 Zoom full screen
 // TODO URLSearchParams()
@@ -269,7 +270,7 @@ function writeAudioSamples(n) {
 // ********************************* AUDIO BUFFER TO BROWSER AUDIO ************************************
 
 let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-const bufferSize = 2048;
+const bufferSize = 2048*2;
 const sampleRate = audioContext.sampleRate;
 var speakerSound = audioContext.createScriptProcessor(bufferSize, 1, 1);
 
