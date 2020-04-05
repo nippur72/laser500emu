@@ -182,61 +182,26 @@ mapKey(KEY_F7           , KA_xB, KD2);
 mapKey(KEY_F6           , KA_xB, KD1); 
 mapKey(KEY_F5           , KA_xB, KD0);
 
-// keyboard matrix
-const KM = [];
-for(let t=0;t<=KA_xD;t++) KM[t] = [ 1,1,1,1,1,1,1 ];
+let KD = 0b1111111;         // 7-bit latch on data bus
+let KA = 0b111111111111;    // 12-bit latch KA0-7 + ABCD
+let KA0_10 = 0b11111111111; // 11-bit output address line
 
 function keyPress(laserkey) {   
-   const { row, col } = key_row_col[laserkey];
-   KM[row][col] = 0;    
+   const { row, col } = key_row_col[laserkey];   
+   KA = reset_bit(KA, row);
+   KD = reset_bit(KD, col);
    update_lines();
 }
 
 function keyRelease(laserkey) {
-   const { row, col } = key_row_col[laserkey];
-   KM[row][col] = 1;
+   const { row, col } = key_row_col[laserkey];   
+   KA = set_bit(KA, row);
+   KD = set_bit(KD, col);
    update_lines();
 }
 
-let KA = 0b111111111111;
-let KD = 0b1111111;
-
 function update_lines() {
-   // sum all 7 KD lines
-   KD = 0b1111111;
-   for(let row=0; row<=KA_xD; row++) {
-      KD = KD & ( 
-         (KM[row][KD0]<<0) + 
-         (KM[row][KD1]<<1) + 
-         (KM[row][KD2]<<2) + 
-         (KM[row][KD3]<<3) + 
-         (KM[row][KD4]<<4) + 
-         (KM[row][KD5]<<5) + 
-         (KM[row][KD6]<<6)
-      );   
-   }   
-          
-   // sum all 12 KA lines
-   KA = 0b111111111111;
-   for(let col=0; col<=6; col++) {
-      KA = KA & ( 
-         (KM[KA0  ][col]<< 0) + 
-         (KM[KA1  ][col]<< 1) + 
-         (KM[KA2  ][col]<< 2) + 
-         (KM[KA3  ][col]<< 3) + 
-         (KM[KA4  ][col]<< 4) + 
-         (KM[KA5  ][col]<< 5) + 
-         (KM[KA6  ][col]<< 6) +
-         (KM[KA7  ][col]<< 7) + 
-         (KM[KA_xA][col]<< 8) + 
-         (KM[KA_xB][col]<< 9) + 
-         (KM[KA_xC][col]<<10) + 
-         (KM[KA_xD][col]<<11)
-      );   
-   } 
-
-   // reduce 12 KA' lines into 11 KA lines via LS138 multiplexer
-                   
+   // reduce 12 KA' lines into 11 KA lines via LS138 multiplexer                   
    let ABCD = (KA & 0b111100000000) >> 8;
    let KA8_10 = 0b0101000 | 0b111;
    let prefix = 0b0101 << 11;
@@ -246,7 +211,7 @@ function update_lines() {
    else if(ABCD === 0b1011) KA8_10 = 0b010;
    else if(ABCD === 0b0111) KA8_10 = 0b011;   
 
-   KA = prefix | (KA & 0b11111111) | (KA8_10 << 8);
-
+   KA0_10 = prefix | (KA & 0b11111111) | (KA8_10 << 8);
+   
    // console.log(`ABCD=${bin(ABCD,4)} KA8_11=${bin(KA8_10,3)} KA=${bin(KA,11)} KD=${bin(KD,7)} hex=${hex(KA,4)}`);
 }

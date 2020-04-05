@@ -5,7 +5,7 @@ function mapped_io_read(address) {
    // mapped respectively on address and data bus      
    if(address>=0x2800 && address<=0x2FFF) {
       let DO = 0x7f;
-      if(address === KA) DO = KD;
+      if(address === KA0_10) DO = KD;
       return (cassette_bit_in << 7) | DO;   
    }
    return 0x7f;
