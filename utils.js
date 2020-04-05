@@ -291,14 +291,6 @@ function info() {
    console.log(`frame rendering: min ${Math.round(minFrameTime*10,2)/10} ms (load=${Math.round(minFrameTime/frameDuration*100*10,2)/10} %) average ${Math.round(average*10,2)/10} ms (${Math.round(average/frameDuration*100*10,2)/10} %)`);   
 }
 
-function set_bit(value, bitn) {
-   return value | (1<<bitn);
-}
-
-function reset_bit(value, bitn) {
-   return value & ~(1<<bitn);
-}
-
 function set(value, bitmask) {
    return value | bitmask; 
 }
