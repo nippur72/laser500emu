@@ -182,18 +182,17 @@ mapKey(KEY_F7           , KA_B, KD2);
 mapKey(KEY_F6           , KA_B, KD1); 
 mapKey(KEY_F5           , KA_B, KD0);
 
-// keyboard matrix
-const KM = [];
-for(let t=0;t<=KA_D;t++) KM[t] = [ 1,1,1,1,1,1,1 ];
+// keyboard matri (12 rows x 7 columns)
+KAX = new Uint8Array(12).fill(0b1111111);
 
 function keyPress(laserkey) {   
-   const { row, col } = key_row_col[laserkey];
-   KM[row][col] = 0;    
+   const { row, col } = key_row_col[laserkey];   
+   KAX[row] = reset_bit(KAX[row], col);
 }
 
 function keyRelease(laserkey) {
-   const { row, col } = key_row_col[laserkey];
-   KM[row][col] = 1;
+   const { row, col } = key_row_col[laserkey];   
+   KAX[row] = set_bit(KAX[row], col);
 }
 
 // the CPU feeds an address on A0-A10 and the keyboard
@@ -215,15 +214,7 @@ function keyboard_poll(address)
    let KD = 0b1111111;
    for(let row=0; row<=KA_D; row++) {
       if((KA & (1<<row)) === 0) {
-         KD = KD & ( 
-            (KM[row][KD0]<<0) + 
-            (KM[row][KD1]<<1) + 
-            (KM[row][KD2]<<2) + 
-            (KM[row][KD3]<<3) + 
-            (KM[row][KD4]<<4) + 
-            (KM[row][KD5]<<5) + 
-            (KM[row][KD6]<<6)
-         );   
+        KD = KD & KAX[row];
       }
    }   
          
