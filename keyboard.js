@@ -50,7 +50,7 @@ function pckey_to_laserkey(pckey) {
    if(pckey === "BracketLeft")  laser_key = KEY_OPEN_BRACKET; 
    if(pckey === "BracketRight") laser_key = KEY_CLOSE_BRACKET; 
    if(pckey === "Enter")        laser_key = KEY_RETURN; 
-   if(pckey === "NumpadEnter")        laser_key = KEY_RETURN; 
+   if(pckey === "NumpadEnter")  laser_key = KEY_RETURN; 
    if(pckey === "ControlLeft")  laser_key = KEY_CONTROL; 
    if(pckey === "ControlRight") laser_key = KEY_CONTROL; 
 
@@ -69,7 +69,7 @@ function pckey_to_laserkey(pckey) {
    if(pckey === "Backquote") laser_key = KEY_BACK_QUOTE; 
    if(pckey === "Backslash") laser_key = KEY_BACKSLASH; 
    
-   if(pckey === "ArrowUp") laser_key = KEY_UP; 
+   if(pckey === "ArrowUp")    laser_key = KEY_UP; 
    if(pckey === "ShiftLeft")  laser_key = KEY_SHIFT; 
    if(pckey === "ShiftRight") laser_key = KEY_SHIFT; 
 
@@ -115,7 +115,7 @@ function keyDown(e) {
 
    // *** special (non characters) keys ***   
 
-   // RESET key is mapped as ALT+R or CTRL+Break or Pause
+   // RESET key is mapped as ALT+R, CTRL+Break or Pause
    if(e.key=="Cancel" || e.key=="Pause" || (e.code == "KeyR" && e.altKey)) {
       cpu.reset();      
       e.preventDefault(); 

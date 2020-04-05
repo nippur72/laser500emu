@@ -4,9 +4,11 @@ function mapped_io_read(address) {
    // KA and KD are lines coming from keyboard 
    // mapped respectively on address and data bus      
    if(address>=0x2800 && address<=0x2FFF) {
+      /*
       let DO = 0x7f;
       if(address === KA) DO = KD;
-      return (cassette_bit_in << 7) | DO;   
+      */
+      return (cassette_bit_in << 7) | keyboard_poll(address);   
    }
    return 0x7f;
 }
