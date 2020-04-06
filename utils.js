@@ -258,6 +258,7 @@ function asciiToKey(c) {
 }
 
 function zap() {      
+   bank3.forEach((e,i)=>bank4[i]=i % 4 === 0 ? 0 : 0xFF);
    bank4.forEach((e,i)=>bank4[i]=i % 4 === 0 ? 0 : 0xFF);
    bank5.forEach((e,i)=>bank5[i]=i % 4 === 0 ? 0 : 0xFF);
    bank6.forEach((e,i)=>bank5[i]=i % 4 === 0 ? 0 : 0xFF);
