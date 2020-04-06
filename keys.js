@@ -182,7 +182,7 @@ mapKey(KEY_F7           , KA_B, KD2);
 mapKey(KEY_F6           , KA_B, KD1); 
 mapKey(KEY_F5           , KA_B, KD0);
 
-// keyboard matri (12 rows x 7 columns)
+// keyboard matrix (12 rows x 7 columns)
 KAX = new Uint8Array(12).fill(0b1111111);
 
 function keyPress(laserkey) {   

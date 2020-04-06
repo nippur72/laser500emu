@@ -4,6 +4,9 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO fix page refresh when in laser 350 mode
+// TODO italian keyboard layout
+// TODO keyboard caps lock alignment
 // TODO save/load state does not save banks?
 // TODO 1x1 pixel rendering
 // TODO RGB mask does not survive F11 Zoom full screen
