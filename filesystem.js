@@ -79,17 +79,17 @@ async function save(filename, p1, p2) {
 
 function loadBytes(bytes, address, fileName) {
    const startAddress = (address === undefined) ? 0x8995 : address;
-   const end = startAddress + bytes.length - 1;
+   const endAddress = startAddress + bytes.length - 1;
 
-   for(let i=0,t=startAddress;t<=end;i++,t++) {
+   for(let i=0,t=startAddress;t<=endAddress;i++,t++) {
       mem_write(t, bytes[i]);
    }
 
    // modify end of basic program pointer   
-   if(startAddress === 0x8995) mem_write_word(0x83E9, end+1);   
+   if(startAddress === 0x8995) mem_write_word(0x83E9, endAddress+1);   
 
    if(fileName === undefined) fileName = "autoload";
-   console.log(`loaded "${fileName}" ${bytes.length} bytes from ${hex(startAddress,4)}h to ${hex(end,4)}h`);
+   console.log(`loaded "${fileName}" ${bytes.length} bytes from ${hex(startAddress,4)}h to ${hex(endAddress,4)}h`);
 }
 
 async function load_file(fileName, address) {   
