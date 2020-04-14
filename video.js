@@ -1057,7 +1057,7 @@ const color_vsync = 0xFF8aff69;
 const color_hsync = 0xFFd64de2;
 const color_blank = 0xFF331e38;
 
-let load_column = 0;
+//let load_column = 0;
 
 let vdc_interrupt = 0;
 let ppp=0;
@@ -1070,9 +1070,9 @@ let bg = 0;
 function clockF14M() {
    
    // external ports
-   //ramQ = vdc_page_7 ? bank7[_ramAddress & 0x3FFF] : bank3[_ramAddress & 0x3FFF];   
+   ramQ = vdc_page_7 ? bank7[_ramAddress & 0x3FFF] : bank3[_ramAddress & 0x3FFF];   
 
-   ramQ = _ramQ;
+   //ramQ = _ramQ;
 
    /*
    if(_CGS === 1) _charsetAddress = (ramQ << 3) | (_ycnt & 0b111); // TODO eng/ger/fra
@@ -1110,18 +1110,24 @@ function clockF14M() {
    hsync = (hcnt < hsw) ? 0 : 1; 
    vsync = (vcnt <   2) ? 0 : 1;
 
+   /*
    // set row address loading colum
    load_column =   vdc_graphic_mode_enabled && vdc_graphic_mode_number === 5 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(1*8)
                  : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 4 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(2*8)
                  : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 3 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(1*8)
-                 : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 2 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(2*8)
-                 : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 1 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(4*8)
+                 : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 2 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(1*8)
+                 : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 1 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(3*8)
                  : vdc_graphic_mode_enabled && vdc_graphic_mode_number === 0 ? hsw+hbp+LEFT_BORDER_WIDTH-1-(1*8)
                  : vdc_text80_enabled ?                                        hsw+hbp+LEFT_BORDER_WIDTH-1-(1*8)
                  :                                                             hsw+hbp+LEFT_BORDER_WIDTH-1-(2*8);
+   */
 
-   fg = (vdc_graphic_mode_enabled && (vdc_graphic_mode_number === 5 || vdc_graphic_mode_number === 2)) || vdc_text80_enabled ? palette[vdc_text80_foreground] : palette[fgbg >> 4];
-   bg = (vdc_graphic_mode_enabled && (vdc_graphic_mode_number === 5 || vdc_graphic_mode_number === 2)) || vdc_text80_enabled ? palette[vdc_text80_background] : palette[fgbg & 0x0F];
+   let xcnt1 = xcnt + 8;  // text80, gr0, gr2, gr3             
+   let xcnt2 = xcnt + 16; // text40 and gr4
+   let xcnt3 = xcnt + 24; // gr1   
+
+   fg = (vdc_graphic_mode_enabled && (vdc_graphic_mode_number === 5 || vdc_graphic_mode_number === 2)) || (!vdc_graphic_mode_enabled && vdc_text80_enabled) ? palette[vdc_text80_foreground] : palette[fgbg >> 4];
+   bg = (vdc_graphic_mode_enabled && (vdc_graphic_mode_number === 5 || vdc_graphic_mode_number === 2)) || (!vdc_graphic_mode_enabled && vdc_text80_enabled) ? palette[vdc_text80_background] : palette[fgbg & 0x0F];
 
    // ******** end assign block
 
@@ -1225,6 +1231,7 @@ function clockF14M() {
       _charsetAddress = (ramQ << 3) | (ycnt & 0b111); // TODO eng/ger/fra
    }
 
+   /*
    // T=7 calculate RAM address of character/byte (ram reading starts)
    if((xcnt & 7) === 7) {
       // load start row address on the leftmost column
@@ -1245,7 +1252,7 @@ function clockF14M() {
                   (((ycnt & (1<<6))>>6)<< 4) ;   // address[ 4] = ycnt[6]
             } else if(vdc_graphic_mode_number === 2 || vdc_graphic_mode_number === 1) {
                // GR 2            
-               _ramAddress = (1<<13) +
+                  (1<<13) +
                   (((ycnt & (1<<2))>>2)<<12) |   // address[12] <= ycnt[2]
                   (((ycnt & (1<<1))>>1)<<11) |   // address[11] <= ycnt[1]
                   (((ycnt & (1<<5))>>5)<<10) |   // address[10] <= ycnt[5]
@@ -1287,7 +1294,101 @@ function clockF14M() {
          }
       }
       else {
-         _ramAddress = ramAddress + 1;   
+         if(!(vdc_graphic_mode_enabled && (vdc_graphic_mode_number === 2 || vdc_graphic_mode_number === 1)))
+            _ramAddress = ramAddress + 1;   
+      }
+   }
+   */
+  
+   // *** NEW *** T=7 calculate RAM address
+   if(true) {
+      // load start row address on the leftmost column
+      
+      if(vdc_graphic_mode_enabled) {
+         if(vdc_graphic_mode_number === 5 || vdc_graphic_mode_number === 4 || vdc_graphic_mode_number === 3) {
+            // GR 5, GR 4, GR 3                                                   
+            _ramAddress = 
+               (((ycnt & (1<<2))>>2)<<13) |   // address[13] = ycnt[2]
+               (((ycnt & (1<<1))>>1)<<12) |   // address[12] = ycnt[1]
+               (((ycnt & (1<<0))>>0)<<11) |   // address[11] = ycnt[0]
+               (((ycnt & (1<<5))>>5)<<10) |   // address[10] = ycnt[5]
+               (((ycnt & (1<<4))>>4)<< 9) |   // address[ 9] = ycnt[4]
+               (((ycnt & (1<<3))>>3)<< 8) |   // address[ 8] = ycnt[3]
+               (((ycnt & (1<<7))>>7)<< 7) |   // address[ 7] = ycnt[7]
+               (((ycnt & (1<<6))>>6)<< 6) |   // address[ 6] = ycnt[6]
+               (((ycnt & (1<<7))>>7)<< 5) |   // address[ 5] = ycnt[7]
+               (((ycnt & (1<<6))>>6)<< 4) ;   // address[ 4] = ycnt[6]
+
+               if(vdc_graphic_mode_number === 5) _ramAddress = _ramAddress + (xcnt1 >> 3);   
+               if(vdc_graphic_mode_number === 4) _ramAddress = _ramAddress + (xcnt2 >> 3);   
+               if(vdc_graphic_mode_number === 3) _ramAddress = _ramAddress + (xcnt1 >> 3);   
+
+         } else if(vdc_graphic_mode_number === 2 || vdc_graphic_mode_number === 1) {
+            // GR 2 e GR 1
+            _ramAddress = 
+               (1<<13) +
+               (((ycnt & (1<<2))>>2)<<12) |   // address[12] <= ycnt[2]
+               (((ycnt & (1<<1))>>1)<<11) |   // address[11] <= ycnt[1]
+               (((ycnt & (1<<5))>>5)<<10) |   // address[10] <= ycnt[5]
+               (((ycnt & (1<<4))>>4)<< 9) |   // address[ 9] <= ycnt[4]
+               (((ycnt & (1<<3))>>3)<< 8) |   // address[ 8] <= ycnt[3]
+               (((ycnt & (1<<0))>>0)<< 7) |   // address[ 7] <= ycnt[0]
+               (((ycnt & (1<<7))>>7)<< 6) |   // address[ 6] <= ycnt[7]
+               (((ycnt & (1<<6))>>6)<< 5) |   // address[ 5] <= ycnt[6]
+               (((ycnt & (1<<7))>>7)<< 4) |   // address[ 4] <= ycnt[7]
+               (((ycnt & (1<<6))>>6)<< 3) ;   // address[ 3] <= ycnt[6]         
+
+               if(vdc_graphic_mode_number === 2) _ramAddress = _ramAddress + (xcnt1 >> 4);   
+               if(vdc_graphic_mode_number === 1) _ramAddress = _ramAddress + (xcnt3 >> 4);   
+
+         } else if(vdc_graphic_mode_number === 0) {
+            // GR 0            
+            _ramAddress = (1<<13) +
+               (((ycnt & (1<<2))>>2)<<12) |   // address[12] = ycnt[2]
+               (((ycnt & (1<<1))>>1)<<11) |   // address[11] = ycnt[1]
+               (((ycnt & (1<<5))>>5)<<10) |   // address[10] = ycnt[5]
+               (((ycnt & (1<<4))>>4)<< 9) |   // address[ 9] = ycnt[4]
+               (((ycnt & (1<<3))>>3)<< 8) |   // address[ 8] = ycnt[3]
+               (((ycnt & (1<<7))>>7)<< 7) |   // address[ 7] = ycnt[7]
+               (((ycnt & (1<<6))>>6)<< 6) |   // address[ 6] = ycnt[6]
+               (((ycnt & (1<<7))>>7)<< 5) |   // address[ 5] = ycnt[7]
+               (((ycnt & (1<<6))>>6)<< 4) ;   // address[ 4] = ycnt[6]
+
+               _ramAddress = _ramAddress + (xcnt1 >> 3); 
+         }
+      }
+      else if(vdc_text80_enabled) {
+         // TEXT 80      
+         const by = ycnt >> 3;               
+         let offs = ((by & 7) << 8) + ((by >> 3) << 6) + ((by >> 3) << 4);         
+         _ramAddress = 0x3800+offs;                               
+
+         _ramAddress = 0x3800+
+            (((ycnt & (1<<5))>>5)<<10) |   // address[10] = ycnt[5]
+            (((ycnt & (1<<4))>>4)<< 9) |   // address[ 9] = ycnt[4]
+            (((ycnt & (1<<3))>>3)<< 8) |   // address[ 8] = ycnt[3]
+            (((ycnt & (1<<7))>>7)<< 7) |   // address[ 7] = ycnt[7]
+            (((ycnt & (1<<6))>>6)<< 6) |   // address[ 6] = ycnt[6]
+            (((ycnt & (1<<7))>>7)<< 5) |   // address[ 5] = ycnt[7]
+            (((ycnt & (1<<6))>>6)<< 4) ;   // address[ 4] = ycnt[6]
+
+         _ramAddress = _ramAddress + (xcnt1 >> 3);   
+      } else {
+         // TEXT 40      
+         const by = ycnt >> 3;               
+         let offs = ((by & 7) << 8) + ((by >> 3) << 6) + ((by >> 3) << 4);         
+         _ramAddress = 0x3800+offs;                               
+
+         _ramAddress = 0x3800+
+            (((ycnt & (1<<5))>>5)<<10) |   // address[10] = ycnt[5]
+            (((ycnt & (1<<4))>>4)<< 9) |   // address[ 9] = ycnt[4]
+            (((ycnt & (1<<3))>>3)<< 8) |   // address[ 8] = ycnt[3]
+            (((ycnt & (1<<7))>>7)<< 7) |   // address[ 7] = ycnt[7]
+            (((ycnt & (1<<6))>>6)<< 6) |   // address[ 6] = ycnt[6]
+            (((ycnt & (1<<7))>>7)<< 5) |   // address[ 5] = ycnt[7]
+            (((ycnt & (1<<6))>>6)<< 4) ;   // address[ 4] = ycnt[6]
+         
+         _ramAddress = _ramAddress + (xcnt2 >> 3);
       }
    }
 
@@ -1315,14 +1416,17 @@ function clockF14M() {
       } else if(vdc_graphic_mode_number === 2) {
          if((xcnt & 15) === 15) {
             _char = ramData;             
+            //_ramAddress = ramAddress + 1;   
          }
       } else if(vdc_graphic_mode_number === 1) {
          if((xcnt & 31) === 15) {
-            _ramDataD = ramData;             
+            _ramDataD = ramData;                                             
+            _ramAddress = ramAddress + 1;            
          }   
          else if((xcnt & 31) === 31) {
             _char = ramDataD;
-            _fgbg = ramData;             
+            _fgbg = ramData;                
+            //_ramAddress = ramAddress + 1;            
          }   
       }            
    }
@@ -1340,9 +1444,10 @@ function clockF14M() {
       else if((xcnt & 15) === 15) {
          _char = ramDataD;
          _fgbg = ramData;          
-      }   
-   }   
-}
+      }  
+   }
+}   
+
 
 // _char = vdc_graphic_mode_enabled ? ramData : charset[(ramData * 8) + (ycnt & 7)]; // todo charset offset
 /*
