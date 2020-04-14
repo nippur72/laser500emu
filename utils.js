@@ -326,7 +326,7 @@ function saveState() {
       vdc_text80_background,
       vdc_border_color,
       speaker_A,
-      speaker_B,
+      io_bit_5,
       io_bit_7,
       caps_lock_bit,
       io_bit_4,
@@ -363,7 +363,7 @@ function restoreState() {
       vdc_text80_background   = s.vdc_text80_background;
       vdc_border_color        = s.vdc_border_color;
       speaker_A               = s.speaker_A;
-      speaker_B               = s.speaker_B;
+      io_bit_5                = s.io_bit_5;
       io_bit_7                = s.io_bit_7,
       caps_lock_bit           = s.caps_lock_bit,
       io_bit_4                = s.io_bit_4,
