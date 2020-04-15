@@ -323,12 +323,12 @@ MEMORY MAPPED I/O
    WRITE (6800-6BFF when on bank 2)
       * bit  function
       * 7-6  not assigned
-      * 5    speaker B (has no effect)
+      * 5    ??? not assigned (speaker B on Laser 110/210/310)
       * 4    ???
       * 3    VDC mode: 1 graphics, 0 text
       * 2    cassette out (MSB)
       * 1    cassette out (LSB)
-      * 0    speaker A
+      * 0    speaker 
 ```
 PRINTING CODES
 ==============
