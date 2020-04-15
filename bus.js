@@ -74,7 +74,8 @@ function io_read(ioport) {
       case 0x2b: return joy0;  // joystick 8 directions
       case 0x27: return joy1;  // joystick fire buttons
       case 0x00: return printerReady;
-      //case 0x2e: return 0x00;  // joystick 2 not emulated yet
+      case 0x2d: return 0xff;  // joystick 2 not emulated 
+      case 0x2e: return 0xff;  // joystick 2 not emulated 
       case 0x10:
       case 0x11:
       case 0x12:

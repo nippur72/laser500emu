@@ -21,13 +21,9 @@ function mapped_io_read(address) {
 */
 function mapped_io_write(address, value) {
    if(address>=0x2800 && address<=0x2FFF) {
-      io_bit_7                 = bit(value,7);
       caps_lock_bit            = bit(value,6);
-      io_bit_5                 = bit(value,5);
-      io_bit_4                 = bit(value,4);
       vdc_graphic_mode_enabled = bit(value,3);
       cassette_bit_out         = bit(value,2);  
-      cassette_bit_out_l       = bit(value,1); // this is ignored 
       speaker_A                = bit(value,0);
    }
 }

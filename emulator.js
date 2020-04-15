@@ -92,7 +92,6 @@ const bankF = new Uint8Array(16384).fill(0x7F);
 
 let cassette_bit_in; 
 let cassette_bit_out; 
-let cassette_bit_out_l;
 let vdc_graphic_mode_enabled = 0;
 let vdc_graphic_mode_number = 0;
 let vdc_page_7 = 0;
@@ -104,9 +103,7 @@ let speaker_A = 0;
 let speaker_B = 0;
 let joy0 = 255;
 let joy1 = 255;
-let io_bit_7 = 0;
 let caps_lock_bit = 0;
-let io_bit_4 = 0;
 
 let emulate_fdc = true;
 let tape_monitor = true;
