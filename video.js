@@ -1010,8 +1010,8 @@ const hsw = 66;         // hsync width
 const hbp = 78;         // horizontal back porch, unused time after hsync
 
 const HEIGHT              = 192;  // height of active area  
-const TOP_BORDER_WIDTH    =  68;  // top border
-const BOTTOM_BORDER_WIDTH =  52;  // bottom
+const TOP_BORDER_WIDTH    =  64;  // top border
+const BOTTOM_BORDER_WIDTH =  56;  // bottom
 const V                   = 312;  // number of lines
 
 const WIDTH               = 640;  // width of active area  
