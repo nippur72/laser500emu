@@ -1,19 +1,11 @@
-// Laser 500 screen geometry: 720 x 312
-// Active area: 640 x 192
-// Horizontal: 40 + 640 + 40 = 720
-// Vertical: 65 + 192 + 55 = 312
-// Pal frequency = 17.734475 Mhz
-// Cpu frequency = 3.6702 Mhz extimated (3.6947 Mhz nominal, from 14.77873/4 -- CPAL is 17.73447(5?))
-// Pal line period: 64 us
-// Pixel frequency (nominal):   720 / 64 = 11.25 Mhz
-// Pixel frequency (actual):  3.6702 x 3 = 11.0106 Mhz
+// screen geometry: 944 x 313 at 14.7 pixel clock frequency (14.77873 from schematics 944/934=14.77873/14.700000)
 
 let border_top = undefined;
 let border_bottom = undefined;
 let border_h = undefined;
 let aspect = 1.55;
 
-let hardware_screen = false;
+const hardware_screen = false;
 
 const TEXT_W = 640; 
 const TEXT_H = 192;
@@ -40,13 +32,13 @@ let saturation = 1.0;
 
 function calculateGeometry() {
    if(border_top    !== undefined && (border_top    > 65 || border_top    < 0)) border_top    = undefined;
-   if(border_bottom !== undefined && (border_bottom > 55 || border_bottom < 0)) border_bottom = undefined;
+   if(border_bottom !== undefined && (border_bottom > 56 || border_bottom < 0)) border_bottom = undefined;
    if(border_h      !== undefined && (border_h      > 40 || border_h      < 0)) border_h      = undefined;
 
    BORDER_V        = (border_top    !== undefined ? border_top    : 17);
    BORDER_V_BOTTOM = (border_bottom !== undefined ? border_bottom : 23);   
    HIDDEN_SCANLINES_TOP    = 65 - BORDER_V; 
-   HIDDEN_SCANLINES_BOTTOM = 55 - BORDER_V_BOTTOM;   
+   HIDDEN_SCANLINES_BOTTOM = 56 - BORDER_V_BOTTOM;   
    BORDER_H = border_h !== undefined ? border_h : 40;    
    SCREEN_W = BORDER_H + TEXT_W + BORDER_H;
    SCREEN_H = BORDER_V + TEXT_H + BORDER_V_BOTTOM;
@@ -54,8 +46,8 @@ function calculateGeometry() {
    TOTAL_SCANLINES = HIDDEN_SCANLINES_TOP + BORDER_V + TEXT_H + BORDER_V_BOTTOM + HIDDEN_SCANLINES_BOTTOM; // must be 312
 
    if(hardware_screen) {
-      SCREEN_W = 946;
-      SCREEN_H = 312;
+      SCREEN_W = 944;
+      SCREEN_H = 313;
    }
 
    // canvas is the outer canvas where the aspect ratio is corrected
@@ -1007,12 +999,12 @@ function setPixelHardware(x, y, color) {
 
 const hfp = 10;         // horizontal front porch, unused time before hsync
 const hsw = 66;         // hsync width
-const hbp = 78;         // horizontal back porch, unused time after hsync
+const hbp = 70;         // horizontal back porch, unused time after hsync
 
 const HEIGHT              = 192;  // height of active area  
-const TOP_BORDER_WIDTH    =  64;  // top border
+const TOP_BORDER_WIDTH    =  65;  // top border
 const BOTTOM_BORDER_WIDTH =  56;  // bottom
-const V                   = 312;  // number of lines
+const V                   = 313;  // number of lines
 
 const WIDTH               = 640;  // width of active area  
 const LEFT_BORDER_WIDTH   =  72;  // left border
