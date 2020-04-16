@@ -33,7 +33,7 @@ let canvas, canvasContext;
 let screenCanvas, screenContext;
 let imageData, bmp;
 
-let rgbmask_opacity = 0.15;
+let rgbmask_opacity = 0; //0.15;
 let rgbmask_size = 3;
 
 let saturation = 1.0;
@@ -81,7 +81,7 @@ const palette = new Uint32Array(16);
 const halfpalette = new Uint32Array(16);
 
 let hide_scanlines = false;
-let show_scanlines = true;
+let show_scanlines = false;
 let charset_offset = 0;
 
 function buildPalette() {

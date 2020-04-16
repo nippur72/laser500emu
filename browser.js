@@ -172,10 +172,10 @@ function parseQueryStringCommands() {
       tape_monitor = false;      
    }
 
-   if(options.scanlines === false) {
-      show_scanlines = false;   
+   if(options.scanlines === true) {
+      show_scanlines = true;   
       buildPalette();   
-   }
+   }   
 
    if(options.saturation !== undefined) {
            if(options.saturation < 0) saturation = 0;

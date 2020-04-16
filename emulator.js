@@ -141,13 +141,13 @@ let options = {
    restore: true,
    nodisk: false,
    notapemonitor: false,
-   scanlines: true,
+   scanlines: false,
    saturation: 1.0,
    charset: "english",
    bt: undefined,
    bb: undefined,
    bh: undefined,
-   rgbmaskopacity: 0.15,
+   rgbmaskopacity: 0,
    rgbmasksize: 3   
 };
 
