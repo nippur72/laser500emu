@@ -85,20 +85,20 @@ These are the commands you can type from the JavaScript console (F12 key):
 OPTIONS
 =======
 Options can be given in the form of query string commands on the URL of the emulator,
-e.g. `https://nippur72.github.io/laser500emu?scanlines=false&nodisk=true`
+e.g. `https://nippur72.github.io/laser500emu?scanlines=true&nodisk=true`
 
 - `restore=false` do not restore previous emulator state, start fresh (default is restore)
 - `load=programName` load and run the specified program from the `software` directory of the emulator GitHub repo. If no relative path is specified, `programName` will be searched in all subdirectories. 
 - `nodisk=true` disconnect emulated disk drive interface (default is attached)
 - `notapemonitor=true` disables audio playback from tape (tape monitor)
 - `charset=english|german|french` modify the hardware switches used to address the charset ROM (default is english).  
-- `scanlines=false` turn off the scanlines effect (default is on)
+- `scanlines=true` turn on the scanlines effect (default is off)
 - `saturation=value` set color saturation between 0 (B/W) and 1 (full color)
 - `bh=value` horizontal border width in pixels (0-40)
 - `bt=value` vertical top border height in pixels (0-65)
 - `bb=value` vertical bottom border border height in pixels (0-55)
 - `aspect=value` aspect ratio (default 1.55)
-- `rgbmaskopacity=value` opacity of RGB mask effect (default 0.15)
+- `rgbmaskopacity=value` opacity of RGB mask effect (default is 0, no effect)
 - `rgbmasksize=value` size in pixel of RGB mask effect (default 3)
 
 DEBUGGER
