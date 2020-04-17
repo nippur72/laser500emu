@@ -254,7 +254,7 @@ function writeAudioSamples(n) {
    downSampleCounter += (n * sampleRate);
    if(downSampleCounter >= cpuSpeed) {
       let s = (speaker_A ? -0.5 : 0.0);
-      if(tape_monitor) s += (cassette_bit_out ? 0.5 : 0.0) + (cassette_bit_in ? 0.5 : 0.0);
+      if(tape_monitor) s += (cassette_bit_out ? 0.5 : 0.0) + (cassette_bit_in ? 0.0 : 0.5);
       downSampleCounter -= cpuSpeed;
       audioBuffer[audioPtr++] = s;
       audioPtr = audioPtr % audioBufferSize;
