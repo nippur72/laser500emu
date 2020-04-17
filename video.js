@@ -1442,6 +1442,7 @@ function clockF14M() {
 
 
 // _char = vdc_graphic_mode_enabled ? ramData : charset[(ramData * 8) + (ycnt & 7)]; // todo charset offset
+
 /*
 
 ndots * 15625 = pixel clock
@@ -1460,23 +1461,4 @@ Laser: 946 @14.77873
 -- hsync blank picture blank
 -- 67    71    798     10     total 946 clocks
    7%    7%    84%     1%
-
-
-VDC / CPU slot
-
-|BORDER |BORDER |COL0   |COL1   |COL2   |       
-012345670123456701234567012345670123456701234567  <-- time slot T=F14M mod 8
-VVVV----VVVV----VVVV----VVVV----VVVV----VVVV----  <-- V = video has bus
-----CCCC----CCCC----CCCC----CCCC----CCCC----CCCC  <-- C = cpu has bus
-
-T=7  CPU    calculate next character RAM address start reading ram           
-T=0  VIDEO  ram is reading,  67ns at the end of this clock cyle
-T=1  VIDEO  ram is reading, 134ns at the end of this clock cyle
-T=2  VIDEO  ram is reading, 201ns at the end of this clock cyle, enable rom reading
-T=3  VIDEO  read character from RAM and stores into latch, read rom 67ns at the end of this clock cyle
-T=4  CPU    charset rom is reading, 134ns at the end of this clock cyle
-T=5  CPU    charset rom is reading, 201ns at the end of this clock cyle
-T=6  CPU    charset rom is reading, 268ns at the end of this clock cyle
-T=7  CPU    read charset rom, move saved latch to the pixel register
-
 */

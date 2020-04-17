@@ -30,11 +30,11 @@ debugBefore = ()=> {
 let ct = 0;
 debugBefore = ()=> {      
    const pc = cpu.getState().pc;
-   //if(pc === 0x8927) ct = cycles;
-   //if(pc === 0x892f) console.log(`${cycles-ct}`);
+   //if(pc === 0x8927) ct = total_cycles;
+   //if(pc === 0x892f) console.log(`${total_cycles-ct}`);
 
-   if(pc === 0x8969) ct = cycles;
-   if(pc === 0x8983) console.log(`${cycles-ct}`);
+   if(pc === 0x8969) ct = total_cycles;
+   if(pc === 0x8983) console.log(`${total_cycles-ct}`);
 }
 
 
@@ -836,3 +836,34 @@ pasteBasic(`
 
 
 */
+
+
+// count t-states between two addresses (included)
+(function(start, end) {
+   let ct = 0;
+   let pc;
+   debugBefore = ()=> {      
+      pc = cpu.getState().pc;
+      if(pc === start) ct = total_cycles;      
+   };
+   debugAfter = () =>{
+      if(pc === end) {
+         console.log(`${total_cycles-ct} CPU cycles`);
+         debugBefore = undefined;
+         debugAfter = undefined;
+      }
+   };
+})(0x8e9e, 0x8eb4);
+
+// find instruction count for raster pattern
+(function() {
+   for(let a=0;a<10;a++) {
+      for(let b=0;b<10;b++) {     
+         for(let c=0;c<10;c++) {
+            let elap = 28 + 10*a + 22*b + 26*c
+            if(elap === 118) console.log(a,b,c);
+         }
+      }
+   }   
+   console.log("end");
+})();

@@ -4,6 +4,8 @@
 // im1: simple: call 0038H
 // im2: complex
 
+// TODO fix palette
+// TODO fix cpu speed
 // TODO fix page refresh when in laser 350 mode
 // TODO italian keyboard layout
 // TODO keyboard caps lock alignment
@@ -112,19 +114,13 @@ let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
 /******************/
 
-const frameRate = 49.7; // 50 Hz PAL standard
-const frameDuration = 1000/frameRate; // duration of 1 frame in msec
-const cpuSpeed = /*3694682.5;*/ 3672000;  /*for 312 */ //3694700; // Z80 speed 3.6947 MHz (NEC D780c)
-let cyclesPerLine = 944/4; 
+const cpuSpeed = (14778730*(944/950))/4; // takes into account the 6 cycles lost in the HSYNC circuit
+const frameRate = cpuSpeed / (944*312);  // ~49.7 Hz
+const frameDuration = 1000/frameRate;    // duration of 1 frame in msec
+const cyclesPerLine = 944/4; 
 const HIDDEN_LINES = 2;
 
-// 3694682.5 - 192 * 80 - 312 * 20
-
 let stopped = false; // allows to stop/resume the emulation
-
-// PAL Standard: 720 x 576
-
-// 192 righe video + 96 bordo (48 sopra e 48 sotto) = 192+96 = 288 ; x2 = 576
 
 let frames = 0;
 let nextFrameTime = 0;
@@ -132,7 +128,7 @@ let averageFrameTime = 0;
 let minFrameTime = Number.MAX_VALUE;
 
 let cycle = 0;
-let cycles = 0;
+let total_cycles = 0;
 
 let throttle = false;
 
@@ -158,7 +154,7 @@ function cpuCycle() {
    elapsed += bus_ops;
    if(debugAfter !== undefined) debugAfter(elapsed);
    cycle += elapsed;
-   cycles += elapsed;
+   total_cycles += elapsed;
    writeAudioSamples(elapsed);
    cloadAudioSamples(elapsed); 
    if(csaving) csaveAudioSamples(elapsed);       
@@ -176,7 +172,7 @@ function renderLines(nlines, hidden) {
          elapsed += bus_ops;
          if(debugAfter !== undefined) debugAfter(elapsed);
          cycle += elapsed;
-         cycles += elapsed;
+         total_cycles += elapsed;
          writeAudioSamples(elapsed);
          cloadAudioSamples(elapsed); 
          if(csaving) csaveAudioSamples(elapsed);       
@@ -411,7 +407,7 @@ if(autoload !== undefined) {
    cpu.reset();
    
    setTimeout(()=>{
-      loadBytes(autoload);   
+      loadBytes(autoload);
       pasteLine("RUN\r\n");
    }, 200);
 }
