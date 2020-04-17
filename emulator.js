@@ -4,7 +4,6 @@
 // im1: simple: call 0038H
 // im2: complex
 
-// TODO fix palette
 // TODO fix page refresh when in laser 350 mode
 // TODO italian keyboard layout
 // TODO keyboard caps lock alignment
