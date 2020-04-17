@@ -5,7 +5,6 @@
 // im2: complex
 
 // TODO fix palette
-// TODO fix cpu speed
 // TODO fix page refresh when in laser 350 mode
 // TODO italian keyboard layout
 // TODO keyboard caps lock alignment
@@ -114,8 +113,9 @@ let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
 /******************/
 
-const cpuSpeed = (14778730*(944/950))/4; // takes into account the 6 cycles lost in the HSYNC circuit
-const frameRate = cpuSpeed / (944*312);  // ~49.7 Hz
+const F14M = 14778730*(944/950);  // takes into account the 6 cycles lost in the HSYNC circuit
+const cpuSpeed = F14M / 4; 
+const frameRate = F14M / (944*312);  // ~49.7 Hz
 const frameDuration = 1000/frameRate;    // duration of 1 frame in msec
 const cyclesPerLine = 944/4; 
 const HIDDEN_LINES = 2;
