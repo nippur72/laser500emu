@@ -58,6 +58,27 @@ function makeCharsetRom() {
 }
 */
 
+/*
+function makeC64CharsetRom() {
+   // the ROM starts from 8192, before it's all 0xFF
+   const charset = fs.readFileSync("chargen_c64.rom");
+
+   let s = "// C64 Charset ROM \r\n\r\n"
+   
+   s += "const charset64 = new Uint8Array([\n   ";
+
+   charset.forEach((value, i)=> {   
+      const comma = (i != charset.length-1) ? ',':'';
+      const cr = (i % 16 == 15) ? '\n   ' : '';
+      s += `${hex(value)}${comma}${cr}`;   
+   });
+
+   s+="]);";
+
+   console.log(s);
+}
+*/
+
 function hex(value) {
    return "0x" + (value<=0xF ? "0":"") + value.toString(16);
 }
@@ -81,6 +102,8 @@ function makeKernalRom() {
 
    console.log(s);
 }
+
+//makeC64CharsetRom();
 
 makeCharsetRom();
 makeKernalRom();

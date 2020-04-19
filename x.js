@@ -867,3 +867,62 @@ pasteBasic(`
    }   
    console.log("end");
 })();
+
+// make c64 charset rom
+(function() {
+   function invert(byte) {
+      let s=0;
+      for(t=0;t<8;t++) {
+         if((byte & (1<<t))>0) s = s | (1<<(7-t));
+      }
+      return s;
+   }
+
+   function copychar(from, to, n) {
+      if(n===undefined) n=0;
+      let off = 256*8;
+      for(let k=0;k<n;k++) {
+         for(let t=0;t<8;t++) {
+            charset[(to+k)*8+t] = invert(charset64[off+(from+k)*8+t]);
+            charset[128*8+(to+k)*8+t] = 255-(invert(charset64[off+(from+k)*8+t]));
+         }   
+      }
+   }
+
+   copychar(65,65,26);  // uppercase
+   copychar(33,33,31);  // numbers
+   copychar(1,97,26)    // lowercase
+   copychar(0,64,1)     // @
+})();
+
+
+/*
+
+assign x = x[2:0];
+
+reg [16:0] cnt;
+reg end;
+
+always @(posedge CLK) begin
+   if(!end) begin
+      cnt <= cnt + 1;
+      if(cnt == 200) end <= 1;
+   end
+end
+
+// ###### diventa
+
+let x;
+let end;
+
+function posedge_clk()
+{
+   cnt = _cnt;
+   end = _end;
+   x = cnt[2:0];
+
+   _cnt = cnt + 1;
+   if(cnt == 200) _end <= 1;
+}
+
+*/
