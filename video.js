@@ -1064,7 +1064,7 @@ let _fgbg  = 0;
 let _ramAddress = 0;
 let _charsetAddress = 0;
 let _CGS = 0;
-let _ramQ = 0;
+let _sdram_dout = 0;
 
 const color_vsync = 0xFF8aff69;
 const color_hsync = 0xFFd64de2;
@@ -1083,12 +1083,12 @@ let bg = 0;
 function clockF14M() {
    
    // external ports
-   ramQ = vdc_page_7 ? bank7[_ramAddress & 0x3FFF] : bank3[_ramAddress & 0x3FFF];   
+   sdram_dout = vdc_page_7 ? bank7[_ramAddress & 0x3FFF] : bank3[_ramAddress & 0x3FFF];   
 
-   //ramQ = _ramQ;
+   //sdram_dout = _sdram_dout;
 
    /*
-   if(_CGS === 1) _charsetAddress = (ramQ << 3) | (_ycnt & 0b111); // TODO eng/ger/fra
+   if(_CGS === 1) _charsetAddress = (sdram_dout << 3) | (_ycnt & 0b111); // TODO eng/ger/fra
    */
 
    charsetQ = charset[_charsetAddress];
@@ -1111,7 +1111,7 @@ function clockF14M() {
    xcnt = hcnt - (hsw+hbp+LEFT_BORDER_WIDTH);      
 
    // ram data is not available during the CPU slot
-   if((xcnt % 8) >= 4) ramQ = 0xFE; // junk data 
+   if((xcnt % 8) >= 4) sdram_dout = 0xFE; // junk data 
 
    // ROM only during T=7
    if((xcnt & 7) !== 7) charsetQ = 0xFE; // junk data 
@@ -1168,10 +1168,10 @@ function clockF14M() {
 
    // simulate ram data
    if((xcnt & 15) === 14) {
-      _ramQ = ((xcnt >> 4) + 35 + (ycnt >> 3)) & 0xFF;
+      _sdram_dout = ((xcnt >> 4) + 35 + (ycnt >> 3)) & 0xFF;
    }   
    else if((xcnt & 15) === 6) {
-      _ramQ = 0xf1;      
+      _sdram_dout = 0xf1;      
    }   
 
    // draw pixel at hcnt,bcnt
@@ -1240,8 +1240,8 @@ function clockF14M() {
    
    // T=3 read character from RAM and stores into latch, starts ROM reading   
    if((xcnt & 7) === 3) {
-      _ramData = ramQ;
-      _charsetAddress = (ramQ << 3) | (ycnt & 0b111); // TODO eng/ger/fra
+      _ramData = sdram_dout;
+      _charsetAddress = (sdram_dout << 3) | (ycnt & 0b111); // TODO eng/ger/fra
    }
 
    /*
