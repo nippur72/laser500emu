@@ -255,14 +255,18 @@ let downSampleCounter = 0;       // counter used to downsample from CPU speed to
 
 function writeAudioSamples(n) {
    downSampleCounter += (n * sampleRate);
-   if(downSampleCounter >= cpuSpeed) {
+   if(downSampleCounter > cpuSpeed) {
+      downSampleCounter -= cpuSpeed
       let s = (speaker_A ? -0.5 : 0.0);
       if(tape_monitor) s += (cassette_bit_out ? 0.5 : 0.0) + (cassette_bit_in ? 0.0 : 0.5);
-      downSampleCounter -= cpuSpeed;
-      audioBuffer[audioPtr++] = s;
-      audioPtr = audioPtr % audioBufferSize;
-      audioPtr_unclipped++;
+      writeAudioSample(s);
    }      
+}
+
+function writeAudioSample(s) {
+   audioBuffer[audioPtr++] = s;
+   audioPtr = audioPtr % audioBufferSize;
+   audioPtr_unclipped++;
 }
 
 // ********************************* AUDIO BUFFER TO BROWSER AUDIO ************************************
@@ -281,6 +285,7 @@ speakerSound.onaudioprocess = function(e) {
    // playback gone too far, wait   
    if(audioPlayPtr_unclipped + bufferSize > audioPtr_unclipped ) {
       for(let i=0; i<bufferSize; i++) output[i];
+      //console.log(`gone too far: ${audioPtr_unclipped} - ${audioPlayPtr_unclipped} diff: ${audioPtr_unclipped-audioPlayPtr_unclipped}`);
       return;
    }
   
@@ -290,10 +295,7 @@ speakerSound.onaudioprocess = function(e) {
       audioPlayPtr = audioPlayPtr % audioBufferSize;
       audioPlayPtr_unclipped++;
       output[i] = audio;
-    }    
-    
-    // write pointer should be always ahead of reading pointer
-    // if(kk++%50==0) console.log(`write: ${audioPtr_unclipped} read: ${audioPlayPtr_unclipped} diff: ${audioPtr_unclipped-audioPlayPtr_unclipped}`);
+    }
 }
 
 function goAudio() {
