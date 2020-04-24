@@ -100,6 +100,7 @@ e.g. `https://nippur72.github.io/laser500emu?scanlines=true&nodisk=true`
 - `aspect=value` aspect ratio (default 1.55)
 - `rgbmaskopacity=value` opacity of RGB mask effect (default is 0, no effect)
 - `rgbmasksize=value` size in pixel of RGB mask effect (default 3)
+- `keyboard=value` use real PC keyboard layout (only `keyboard=ITA` supported at the moment)
 
 DEBUGGER
 ========

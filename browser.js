@@ -172,9 +172,8 @@ function parseQueryStringCommands() {
       tape_monitor = false;      
    }
 
-   if(options.scanlines === true) {
-      show_scanlines = true;   
-      buildPalette();   
+   if(options.keyboard === "ITA") {
+      keyboard_ITA = true;
    }   
 
    if(options.saturation !== undefined) {
