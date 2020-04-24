@@ -1,9 +1,12 @@
 "use strict";
 
 // im0: data = first byte of instruction, other bytes from mem_read?
-// im1: simple: call 0038H
-// im2: complex
+// im1: simple: jp 0038H
+// im2: jp to address &00XX where XX comes from data bus
 
+// TODO investigate requestAnimationFrame
+// TODO modularize, avoid global variables
+// TODO stop() resumes after browser tab reactivates
 // TODO fix page refresh when in laser 350 mode
 // TODO italian keyboard layout
 // TODO keyboard caps lock alignment
@@ -108,6 +111,8 @@ let caps_lock_bit = 0;
 let emulate_fdc = true;
 let tape_monitor = true;
 
+let USE_WASM = false;
+
 let cpu = new Z80({ mem_read, mem_write, io_read, io_write });
 
 /******************/
@@ -167,7 +172,7 @@ function cpuCycle() {
 function renderLines(nlines, hidden) {
    for(let t=0; t<nlines; t++) {
       // run cpu
-      while(true) {         
+      while(true) {     
          if(debugBefore !== undefined) debugBefore();
          bus_ops = 0;
          let elapsed = cpu.run_instruction();         
@@ -209,7 +214,7 @@ function renderAllLines() {
    }
    else
    {
-      cpu.interrupt(false, 0);                         // generate VDC interrupt   
+      cpu.interrupt(false, 0);                         // generate VDC interrupt
       renderLines(HIDDEN_SCANLINES_TOP, true);               
       renderLines(SCREEN_H, false);                    
       renderLines(HIDDEN_SCANLINES_BOTTOM, true);               
@@ -397,21 +402,32 @@ function cstop() {
 
 /*********************************************************************************** */
 
-// prints welcome message on the console
-welcome();
-
-parseQueryStringCommands();
-
-// starts drawing frames
-oneFrame();
-
-// autoload program and run it
-if(autoload !== undefined) {
-   zap();
-   cpu.reset();
-   
-   setTimeout(()=>{
-      loadBytes(autoload);
-      pasteLine("RUN\r\n");
-   }, 200);
+async function init() {
+   cpu = await z80_bundle();
+   if(USE_WASM) cpu.init();
+   main();
 }
+
+function main() {
+   // prints welcome message on the console
+   welcome();
+
+   parseQueryStringCommands();
+   
+   // starts drawing frames
+   oneFrame();
+   
+   // autoload program and run it
+   if(autoload !== undefined) {
+      zap();
+      cpu.reset();
+      
+      setTimeout(()=>{
+         loadBytes(autoload);
+         pasteLine("RUN\r\n");
+      }, 200);
+   }   
+}
+
+if(USE_WASM) init();
+else main();
