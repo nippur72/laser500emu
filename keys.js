@@ -183,9 +183,13 @@ mapKey(KEY_F6           , KA_B, KD1);
 mapKey(KEY_F5           , KA_B, KD0);
 
 // keyboard matrix (12 rows x 7 columns)
-KAX = new Uint8Array(12).fill(0b1111111);
+let KAX = new Uint8Array(12).fill(0b1111111);
 
-function keyPress(laserkey) {   
+function keyboardReset() {
+   KAX = new Uint8Array(12).fill(0b1111111);
+}
+
+function keyPress(laserkey) {
    const { row, col } = key_row_col[laserkey];   
    KAX[row] = reset_bit(KAX[row], col);
 }

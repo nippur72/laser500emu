@@ -131,6 +131,8 @@ let total_cycles = 0;
 
 let throttle = false;
 
+let keyboard_ITA = false;
+
 let options = {
    load: undefined,
    restore: true,
@@ -143,7 +145,8 @@ let options = {
    bb: undefined,
    bh: undefined,
    rgbmaskopacity: 0,
-   rgbmasksize: 3   
+   rgbmasksize: 3,
+   keyboard_ITA: false
 };
 
 function cpuCycle() {
