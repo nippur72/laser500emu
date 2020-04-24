@@ -75,7 +75,7 @@ These are the commands you can type from the JavaScript console (F12 key):
 - `load("disk.dsk" [,drive])` loads a disk image on the specified drive (1,2)
 - `save("file.bin" [,start, end])` saves a binary file 
 - `save("disk.dsk" [,drive])` create a disk image from the specified drive (1,2)
-- `download("file_or_image")` gets a file as download on the browser
+- `download("file_or_image")` gets the file as a browser download
 - `remove("file_or_image")` remove file or image from browser's cache
 - `dir()` lists files on browser's cache
 - `csave()` starts recording to WAV (max 5 minutes); use before typing "CSAVE" on the emulator
@@ -111,7 +111,8 @@ You can plug your own Javascript debug functions by defining
 after the istruction and the number of occurred T-states is passed in the `elapsed` argument.
 
 Within the debug functions you can access all the emulator variables, most likely 
-you'll want to read the Z80 state with `cpu.getState()`. 
+you'll want to read the Z80 state with `cpu.getState()` or the memory content 
+with `mem_read()` and `mem_write()`.
 
 AUTOLOADING
 =================
