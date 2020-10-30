@@ -1,15 +1,38 @@
 ; DOS BASIC 1.0 BOOT LOADER
 ;
 ; This resides on the first sector (track 0, sector 0)
-; and it is loaded in memory at the address $A200
+; of a formatted floppy disc and it is loaded in memory 
+; at the address $A200-$A2FF by the ROM at boot 
+; when disk interface is detected.
 ;
-; The loader basically loads the first 22 sectors from
-; the disk and places them at 5E00 in page 6 bank 2
-; from $5E00 to $5E00 + $2200 = $8000
+; The loader basically loads the first 34 sectors from
+; the disk and places them in page #6 at $DE00-$FFFF 
+;
+; The DOS routines in page #6 are meant to be used 
+; in bank #1 from $5E00 to $5E00 + $2200 = $7fff
+
+   +------------+ ffff
+   |            |  
+   |            | de00-ffff vt-dos (loaded)
+   |     6 RAM  |  
+   +------------+ dfff
+   |            |  
+   |            | a200-a2ff boot sector 
+   |            |  
+   |            | 9fff stack pointer 
+   |     4 RAM  |  
+   +------------+ 7fff
+   |            |  
+   |     6 RAM  | 5e00-7fff vt-dos 
+   |       /    |  
+   |     1 ROM  |  
+   +------------+ 3fff
+   |     0 ROM  |  
+   +------------+ 0
 
    defc SECTORBUF = $860b
-   defc SECTOR = $8609
-   defc TRACK = $8608
+   defc SECNUM    = $8609
+   defc TRACKNUM  = $8608
 
    org 0xa200
 boot:
@@ -30,8 +53,8 @@ boot:
    ld      hl, LA2AE_MESSAGE               ;[a20d] 21 ae a2
    call    PRINT_MESSAGE                   ;[a210] cd 87 a2
 
-LA213_retry:
-   ld      sp,$9fff                        ;[a213] 31 ff 9f
+LA213_retry:   
+   ld      sp,$9fff                        ; set stack pointer below the boot sector routine
 
    ; prepare parameters for calling $0033 (READDSK)   
    ld      b,$22                           ; B=34 number of sector to read 
@@ -44,42 +67,42 @@ loop:
    push    hl                              ;[a220] e5
 
    ; read disk sector 0 and retry if fails
-   ld      (SECTORBUF),hl                  ; 0x860b = read sector buffer result
+   ld      (SECTORBUF),hl                  ; set read disk buffer to point in destination memory
 
    ld      hl, LA2C2_SECTOR_NUMBERING      ; 
    ld      d,$00                           ; converts physical sector into logical
    add     hl,de                           ; and writes in 0x8609
    ld      a,(hl)                          ; a = LA2C2_SECTOR_NUMBERING[e]
-   ld      (SECTOR),a                      ; 
+   ld      (SECNUM),a                      ; 
 
-   call    $0033                           ; read disk sector pointed by TRACK/SECTOR and
+   call    $0033                           ; read disk sector pointed by TRACKNUM/SECNUM and
    jr      c, LA213_retry                  ; writes it in SECTORBUF. CF=1 failed read
 
    pop     hl                              ; HL = HL + 256
    ld      de,$0100                        ; increments the memory destination
    add     hl,de                           ; 
    pop     bc                              ; 
-   dec     b                               ; decrement sector count
+   dec     b                               ; decrement sector counter
    jr      z, finished_read                ; if count == 0 then goto finished_read
 
-   ; increment track, sector
+   ; increment sector e/o track
    pop     de                              ;
    inc     e                               ; e++; increment sector
    ld      a,e                             ;
    cp      $10                             ; if sector<10 then goto loop
    jr      c, loop                         ;  
    ld      e,$00                           ; sector = 0
-   inc     d                               ; increment track
+   inc     d                               ; d++; increment track
    ld      a,d                             ;
-   ld      (TRACK),a                       ; update track
+   ld      (TRACKNUM),a                    ; update track
    jr      loop                            ; 
 
 finished_read:   
 
-   ; when arrived here, it has read 22 consecutive sectors
-   ; starting from track 0 sector 0, and put them in memory at 0xde00 (in page 6)
+   ; when arrived here, it has read $22 consecutive sectors
+   ; starting from track 0 sector 0, and put them in page #6 at $de00-$ffff
 
-   ; restore page 5
+   ; restore old page #5 on bank 3
    ld      a,$05                           ;[a24c] 3e 05
    ld      ($8668),a                       ;[a24e] 32 68 86
    out     ($43),a                         ;[a251] d3 43
