@@ -8,20 +8,16 @@
 // TODO modularize, avoid global variables
 // TODO stop() resumes after browser tab reactivates
 // TODO fix page refresh when in laser 350 mode
-// TODO italian keyboard layout
-// TODO keyboard caps lock alignment
 // TODO save/load state does not save banks?
 // TODO 1x1 pixel rendering
 // TODO RGB mask does not survive F11 Zoom full screen
 // TODO URLSearchParams()
-// TODO requestAnimationFrame ?
 // TODO gamepad api
 // TODO tape stereo trick https://retrocomputing.stackexchange.com/questions/773/loading-zx-spectrum-tape-audio-in-a-post-cassette-world
 // TODO inverted waveform option
 // TODO remove software from facebook group
 // TODO contrast/luminosity
 // TODO fix bug introduced with audioContext.resume
-// TODO experiment with keyboard buffer sync with frames
 // TODO screen writing emulation as browser support
 // TODO emulate true drive @300 RPM
 // TODO display drive activity in canvas
@@ -31,9 +27,6 @@
 // TODO finalize Z80.js fuse tests
 // TODO disk drive sounds
 // TODO finalize pasteLine/pasteText
-// TODO LPRINT command communicate with emu or via OUT 255, RST $30 
-// TODO use interrupts to communicate with z80
-// TODO check t-states in Z80.js
 // TODO save emulator snapshots?
 // TODO slow mode, skip frames
 // TODO draw keyboard for mobile
@@ -44,27 +37,15 @@
 // TODO laser 350/700
 // TODO cartdriges / rom expansion slots
 // TODO laser 200 family? study vzem
-// TODO Z80.js: port in assemblyscript
 // TODO draw in webassembly
 // TODO caplock key / led ?
 // TODO visual/sound display of activity
 // TODO wrap in electron app
 // TODO verify cassette_bit I/O range on real HW
-// TODO check colors with real hardware
 // TODO options window (modal)
 // TODO build of CP/M ?
 // TODO be able to emulate CTRL+power up
 // TODO sprite routine?
-
-// TODO make again a speed test check:
-// PASS: raster test with "raster_test.c"
-// PASS: "tape_monitor.c" with 397.6 Hz wave
-// PASS:* 1 FOR T=1 TO 2000:NEXT:SOUND 30,1:GOTO 1 (*emu skips frames)
-// PASS: "PAL_frame_counter.c" with real machine
-// TODO: "highpitch.c" measure frequency
-// TODO: "tstates_counter.c" (improve program)
-// TODO: SOUND 20, 10 measure frequency
-// TODO: CSAVE wav file compare
 
 // *** laser 500 hardware ***
 
@@ -426,7 +407,6 @@ function main() {
          loadBytes(autoload);
          pasteLine("RUN\r\n");
       }, 200);
-   }   
 }
 
 if(USE_WASM) init();
