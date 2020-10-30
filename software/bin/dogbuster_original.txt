@@ -1,0 +1,158 @@
+﻿0 randomize:c=36:x=60:y=26:gr 0:gosub 6000
+1 w2$="MARTINO & C.":w2=5623:text 40
+10 by=int(rnd*80)+10:bx=int(rnd*140)+10
+40  color 15,0,1:gosub 3000
+80 gr :gosub 2000
+100 f=2:r=0:v=0
+101 gosub 110
+102 goto 220
+110 color 4:move(0,0):draw(159,0):draw(159,95):draw(0,95):draw(0,0)
+190 gosub 5000
+210 return
+220 x=int(rnd*150)+1
+230 y=int(rnd*90)+1
+240 a=1:b=1:z=159:d=94
+250 m=int(rnd*150)+1
+260 n=int(rnd*90)+1
+270 set(m,n)
+280 p=x:q=y
+290 if x>bx+8 or y>by+5 or x<bx or y<by then j=0 else j=j+1:if j=25 then 600 else if j/1=int(j/1) then sound 31,1
+300 g=joy(0)
+301 if inkey$="l" then for i=1 to 94:color 0:move(1,i):draw(158,i):color 4:move(1,i+1):draw(158,i+1):next:gosub 2000
+320 if g<>0 then 500
+330 v=v+1
+340 set(x,y)
+350 if point(x+a,y+b) <> 0 then 360 else x=x+a:y=y+b:color 0:set(p,q):color 2:set(x,y):goto 280
+360 a1=a:a2=b
+370 color 0:set(x,y)
+380 if point(x,y+b) then b=-b
+390 if point(x+a,y)>0 then a=-a
+400 if not point(x+a,y+b)>0 then 290
+410 a=-a1:b=-a2
+420 if not point(x+a,y+b)>0 then 290
+430 a=a1:b=a2
+440 if not point(x+a,y)=f then x=x+a:goto 290
+450 if not point(x,y+b)=f then y=y+b:goto 290
+460 if not point(x-a,y)=f then x=x-a:goto 290
+470 if not point(x,y-b)=f then y=y-b:goto 290
+480 r=1
+490 goto 560
+500 if g=3 then if m<z then m=m+1:color 2:set(m,n):goto 540
+510 if g=5 then if n<d then n=n+1:color 2:set(m,n):goto 540
+520 if g=1 then if n>1 then n=n-1:color 2:set(m,n):goto 540
+530 if g=7 then if m>1 then m=m-1:color 2:set(m,n)
+540 if joy(1)=1 or joy(2)=1 then color 0:set(m,n)
+550 goto 330
+560 for t=31 to 1 step -2:sound t,1:next
+561 color 15,0,0:print "Hai,hai,hai, ti sei fatto mordere!!
+562 print "Mi  displace per te, ma non abbiamo
+563 print "il siero anti-rabbia per curarti!!!
+564 print "quindi muori....
+565 ?:?:?"IL TUO PUNTEGGIO E§";:color 0,3:print 10000-v:color 15,0::print"NON TI ILLUDERE PERCHE§TI SEI FATTO     MISEREVOLMENTE SBRANARE DA QUELLA CHE   DOVEVA ESSERERE LA TUA VITTIMA !":print:print"ADDIO...PREMI UN TASTO":j$=input$(1):goto 40
+600 for t=1 to 31 step 2:sound t,1:next
+610 color 15,0,0:print "COMPLIMENTI!!!"
+620 print "Finalmente ci sei riuscito!!!
+700 print :print "Punteggio totalizzato --> ";:color 15,1
+710 print 10000-v :color 15,0
+720 v=10000-v
+721 hj$=input$(1)
+730 if v<w2 then goto 40
+740 print :print"Hai fatto il punteggio migliore,
+750 print:print "Qual'e§ il tuo nome, campione ?":print:print:print
+760 line input w2$:w2=v:v=0
+770 goto 40
+1190 end
+2000 for i=1 to 12
+2005 ax=int(rnd*140)+5
+2010 ay=int(rnd*40)+15
+2020 color rnd*15:for t=1 to 5:move(ax,ay+t):draw(ax+7,ay+t):next
+2030 color rnd*15:move(ax,ay):draw(ax+7,ay):draw(ax+7,ay+5):draw(ax,ay+5):draw(ax,ay)
+2034 next:color 3
+2035 move(bx,by):draw(bx+8,by):move(bx,by+5):draw(bx+8,by+5)
+2040 return
+3000 color 15,0,0
+3010 cls
+3011 color 15,4
+3012 print "                                       "
+3013 print "         <<<  DOGBUSTER  >>>           "
+3014 print "              ^^^^^^^^^                "
+3015 color 15,0:print
+3020 print "   In questo gioco vi vedrete nei panni
+3021 print "di un accalappiacani, e, ovviamente do-
+3022 print "vrete svolgere il vostro  lavoro cattu-
+3023 print "rando i cani randagi che  vagano per la
+3024 print "radura.
+3025 print "   Avete a vostra disposizione una rete
+3026 print "con la quale dovrete racchiudere la vo-
+3027 print "stra vittima  in  modo da farla deviare
+3028 print "verso la  gabbia,  che  precedentesente
+3029 print "avete piazzato in mezzo alla radura.
+3030 print "   State  attenti  a  non farVi mordere
+3031 print "da quelle bestie, perche', oltre ad es-
+3032 print "sere randagie, sono anche idrofobe.... 
+3040 print "   Quando avrete intrappolato la bestia
+3041 print "ricordatevi di   chiudere la gabbia con
+3042 print "della rete,  in modo da assicurare ogni
+3043 print "lentativo di fuga.":print input $(1):cls
+3044 print "   Per  cancellare la rete,  premere un
+3045 print "tasto di FIRE piu§ la direzione deside-
+3046 print "rata.  Premere 'L' per cancellare tutto
+3047 print "il reticolato.
+3048 print
+3049 print "N.B. bisogna attendere che il cane   si
+3050 print "calmi quando e' chiuso in gabbia."
+3051 print
+3055 color 15,1:print "Record di:"w2$;" con"w2"punti":color 15,2
+3056 print :print "(C) Copyright 1986 Laser Computer Club  "
+3057 print "Scritto da Martino Agostino &           Porcino Antonino
+3058 print "Si ringraziano i soci L.C.C. per la col-laborazione.                            "
+3059 print "All right reserved                      "
+3060 print  input$(1): color 15,0,1:cls:return
+5000 '
+5020 move(bx,by):color 3:draw(bx+8,by):move(bx,by+5):draw(bx+8,by+5):return
+6000 gosub 7000: for t=1 to c
+6010 read a$
+6020 for n=1 to len(a$)
+6040 j=val(mid$(a$,n,1))
+6050 color j:set(n+x,t+y)
+6060 next:next
+6081 data"    4444444                78
+6082 data"  44     4444               78
+6083 data" 44     44  44        888888888
+6084 data"44     44    44   18888728888884
+6085 data"44    44     44   888888887788844
+6086 data"44   44      44   8887777777884474
+6087 data" 44 44      44     4777777774474488
+6088 data"  444      44     4      84474488888
+6089 data"    4444444              47448888888
+6090 data"                                    ":data"
+6091 data"111   22  3333 444  5 55 6666 7777 9999 111  22"
+6092 data"1 11 2 22 3    4 44 5 55 6     77  99   1 11 22"
+6093 data"1 11 2 22 3 33 444  5 55 6666  77  9999 111  22"
+6094 data"1 11 2 22 3  3 4 44 5 55   66  77  99   1 11   "
+6095 data"1111  222 3333 4444 5555 6666  77  9999 1 11 22":data"    ":data"                         22442244224422442"
+6096 data"    1111               4421111111111111244
+6097 data"    111111     119    244111333733733311422
+6098 data"    6666      19 19  44211333333733733311244
+6099 data"    6666         19  22411333333373373311422
+6100 data"  111611111     19   44211311111111111311244
+6110 data" 11111171111   19    22411111111111111111422
+6111 data"111 11111 11         21111114444444441111118
+6112 data"111 11171 11   19    1777114 4 4 4 4 4117771
+6113 data" 11661111. 16  19    1777114 4 4 4 4 4117771
+6114 data"   611111  666       1111114 4 4 4 4 4111111
+6115 data"    11 11            1111114 4 4 4 4 4111111
+6116 data"    11 11      33  771111111111111111111111177
+6117 data"    11 11     7  7  7777777777777777777777777
+6118 data"    31 13    222222   888               888
+6119 data"    13 31    223322   888 2 2 2         888
+6120 data"   131 1313  223222   888  222          888
+6125 data" 222222222222222222222222222222222222222222222
+6130 data"22222222222222222222222222222222222222222222222
+6500 restore 6510
+6510 data 16,25,23,16,25,23,16,16,16,25,23,18,18,0
+6520 read a:if a=0 then 6500
+6525 if inkey$<>"" then return
+6530 sound a,2:goto 6520
+7000 for t=0 to 95 :color (rnd*14)+1:move(0,t):draw(159,t):next t
+7010 for t=25 to 65:color 0:move(55,t):draw(110,t):next:return
