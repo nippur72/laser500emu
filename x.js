@@ -516,6 +516,18 @@ debugBefore = (function() {
 })();
 
 
+// debugs when HALT
+debugAfter = (function() {
+   return function() {
+      let state = cpu.getState();
+      if(state.halted) {
+         console.log(`HALT ${cpu_status()}`);
+         state.halted = false;
+         cpu.setState(state);
+      }
+   };
+})();
+
 // generate tone burst vsync
 
 //let tone = 49.62 * 60;  
@@ -926,3 +938,36 @@ function posedge_clk()
 }
 
 */
+
+
+
+(function() {
+   let startTime = null;
+   let last = 0;
+
+   function step(timestamp) {
+     if (!startTime) startTime = timestamp;
+     let progress = timestamp - startTime;
+     console.log(timestamp-last);
+     last = timestamp;
+
+     if (progress < 2000) {
+       window.requestAnimationFrame(step);
+     }
+   }
+
+   window.requestAnimationFrame(step);
+})();
+
+
+// calculates row table for text 80
+(function() {
+   let val = [];
+   for(let y=0;y<192;y+=8) {
+      let by = y >> 3;
+      let oy = y & 0b111
+      let offs = ((by & 7) << 8) + ((by >> 3) * 80);
+      val.push(0x7800+offs+oy);
+   }
+   console.log(val.join("\r\n DEFW "));
+})();
