@@ -1,0 +1,34 @@
+NOTES ON RECREATING THE CP/M ON THE LASER 500/700
+=================================================
+
+RAM:
+
+F800 - FFFF VRAM 80x24 (there is some space left at the end)
+C000 - F7FF FREE SPACE
+BA00 - BFFF CBIOS
+A400 - B9FF BDOS + CCP = 5632 ($1600) bytes
+0100 - A3FF TRANSIENT PROGRAM AREA
+0080 - 00FF CPM DMA BUFFER ?
+0000 - 007F LOW MEMORY AREA
+
+CPM DISK
+
+- Disk size is 2x40x6x256
+- boot sector: side 0, track 0, sector 0, 256 Bytes, loaded at $A200 and executed
+
+# BOOT SECTOR
+- loaded by ROM at $A200
+- sets the VDC 80 colums/reset
+- set BANK0 = PAGE 4
+- jp at bank0 address
+- set 4,5,6,7 in banks
+- mapped io page 2 is switched in bank 2 between 2 and 5
+
+           
+           
+
+
+
+
+
+
