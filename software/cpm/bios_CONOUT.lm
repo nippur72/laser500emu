@@ -1,0 +1,279 @@
+;***************************************************************************************
+;
+;
+;***************************************************************************************
+
+; TODO implement IOBYTE
+
+EXTERN _CONOUT
+
+VIDEO EQU $7800
+NCOLS EQU 80
+NROWS EQU 24
+
+CURSOR_COL: DEFB 43
+CURSOR_ROW: DEFB 22
+
+_CONOUT:
+CONOUT:
+    di
+    ld   a,l
+    call HANDLE_CHARS
+    ei
+    ret
+
+HANDLE_CHARS:
+    ; special characters
+    ;IF a=7  THEN goto CHAR_BELL
+    IF a=8  THEN goto CHAR_BACKSPACE
+    IF a=9  THEN goto CHAR_TAB
+    IF a=10 THEN goto CHAR_LF
+    IF a=13 THEN goto CHAR_CR
+    IF a=28 THEN goto CHAR_HOME
+    IF a=31 THEN goto CHAR_CLS
+    ;IF a=29 THEN goto CHAR_REVSON
+    ;IF a=27 THEN goto CHAR_REVSOFF
+    IF a=26 THEN goto CHAR_UP
+    IF a=25 THEN goto CHAR_LEFT
+    IF a=24 THEN goto CHAR_RIGHT
+    ;IF a=23 THEN goto CHAR_PRINTAT
+
+NORMAL_CHARACTER:
+    push af
+    call VBANK_ON
+    call CALC_CURSOR_ADDR
+    pop  af
+    ld   (hl),a            ; writes the character over the cursor (canceling it)
+    call CURSOR_RIGHT      ; goes right
+    call CURSOR_TOGGLE     ; turns on the cursor
+    call VBANK_OFF
+    ret
+
+;CHAR_BELL:
+;    ret
+
+CHAR_BACKSPACE:
+    ret
+
+CHAR_TAB:
+    ret
+
+CHAR_LF:
+    ret
+
+CHAR_CR:
+    ret
+
+CHAR_HOME:
+    call CURSOR_TOGGLE     ; turn off cursor
+CHAR_HOME_AFTERTOGGLE:
+    xor  a                 ; a=0
+    ld   (CURSOR_COL),a    ; go first col
+    ld   (CURSOR_ROW),a    ; go first row
+    call CURSOR_TOGGLE     ; turn on cursor again
+    ret
+
+CHAR_CLS:
+    ld hl,VIDEO
+    ld de,VIDEO+1
+    ld bc,80*24
+    ld a,32                ; TODO consider reverse
+    ld (hl),a
+    ldir
+    jp CHAR_HOME_AFTERTOGGLE
+
+;CHAR_REVSON:
+;    ret
+
+;CHAR_REVSOFF:
+;    ret
+
+CHAR_UP:
+    ret
+
+CHAR_LEFT:
+    ret
+
+CHAR_RIGHT:
+    call CURSOR_TOGGLE
+    call CURSOR_RIGHT
+    jp   CURSOR_TOGGLE
+
+CHAR_PRINTAT:
+    ret
+
+
+;
+; calculates in HL the address in video memory of the cursor
+; at position (CURSOR_COL, CURSOR_ROW)
+;
+CALC_CURSOR_ADDR:
+    push de
+    ld   a,(CURSOR_ROW)
+    sla  a
+    ld   l,a
+    ld   h,0
+    ld   de,ROWTABLE
+    add  hl,de
+    ld   e,(hl)
+    inc  hl
+    ld   d,(hl)
+    push de
+    pop  hl
+    ld   d, 0
+    ld   a,(CURSOR_COL)
+    ld   e,a
+    add  hl,de
+    pop  de
+    ret
+
+;
+; Purpose: reverse the character under the cursor
+; at position (CURSOR_COL, CURSOR_ROW)
+;
+CURSOR_TOGGLE:
+    call CALC_CURSOR_ADDR
+    ld   a,(hl)
+    xor  128
+    ld   (hl),a
+    ret
+
+;
+; Purpose: advances the cursor 1 position to the right
+; updating (CURSOR_COL, CURSOR_ROW)
+;
+CURSOR_RIGHT:
+    ld a,(CURSOR_COL)
+    IF a=NCOLS-1 THEN
+       xor a
+       ld (CURSOR_COL),a
+       ld a,(CURSOR_ROW)
+       IF a=NROWS-1 THEN
+          CALL SCROLL_UP
+       ELSE
+          inc a
+          ld (CURSOR_ROW),a
+       END IF
+    ELSE
+       inc a
+       ld (CURSOR_COL),a
+    END IF
+    ret
+
+;
+; Purpose: scrolls up the video by one row
+;
+
+counter:
+    defb 0
+
+SCROLL_UP:
+    push bc
+    push de
+    push hl
+
+    ; save current cursor pos
+    ld a,(CURSOR_COL) : ld l,a
+    ld a,(CURSOR_ROW) : ld h,a
+    push hl
+
+    ld a,0
+    ld (counter),a
+    ld (CURSOR_COL),a
+    do
+        ; DE = row[counter]
+        ld a,(counter)
+        ld (CURSOR_ROW),a
+        call CALC_CURSOR_ADDR
+        ld e,l
+        ld d,h
+
+        ; HL = row[counter + 1]
+        ld a,(counter)
+        inc a
+        ld (CURSOR_ROW),a
+        call CALC_CURSOR_ADDR
+
+        ; BC = 80
+        ld bc,80
+
+        ; copy row
+        ldir
+
+        ; increment row
+        ld   a,(counter)
+        inc  a
+        ld   (counter),a
+    loop while a <> 23
+
+    ld a,32       ; space char TODO consider reverse
+    ld hl,32672   ; last row
+    ld de,32672+1 ; last row, col 1
+    ld (hl),a     ; write first space
+    ld bc,80      ; repeat 80
+    ldir          ; go
+
+    ; restore current cursor pos
+    pop hl
+    ld a,l : ld (CURSOR_COL),a
+    ld a,h : ld (CURSOR_ROW),a
+
+    pop hl
+    pop de
+    pop bc
+    ret
+
+VBANK_ON:
+    push af
+    ld   a, VIDEO_PAGE
+    out  (BANK1),a
+    pop  af
+    ret
+
+VBANK_OFF:
+    push af
+    ld   a,ROM1_PAGE
+    out  (BANK1),a
+    pop  af
+    ret
+
+
+ROM0_PAGE  EQU 0
+ROM1_PAGE  EQU 1
+IO_PAGE    EQU 2
+RAM4_PAGE  EQU 4
+RAM5_PAGE  EQU 5
+RAM6_PAGE  EQU 6
+VIDEO_PAGE EQU 7
+
+
+BANK0      EQU $40
+BANK1      EQU $41
+BANK2      EQU $42
+BANK3      EQU $43
+
+ROWTABLE:
+    DEFW 30720
+    DEFW 30976
+    DEFW 31232
+    DEFW 31488
+    DEFW 31744
+    DEFW 32000
+    DEFW 32256
+    DEFW 32512
+    DEFW 30800
+    DEFW 31056
+    DEFW 31312
+    DEFW 31568
+    DEFW 31824
+    DEFW 32080
+    DEFW 32336
+    DEFW 32592
+    DEFW 30880
+    DEFW 31136
+    DEFW 31392
+    DEFW 31648
+    DEFW 31904
+    DEFW 32160
+    DEFW 32416
+    DEFW 32672
