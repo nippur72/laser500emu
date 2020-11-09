@@ -407,6 +407,21 @@ function main() {
          loadBytes(autoload);
          pasteLine("RUN\r\n");
       }, 200);
+   }
+
+   /*
+   // debugs when HALT
+   debugAfter = (function() {
+      return function() {
+         let state = cpu.getState();
+         if(state.halted) {
+            console.log(`HALT ${cpu_status()}`);
+            state.halted = false;
+            cpu.setState(state);
+         }
+      };
+   })();
+   */
 }
 
 if(USE_WASM) init();
