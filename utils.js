@@ -87,6 +87,20 @@ function pasteLine(text) {
    cpu.reset();
 }
 
+function pasteLong(str) {
+   function pasteQueue(lines) {
+      if(lines.length == 0) return;
+      let firstline = lines[0];
+      lines = lines.slice(1);
+      pasteBasicLine(firstline+"\r\n");
+      setTimeout(()=>pasteQueue(lines), 500);
+   }
+
+   let lines = str.split("\n");
+   //lines.forEach(line=>paste(line+"\r\n"));
+   pasteQueue(lines);
+}
+
 function pasteBasic(text) {   
    const lines = text.split("\n");   
    for(let t=0; t<lines.length; t++) {
@@ -117,18 +131,22 @@ function pasteBasicChar(char) {
    if(code.shift) keyDown(evkey("ShiftLeft"));
    keyDown(evkey(code.code));     
 
+   /*
    for(let t=1; mem_read_word(0x85e2) === old_cursor_pos; t++) {
       renderAllLines();
       if(t>5000) {
          console.warn("paste fail");
          break;
       }      
-   }
-   renderAllLines();   
+   }*/
+
+   renderAllLines();
+   renderAllLines();
 
    keyUp(evkey(code.code));
    if(code.shift) keyUp(evkey("ShiftLeft"));
 
+   renderAllLines();
    renderAllLines();
 }
 
