@@ -584,3 +584,31 @@ show_loop:
    */
 }
 
+// ==== DISK ROUTINES ====
+
+#define TRACK  ((byte *)(0xFE60+0x12))
+#define SECTOR ((byte *)(0xFE60+0x11))
+#define SIDE   ((byte *)(0xFE60+0x43))
+#define SECBUF ((byte *)0xFC56)
+
+void set_drive(byte drive, byte side, byte track, byte sector) {
+   *TRACK  = track;
+   *SECTOR = sector;
+   //*SIDE   = side;
+}
+
+byte read_track() {
+   __asm
+   di
+   ld a,6
+   out ($41),a
+
+   ld b,1
+   call $79B7
+
+   ld a,1
+   out ($41),a
+   ei
+   __endasm;
+}
+

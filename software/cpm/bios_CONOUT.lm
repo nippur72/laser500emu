@@ -24,18 +24,19 @@ CONOUT:
 
 HANDLE_CHARS:
     ; special characters
-    ;IF a=7  THEN goto CHAR_BELL
     IF a=8  THEN goto CHAR_BACKSPACE
-    IF a=9  THEN goto CHAR_TAB
     IF a=10 THEN goto CHAR_LF
     IF a=13 THEN goto CHAR_CR
     IF a=28 THEN goto CHAR_HOME
     IF a=31 THEN goto CHAR_CLS
+
+    ;IF a=9  THEN goto CHAR_TAB
+    ;IF a=26 THEN goto CHAR_UP
+    ;IF a=25 THEN goto CHAR_LEFT
+    ;IF a=24 THEN goto CHAR_RIGHT
+    ;IF a=7  THEN goto CHAR_BELL
     ;IF a=29 THEN goto CHAR_REVSON
     ;IF a=27 THEN goto CHAR_REVSOFF
-    IF a=26 THEN goto CHAR_UP
-    IF a=25 THEN goto CHAR_LEFT
-    IF a=24 THEN goto CHAR_RIGHT
     ;IF a=23 THEN goto CHAR_PRINTAT
 
 NORMAL_CHARACTER:
@@ -49,13 +50,7 @@ NORMAL_CHARACTER:
     call VBANK_OFF
     ret
 
-;CHAR_BELL:
-;    ret
-
 CHAR_BACKSPACE:
-    ret
-
-CHAR_TAB:
     ret
 
 CHAR_LF:
@@ -82,26 +77,10 @@ CHAR_CLS:
     ldir
     jp CHAR_HOME_AFTERTOGGLE
 
-;CHAR_REVSON:
-;    ret
-
-;CHAR_REVSOFF:
-;    ret
-
-CHAR_UP:
-    ret
-
-CHAR_LEFT:
-    ret
-
-CHAR_RIGHT:
-    call CURSOR_TOGGLE
-    call CURSOR_RIGHT
-    jp   CURSOR_TOGGLE
-
-CHAR_PRINTAT:
-    ret
-
+;CHAR_RIGHT:
+;    call CURSOR_TOGGLE
+;    call CURSOR_RIGHT
+;    jp   CURSOR_TOGGLE
 
 ;
 ; calculates in HL the address in video memory of the cursor
@@ -277,3 +256,5 @@ ROWTABLE:
     DEFW 32160
     DEFW 32416
     DEFW 32672
+
+

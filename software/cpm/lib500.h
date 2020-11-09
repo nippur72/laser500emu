@@ -72,6 +72,12 @@ typedef unsigned int  word;
 #define GR_MODE_0   0b100
 #define GR_MODE_OFF 16
 
+// DOS V1.1
+#define TRACK  ((byte *)(0xFE60+0x12))
+#define SECTOR ((byte *)(0xFE60+0x11))
+#define SIDE   ((byte *)(0xFE60+0x43))
+#define SECBUF ((byte *)0xFC56)
+
 // utils
 byte peek(byte *address);
 word peek_word(word *address) FASTCALL;
@@ -123,3 +129,7 @@ void gr3_rowinit();
 word gr3_getrow(byte row) FASTNAKED;
 void gr3_pset(byte row, byte col, byte color);
 void gr3_put_bitmap(word picAddress) FASTNAKED;
+
+// DOS 1.1
+void set_drive(byte drive, byte side, byte track, byte sector);
+byte read_track();
