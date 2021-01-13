@@ -87,7 +87,7 @@ OPTIONS
 Options can be given in the form of query string commands on the URL of the emulator,
 e.g. `https://nippur72.github.io/laser500emu?scanlines=true&nodisk=true`
 
-- `restore=false` do not restore previous emulator state, start fresh (default is restore)
+- `restore=true` restore previous emulator state
 - `load=programName` load and run the specified program from the `software` directory of the emulator GitHub repo. If no relative path is specified, `programName` will be searched in all subdirectories. 
 - `nodisk=true` disconnect emulated disk drive interface (default is attached)
 - `notapemonitor=true` disables audio playback from tape (tape monitor)
@@ -141,7 +141,7 @@ EMULATOR FEATURES
 - Keyboard not perfect yet, and with italian layout only
 - ALT+R or CTRL+BREAK is reset key, ALT+P is power on button
 - Drag & drop binary files to load them on the emulator
-- automatically saves and restores the state of the emulator
+- automatically saves the state of the emulator
 
 There are also a bunch of commands that you can run from the JavaScript console (F12)
 to load or save programs. Saved programs are seen as a downloaded file in the browser.

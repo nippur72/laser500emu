@@ -153,7 +153,7 @@ function getQueryStringObject(options) {
    return o;
 }
 
-function parseQueryStringCommands() {
+async function parseQueryStringCommands() {
    options = getQueryStringObject(options);
 
    if(options.restore !== false) {
@@ -161,9 +161,27 @@ function parseQueryStringCommands() {
       restoreState();
    }
 
+   /*
+   // old version
    if(options.load !== undefined) {
       const name = options.load;      
       fetchProgramAll(name);            
+   }
+   */
+
+   if(options.load !== undefined) {
+      const name = options.load;
+      setTimeout(async ()=>{
+         if(name.startsWith("http")) {
+            // external load
+            externalLoad("loadPrg", name);
+            pasteLine("RUN\r\n");
+         }
+         else {
+            // internal load
+            await fetchProgram(name);
+         }
+      }, 4000);
    }
 
    if(options.nodisk === true) {
@@ -214,6 +232,7 @@ function parseQueryStringCommands() {
    }
 }
 
+/*
 async function fetchProgramAll(name) {
    const candidates = [
       name,
@@ -232,10 +251,11 @@ async function fetchProgramAll(name) {
 
    console.log(`cannot load "${name}"`);
 }
+*/
 
 async function fetchProgram(name)
 {
-   console.log(`wanting to load ${name}`);
+   //console.log(`wanting to load ${name}`);
    try
    {
       const response = await fetch(`software/${name}`);

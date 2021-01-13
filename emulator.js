@@ -121,7 +121,7 @@ let keyboard_ITA = false;
 
 let options = {
    load: undefined,
-   restore: true,
+   restore: false,
    nodisk: false,
    notapemonitor: false,
    scanlines: false,
@@ -389,11 +389,11 @@ async function init() {
    main();
 }
 
-function main() {
+async function main() {
    // prints welcome message on the console
-   welcome();
+   // welcome();
 
-   parseQueryStringCommands();
+   await parseQueryStringCommands();
    
    // starts drawing frames
    oneFrame();
