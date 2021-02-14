@@ -490,7 +490,10 @@ function drawFrame_y()
    raster_y++;
    if(raster_y >= SCREEN_H) {
       raster_y = 0; 
-      updateCanvas();     
+      updateCanvas();
+      frames++;
+      if(end_of_frame_hook !== undefined) end_of_frame_hook();
+      cpu.interrupt(false, 0); // generate VDC interrupt
    }
 }
 

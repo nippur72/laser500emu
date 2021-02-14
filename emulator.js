@@ -1,16 +1,11 @@
 "use strict";
 
-// im0: data = first byte of instruction, other bytes from mem_read?
-// im1: simple: jp 0038H
-// im2: jp to address &00XX where XX comes from data bus
-
-// TODO investigate requestAnimationFrame
+// TODO build of CP/M ?
 // TODO modularize, avoid global variables
 // TODO stop() resumes after browser tab reactivates
 // TODO fix page refresh when in laser 350 mode
 // TODO save/load state does not save banks?
 // TODO 1x1 pixel rendering
-// TODO RGB mask does not survive F11 Zoom full screen
 // TODO URLSearchParams()
 // TODO gamepad api
 // TODO tape stereo trick https://retrocomputing.stackexchange.com/questions/773/loading-zx-spectrum-tape-audio-in-a-post-cassette-world
@@ -28,11 +23,9 @@
 // TODO disk drive sounds
 // TODO finalize pasteLine/pasteText
 // TODO save emulator snapshots?
-// TODO slow mode, skip frames
 // TODO draw keyboard for mobile
 // TODO save to cloud ?
 // TODO almost exact cycles drawing
-// TODO investigate what does NMI (cpu.interrupt(true))
 // TODO javascript debugger, halt
 // TODO laser 350/700
 // TODO cartdriges / rom expansion slots
@@ -43,7 +36,6 @@
 // TODO wrap in electron app
 // TODO verify cassette_bit I/O range on real HW
 // TODO options window (modal)
-// TODO build of CP/M ?
 // TODO be able to emulate CTRL+power up
 // TODO sprite routine?
 
@@ -108,14 +100,10 @@ const HIDDEN_LINES = 2;
 let stopped = false; // allows to stop/resume the emulation
 
 let frames = 0;
-let nextFrameTime = 0;
 let averageFrameTime = 0;
-let minFrameTime = Number.MAX_VALUE;
 
 let cycle = 0;
 let total_cycles = 0;
-
-let throttle = false;
 
 let keyboard_ITA = false;
 
@@ -135,6 +123,7 @@ let options = {
    keyboard_ITA: false
 };
 
+/*
 function cpuCycle() {
    if(debugBefore !== undefined) debugBefore();
    bus_ops = 0;
@@ -148,35 +137,37 @@ function cpuCycle() {
    if(csaving) csaveAudioSamples(elapsed);       
    return elapsed;
 }
+*/
 
-// scanline version
-function renderLines(nlines, hidden) {
-   for(let t=0; t<nlines; t++) {
-      // run cpu
-      while(true) {     
-         if(debugBefore !== undefined) debugBefore();
-         bus_ops = 0;
-         let elapsed = cpu.run_instruction();         
-         elapsed += bus_ops;
-         if(debugAfter !== undefined) debugAfter(elapsed);
-         cycle += elapsed;
-         total_cycles += elapsed;
-         writeAudioSamples(elapsed);
-         cloadAudioSamples(elapsed); 
-         if(csaving) csaveAudioSamples(elapsed);       
-         
-         if(cycle>=cyclesPerLine) {
-            cycle-=cyclesPerLine;
-            break;            
-         }
-      } 
+function system_tick(nticks) {
+   let count = 0;
+   while(count<nticks) {
+      if(debugBefore !== undefined) debugBefore();
+      bus_ops = 0;
+      let elapsed = cpu.run_instruction();
+      elapsed += bus_ops;
+      if(debugAfter !== undefined) debugAfter(elapsed);
+      cycle += elapsed;
+      total_cycles += elapsed;
+      count += elapsed;
 
-      // draw video
-      if(!hidden) drawFrame_y();
+      writeAudioSamples(elapsed);
+      cloadAudioSamples(elapsed);
+      if(csaving) csaveAudioSamples(elapsed);
+
+      if(cycle>=cyclesPerLine) {
+         cycle-=cyclesPerLine;
+         drawFrame_y();
+      }
    }
 }
 
-function renderAllLines() {   
+function renderAllLines() {
+   system_tick(cyclesPerLine * 312);
+}
+
+/*
+function renderAllLines() {
    if(hardware_screen) 
    {
       for(;;)
@@ -195,39 +186,29 @@ function renderAllLines() {
    }
    else
    {
-      cpu.interrupt(false, 0);                         // generate VDC interrupt
       renderLines(HIDDEN_SCANLINES_TOP, true);               
       renderLines(SCREEN_H, false);                    
       renderLines(HIDDEN_SCANLINES_BOTTOM, true);               
    }
 }
+*/
 
-let nextFrame;
 let end_of_frame_hook = undefined;
 
-function oneFrame() {   
-   const startTime = new Date().getTime();      
+let last_timestamp = 0;
+function oneFrame(timestamp) {
+   let stamp = timestamp == undefined ? last_timestamp : timestamp;
+   let msec = stamp - last_timestamp;
+   let ncycles = cpuSpeed * msec / 1000;
+   last_timestamp = stamp;
 
-   if(nextFrame === undefined) nextFrame = startTime;
+   if(ncycles > cpuSpeed) ncycles = 200;
 
-   nextFrame = nextFrame + (1000/frameRate); // ~50Hz  
+   system_tick(ncycles);
 
-   renderAllLines();
-   frames++;   
+   averageFrameTime = averageFrameTime * 0.992 + msec * 0.008;
 
-   if(end_of_frame_hook !== undefined) end_of_frame_hook();
-
-   const now = new Date().getTime();
-   const elapsed = now - startTime;
-   averageFrameTime = averageFrameTime * 0.992 + elapsed * 0.008;
-   if(elapsed < minFrameTime) minFrameTime = elapsed;
-
-   let time_out = nextFrame - now;
-   if(time_out < 0 || throttle) {
-      time_out = 0;
-      nextFrame = undefined;      
-   }
-   if(!stopped) setTimeout(()=>oneFrame(), time_out);   
+   if(!stopped) requestAnimationFrame(oneFrame);
 }
 
 // ********************************* CPU TO AUDIO BUFFER *********************************************
@@ -408,20 +389,6 @@ async function main() {
          pasteLine("RUN\r\n");
       }, 200);
    }
-
-   /*
-   // debugs when HALT
-   debugAfter = (function() {
-      return function() {
-         let state = cpu.getState();
-         if(state.halted) {
-            console.log(`HALT ${cpu_status()}`);
-            state.halted = false;
-            cpu.setState(state);
-         }
-      };
-   })();
-   */
 }
 
 if(USE_WASM) init();

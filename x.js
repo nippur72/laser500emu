@@ -971,3 +971,18 @@ function posedge_clk()
    }
    console.log(val.join("\r\n DEFW "));
 })();
+
+
+/*
+   // debugs when HALT
+   debugAfter = (function() {
+      return function() {
+         let state = cpu.getState();
+         if(state.halted) {
+            console.log(`HALT ${cpu_status()}`);
+            state.halted = false;
+            cpu.setState(state);
+         }
+      };
+   })();
+*/
