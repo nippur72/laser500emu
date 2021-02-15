@@ -60,13 +60,13 @@ window.addEventListener("visibilitychange", function() {
    if(document.visibilityState === "hidden")
    {
       stopped = true;
-      stopAudio();
+      audio.stop();
    }
    else if(document.visibilityState === "visible")
    {
       stopped = false;
       oneFrame();
-      goAudio();
+      audio.start();
    }
 });
 
@@ -83,7 +83,7 @@ dropZone.addEventListener('dragover', function(e) {
 
 // Get file data on drop
 dropZone.addEventListener('drop', e => {
-   audioContextResume();
+   audio.resume();
 
    e.stopPropagation();
    e.preventDefault();

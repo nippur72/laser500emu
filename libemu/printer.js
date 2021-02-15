@@ -22,14 +22,3 @@ function printerWrite(byte) {
    printerTimeLastReceived = new Date();
    checkPrinterBuffer();
 }
-
-/*
-// this version prints one line on one console line
-function printerWrite(byte) {
-   printerBuffer += String.fromCharCode(byte & 0xFF);
-   if(byte == 0x0A) {
-      console.log(printerBuffer);
-      printerBuffer = "";
-   }
-}
-*/
