@@ -202,7 +202,7 @@ function oneFrame(timestamp) {
    let ncycles = cpuSpeed * msec / 1000;
    last_timestamp = stamp;
 
-   if(ncycles > cpuSpeed) ncycles = 200;
+   if(msec > frameRate*2) ncycles = cpuSpeed * (frameRate*2 / 1000);
 
    system_tick(ncycles);
 
