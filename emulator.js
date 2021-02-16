@@ -244,6 +244,8 @@ function writeAudioSamples(cpuCycles) {
 let audio = new Audio(4096);
 audio.start();
 
+let storage = new BrowserStorage("laser500");
+
 async function init() {
    cpu = await z80_bundle();
    if(USE_WASM) cpu.init();
