@@ -23,30 +23,6 @@ function PHI1(n) { return (((n)>>1)&1); }
 function PHI2(n) { return (((n)>>2)&1); }
 function PHI3(n) { return (((n)>>3)&1); }
 
-// debug flags
-let fdc_debug_move      = false;
-let fdc_debug_data_size = false;
-let fdc_debug_read      = false;
-let fdc_debug_write     = false;
-let fdc_debug_rw_short  = false;
-let fdc_debug_side      = false;
-let fdc_debug_read_buf  = [];
-let fdc_debug_write_buf = [];
-
-function fdc_debug_flush() {
-    if(fdc_debug_read_buf.length > 0) {
-        if(fdc_debug_rw_short) console.log(`read: ${fdc_debug_read_buf.length} bytes`);
-        else console.log(`read: ${fdc_debug_read_buf.map(e=>hex(e)).join(" ")}`);
-        fdc_debug_read_buf = [];
-    }
-
-    if(fdc_debug_write_buf.length > 0) {
-      if(fdc_debug_rw_short) console.log(`write: ${fdc_debug_write_buf.length} bytes`);
-      else console.log(`write: ${fdc_debug_write_buf.map(e=>hex(e)).join(" ")}`);
-      fdc_debug_write_buf = [];
-    }
-}
-
 function floppy_read_port(port) {      
 	switch(port)
    {
@@ -90,11 +66,6 @@ function write_10(data) {
    FDC_ENBL  = bit(data, 4);
    FDC_PHASE = data & 0b1111;
 
-   if(fdc_debug_side && (FDC_SIDE !== old_side)) {
-      fdc_debug_flush();
-      console.log(`drive ${FDC_DRIVE+1} going on side ${FDC_SIDE}`);
-   }
-
    // decrease track
    if((PHI0(FDC_PHASE) && !(PHI1(FDC_PHASE) || PHI2(FDC_PHASE) || PHI3(FDC_PHASE)) && PHI1(old_phase)) ||
       (PHI1(FDC_PHASE) && !(PHI0(FDC_PHASE) || PHI2(FDC_PHASE) || PHI3(FDC_PHASE)) && PHI2(old_phase)) ||
@@ -120,10 +91,6 @@ function write_10(data) {
 // 255 = turn on self sync bytes 
 function write_11(data) {  
    FDC_BITS = data;
-   if(fdc_debug_data_size) {
-      fdc_debug_flush(); 
-      console.log(`data size is ${FDC_BITS === 213 ? 'normal' : 'extended' } (${FDC_BITS})`);
-   }
 }
 
 // 0x13: Data write register
@@ -197,9 +164,6 @@ class Drive {
       if(FDC_ENBL && !FDC_WREQ) {
          FDC_DATA = this.floppy[pos];
          this.track_offset = (this.track_offset + 1) % nic_track_size;
-         if(fdc_debug_read) {
-            fdc_debug_read_buf.push(FDC_DATA);
-         }
       }
    }
 
@@ -211,33 +175,17 @@ class Drive {
       if(FDC_ENBL && FDC_WREQ) {
          this.floppy[pos] = FDC_DATA;
          this.track_offset = (this.track_offset + 1) % nic_track_size;
-         if(fdc_debug_write) {
-            fdc_debug_write_buf.push(FDC_DATA);
-         }
       }
    }
 
    move_head(direction) {
-      fdc_debug_flush();
-
       if(FDC_ENBL) {
          this.track_x2 += direction;
          if(this.track_x2 >= TRACKS_PER_FLOPPY) {
-            this.track_x2 = TRACKS_PER_FLOPPY-1;
-            if(fdc_debug_move) {
-                console.log(`drive ${FDC_DRIVE+1}: seek ${direction===1?'forward':'backward'}, BUMP on track ${this.track_x2/2} (${this.track_x2}/80)`);
-            }
+            this.track_x2 = TRACKS_PER_FLOPPY-1; // bump
          }
          else if(this.track_x2 < 0) {
-            this.track_x2 = 0;
-            if(fdc_debug_move) {
-                console.log(`drive ${FDC_DRIVE+1}: seek ${direction===1?'forward':'backward'}, BUMP on track ${this.track_x2/2} (${this.track_x2}/80)`);
-            }
-         }
-         else {
-            if(fdc_debug_move) {
-               console.log(`drive ${FDC_DRIVE+1}: seek ${direction===1?'forward':'backward'}, track is now ${this.track_x2/2} (${this.track_x2}/80)`);
-            }
+            this.track_x2 = 0;  // bump
          }
       }
    }
