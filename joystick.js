@@ -17,36 +17,59 @@ Remarks: bits are with negated logic, 0 when button in pressed.
          JOY(2) = 1 fire2 button
 */
 
+const JOY_UP    = 1;
+const JOY_DOWN  = 2;
+const JOY_LEFT  = 4;
+const JOY_RIGHT = 8;
+const JOY_FIRE1 = 16;
+const JOY_FIRE2 = 16;
+
 function handleJoyStick(key, press) 
 {
    let joystick_key = true;
    if(press) 
    {
-           if(key === "Numpad8")       joy0 = reset(joy0, 1);
-      else if(key === "Numpad9")       joy0 = reset(joy0, 1+8);
-      else if(key === "Numpad6")       joy0 = reset(joy0, 8);
-      else if(key === "Numpad3")       joy0 = reset(joy0, 8+2); 
-      else if(key === "Numpad2")       joy0 = reset(joy0, 2);
-      else if(key === "Numpad1")       joy0 = reset(joy0, 2+4);
-      else if(key === "Numpad4")       joy0 = reset(joy0, 4);
-      else if(key === "Numpad7")       joy0 = reset(joy0, 4+1);
-      else if(key === "Numpad0")       joy1 = reset(joy1, 16);
-      else if(key === "ControlRight")  joy0 = reset(joy0, 16);
+           if(key === "Numpad8")       joy0 = reset(joy0, JOY_UP);
+      else if(key === "Numpad9")       joy0 = reset(joy0, JOY_UP | JOY_RIGHT);
+      else if(key === "Numpad6")       joy0 = reset(joy0, JOY_RIGHT);
+      else if(key === "Numpad3")       joy0 = reset(joy0, JOY_RIGHT | JOY_DOWN);
+      else if(key === "Numpad2")       joy0 = reset(joy0, JOY_DOWN);
+      else if(key === "Numpad1")       joy0 = reset(joy0, JOY_DOWN | JOY_LEFT);
+      else if(key === "Numpad4")       joy0 = reset(joy0, JOY_LEFT);
+      else if(key === "Numpad7")       joy0 = reset(joy0, JOY_UP | JOY_LEFT);
+      else if(key === "Numpad0")       joy1 = reset(joy1, JOY_FIRE1);
+      else if(key === "ControlRight")  joy0 = reset(joy0, JOY_FIRE2);
       else joystick_key = false;
    }
    else
    {
-           if(key === "Numpad8")       joy0 = set(joy0, 1);
-      else if(key === "Numpad9")       joy0 = set(joy0, 1+8);
-      else if(key === "Numpad6")       joy0 = set(joy0, 8);
-      else if(key === "Numpad3")       joy0 = set(joy0, 8+2); 
-      else if(key === "Numpad2")       joy0 = set(joy0, 2);
-      else if(key === "Numpad1")       joy0 = set(joy0, 2+4);
-      else if(key === "Numpad4")       joy0 = set(joy0, 4);
-      else if(key === "Numpad7")       joy0 = set(joy0, 4+1);
-      else if(key === "Numpad0")       joy1 = set(joy1, 16);
-      else if(key === "ControlRight")  joy0 = set(joy0, 16);
+           if(key === "Numpad8")       joy0 = set(joy0, JOY_UP);
+      else if(key === "Numpad9")       joy0 = set(joy0, JOY_UP | JOY_RIGHT);
+      else if(key === "Numpad6")       joy0 = set(joy0, JOY_RIGHT);
+      else if(key === "Numpad3")       joy0 = set(joy0, JOY_RIGHT | JOY_DOWN);
+      else if(key === "Numpad2")       joy0 = set(joy0, JOY_DOWN);
+      else if(key === "Numpad1")       joy0 = set(joy0, JOY_DOWN | JOY_LEFT);
+      else if(key === "Numpad4")       joy0 = set(joy0, JOY_LEFT);
+      else if(key === "Numpad7")       joy0 = set(joy0, JOY_UP | JOY_LEFT);
+      else if(key === "Numpad0")       joy1 = set(joy1, JOY_FIRE1);
+      else if(key === "ControlRight")  joy0 = set(joy0, JOY_FIRE2);
       else joystick_key = false;
    }
    return joystick_key;
 }
+
+function updateGamePad() {
+   let gamepad = navigator.getGamepads()[0];
+
+   if(gamepad === null) return;
+
+   if(gamepad.axes[0] < -0.5) joy0 = reset(joy0, JOY_LEFT);   else joy0 = set(joy0, JOY_LEFT);
+   if(gamepad.axes[0] >  0.5) joy0 = reset(joy0, JOY_RIGHT);  else joy0 = set(joy0, JOY_RIGHT);
+   if(gamepad.axes[1] < -0.5) joy0 = reset(joy0, JOY_UP);     else joy0 = set(joy0, JOY_UP);
+   if(gamepad.axes[1] >  0.5) joy0 = reset(joy0, JOY_DOWN);   else joy0 = set(joy0, JOY_DOWN);
+
+   if(gamepad.buttons[0].pressed) joy0 = reset(joy0, JOY_FIRE1);   else joy0 = set(joy0, JOY_FIRE1);
+   if(gamepad.buttons[1].pressed) joy1 = reset(joy1, JOY_FIRE1);   else joy1 = set(joy1, JOY_FIRE1);
+}
+
+

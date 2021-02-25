@@ -1,5 +1,7 @@
 "use strict";
 
+// TODO restore IN(0x13)=0xFF, IN(0x12)=0x13 when no drive selected (@Bonstra test)
+// TODO add a machine reset (FDC ecc..)
 // TODO build of CP/M ?
 // TODO modularize, avoid global variables
 // TODO stop() resumes after browser tab reactivates
@@ -158,6 +160,7 @@ function system_tick(nticks) {
       if(cycle>=cyclesPerLine) {
          cycle-=cyclesPerLine;
          drawFrame_y();
+         updateGamePad();
       }
    }
 }
