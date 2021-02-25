@@ -14,7 +14,7 @@ class Audio {
             // console.log("warning: audio queue is empty");
             return;
          }
-         else if(this.buffers.length > 10) {
+         else if(this.buffers.length > 2) {
             // console.log(`warning: audio queue is getting longer: ${audio_buffers_queue.length}`);
             this.buffers = [];
             return;
