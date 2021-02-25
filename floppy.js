@@ -1,21 +1,21 @@
 // FDC internal registers
 
-let FDC_WREQ;
-let FDC_ENBL;
-let FDC_PHASE;
-let FDC_SIDE;
-let FDC_DRIVE;
-let FDC_BITS;
-let FDC_DATA;
+let FDC_WREQ_n;   // write request
+let FDC_ENBL;     // enable
+let FDC_PHASE;    // step motor phase
+let FDC_SIDE;     // side of the floppy
+let FDC_DRIVE;    // drive number (0,1)
+let FDC_BITS;     // bit sync (not used here)
+let FDC_DATA;     // read/write data byte
 
 function FDC_reset() {
-   FDC_WREQ  = 0;
-   FDC_ENBL  = 0;
-   FDC_PHASE = 0;
-   FDC_SIDE  = 0;
-   FDC_DRIVE = -1;
-   FDC_BITS  = 255;
-   FDC_DATA  = 0;
+   FDC_WREQ_n = 1;
+   FDC_ENBL   = 0;
+   FDC_PHASE  = 0;
+   FDC_SIDE   = 0;
+   FDC_DRIVE  = -1;
+   FDC_BITS   = 255;
+   FDC_DATA   = 0;
 }
 
 function PHI0(n) { return (((n)>>0)&1); }
@@ -58,13 +58,12 @@ function write_10(data) {
    //     enabled when its bit is set.
 
    const old_phase = FDC_PHASE;
-   const old_side  = FDC_SIDE;
 
-   FDC_SIDE  = bit(data, 7);
-   FDC_WREQ  = not_bit(data, 6);
-   FDC_DRIVE = bit(data, 5);
-   FDC_ENBL  = bit(data, 4);
-   FDC_PHASE = data & 0b1111;
+   FDC_SIDE   = (data >> 7) & 1;
+   FDC_WREQ_n = (data >> 6) & 1;
+   FDC_DRIVE  = (data >> 5) & 1;
+   FDC_ENBL   = (data >> 4) & 1;
+   FDC_PHASE  = data & 0x0f;
 
    // decrease track
    if((PHI0(FDC_PHASE) && !(PHI1(FDC_PHASE) || PHI2(FDC_PHASE) || PHI3(FDC_PHASE)) && PHI1(old_phase)) ||
@@ -83,7 +82,6 @@ function write_10(data) {
    {
       drives[FDC_DRIVE].move_head(+1);
    }
-   //else console.log("phase not affected");
 }
 
 // 0x11: Latch register 2
@@ -125,7 +123,6 @@ function read_12() {
    let buffer_status = 1; // always ready
    let write_enabled = drives[FDC_DRIVE].write_enabled;
    data = (buffer_status << 7) | write_enabled;
-   //console.log(`fdc 0x12: read status register of drive ${fdc_drive} is $${hex(data)}`);
    return data;
 }
 
@@ -142,10 +139,10 @@ function read_13() {
 
 // =====================================================================================
 
-const nic_track_size = 8192; // 327680 / 40
-const nic_sector_size = nic_track_size / 16;
-const nic_tracks = 40;
-const FLOPPY_SIDE = nic_track_size * nic_tracks;
+const NIC_TRACK_SIZE = 8192; // 327680 / 40
+const NIC_SECTOR_SIZE = NIC_TRACK_SIZE / 16;
+const NIC_TRACKS = 40;
+const FLOPPY_SIDE = NIC_TRACK_SIZE * NIC_TRACKS;
 const FLOPPY_SIZE = 2 * FLOPPY_SIDE;
 const TRACKS_PER_FLOPPY = 80; // 80ish ?
 
@@ -157,13 +154,17 @@ class Drive {
       this.write_enabled = 0;
    }
 
+   getpos(track, side) {
+      return (track * NIC_TRACK_SIZE) + (side * FLOPPY_SIDE);
+   }
+
    read_byte() {
       if(this.track_x2 % 2 == 1) return 0; // does not read on even tracks: TODO simulate 80 track disk
       const track = this.track_x2 / 2;
-      const pos = track * nic_track_size + this.track_offset + FDC_SIDE * FLOPPY_SIDE;
-      if(FDC_ENBL && !FDC_WREQ) {
+      const pos = this.getpos(track, FDC_SIDE) + this.track_offset;
+      if(FDC_ENBL && FDC_WREQ_n) {
          FDC_DATA = this.floppy[pos];
-         this.track_offset = (this.track_offset + 1) % nic_track_size;
+         this.track_offset = (this.track_offset + 1) % NIC_TRACK_SIZE;
       }
    }
 
@@ -171,22 +172,18 @@ class Drive {
    {
       if(this.track_x2 % 2 == 1) return 0; // does not read on even tracks: TODO simulate 80 track disk
       const track = this.track_x2 / 2;
-      const pos = track * nic_track_size + this.track_offset + FDC_SIDE * FLOPPY_SIDE;
-      if(FDC_ENBL && FDC_WREQ) {
+      const pos = this.getpos(track, FDC_SIDE) + this.track_offset;
+      if(FDC_ENBL && !FDC_WREQ_n) {
          this.floppy[pos] = FDC_DATA;
-         this.track_offset = (this.track_offset + 1) % nic_track_size;
+         this.track_offset = (this.track_offset + 1) % NIC_TRACK_SIZE;
       }
    }
 
    move_head(direction) {
       if(FDC_ENBL) {
          this.track_x2 += direction;
-         if(this.track_x2 >= TRACKS_PER_FLOPPY) {
-            this.track_x2 = TRACKS_PER_FLOPPY-1; // bump
-         }
-         else if(this.track_x2 < 0) {
-            this.track_x2 = 0;  // bump
-         }
+         if(this.track_x2 >= TRACKS_PER_FLOPPY) this.track_x2 = TRACKS_PER_FLOPPY-1;
+         else if(this.track_x2 < 0)             this.track_x2 = 0;
       }
    }
 
