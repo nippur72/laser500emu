@@ -98,19 +98,19 @@ function keyDown(e) {
 
    // *** special (non characters) keys ***   
 
+   // CTRL+ALT+BREAK is power OFF/ON
+   if(e.key=="Cancel" && e.altKey && e.ctrlKey) {
+      power();
+      e.preventDefault();
+      return;
+   }
+
    // RESET key is mapped as ALT+R, CTRL+Break or Pause
    if(e.key=="Cancel" || e.key=="Pause" || (e.code == "KeyR" && e.altKey)) {
       cpu.reset();      
       e.preventDefault(); 
       return;
    }
-
-   // ALT+P is power OFF/ON
-   if(e.code == "KeyP" && e.altKey) {
-      power();
-      e.preventDefault();
-      return;
-   }   
 
    // ALT+Left is rewind tape
    if(e.code == "ArrowLeft" && e.altKey) {
