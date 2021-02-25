@@ -84,7 +84,7 @@ dropZone.addEventListener('drop', e => {
    }
 });
 
-function droppedFile(outName, bytes) {   
+async function droppedFile(outName, bytes) {
 
    const wav = /\.wav$/i;
    if(wav.test(outName)) {
@@ -114,7 +114,7 @@ function droppedFile(outName, bytes) {
 
    const bin = /\.bin$/i;
    if(bin.test(outName)) {     
-      writeFile(outName, bytes)
+      await storage.writeFile(outName, bytes)
       crun(outName);         
    }
 }
