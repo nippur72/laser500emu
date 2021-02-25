@@ -6,6 +6,7 @@ let FDC_PHASE;
 let FDC_SIDE;
 let FDC_DRIVE;
 let FDC_BITS;
+let FDC_DATA;
 
 function FDC_reset() {
    FDC_WREQ  = 0;
@@ -14,6 +15,7 @@ function FDC_reset() {
    FDC_SIDE  = 0;
    FDC_DRIVE = -1;
    FDC_BITS  = 255;
+   FDC_DATA  = 0;
 }
 
 function PHI0(n) { return (((n)>>0)&1); }
@@ -22,12 +24,12 @@ function PHI2(n) { return (((n)>>2)&1); }
 function PHI3(n) { return (((n)>>3)&1); }
 
 // debug flags
-let fdc_debug_move      = true;
-let fdc_debug_data_size = true;
-let fdc_debug_read      = true;
-let fdc_debug_write     = true;
-let fdc_debug_rw_short  = true;
-let fdc_debug_side      = true;
+let fdc_debug_move      = false;
+let fdc_debug_data_size = false;
+let fdc_debug_read      = false;
+let fdc_debug_write     = false;
+let fdc_debug_rw_short  = false;
+let fdc_debug_side      = false;
 let fdc_debug_read_buf  = [];
 let fdc_debug_write_buf = [];
 
@@ -130,8 +132,9 @@ function write_11(data) {
 // 7-0    Data to write to the controller's buffer. Should be written when bit 7
 // 	    of status register is set.
 
-function write_13(data) {  
-   drives[FDC_DRIVE].write_byte(data);
+function write_13(data) {
+   FDC_DATA = data;
+   drives[FDC_DRIVE].write_byte();
 }
 
 // 0x12: Status register
@@ -166,7 +169,8 @@ function read_12() {
 //        of status register is set.
 function read_13() {     
    if(FDC_DRIVE === -1) return 0xFF; // @Bonstra test on no drive select
-   return drives[FDC_DRIVE].read_byte();
+   drives[FDC_DRIVE].read_byte()
+   return FDC_DATA;
 }
 
 // =====================================================================================
@@ -184,35 +188,31 @@ class Drive {
       this.track_offset = 0;
       this.floppy = image === undefined ? new Uint8Array(FLOPPY_SIZE) : this.resize(image);
       this.write_enabled = 0;
-      this.fdc_data = 0;    // latch
    }
 
    read_byte() {
       if(this.track_x2 % 2 == 1) return 0; // does not read on even tracks: TODO simulate 80 track disk
       const track = this.track_x2 / 2;
       const pos = track * nic_track_size + this.track_offset + FDC_SIDE * FLOPPY_SIDE;
-      let data = this.fdc_data;
       if(FDC_ENBL && !FDC_WREQ) {
-         data = this.floppy[pos];
+         FDC_DATA = this.floppy[pos];
          this.track_offset = (this.track_offset + 1) % nic_track_size;
          if(fdc_debug_read) {
-            fdc_debug_read_buf.push(data);
+            fdc_debug_read_buf.push(FDC_DATA);
          }
       }
-      return data;
    }
 
-   write_byte(data)
+   write_byte()
    {
       if(this.track_x2 % 2 == 1) return 0; // does not read on even tracks: TODO simulate 80 track disk
       const track = this.track_x2 / 2;
       const pos = track * nic_track_size + this.track_offset + FDC_SIDE * FLOPPY_SIDE;
-      this.fdc_data = data;
       if(FDC_ENBL && FDC_WREQ) {
-         this.floppy[pos] = data;
+         this.floppy[pos] = FDC_DATA;
          this.track_offset = (this.track_offset + 1) % nic_track_size;
          if(fdc_debug_write) {
-            fdc_debug_write_buf.push(data);
+            fdc_debug_write_buf.push(FDC_DATA);
          }
       }
    }
