@@ -23,30 +23,30 @@ function PHI1(n) { return (((n)>>1)&1); }
 function PHI2(n) { return (((n)>>2)&1); }
 function PHI3(n) { return (((n)>>3)&1); }
 
-function floppy_read_port(port) {      
+function FDC_io_read(port) {
 	switch(port)
    {
-      case 0x12: return read_12();  // FDC status register
-      case 0x13: return read_13();  // FDC data register
+      case 0x12: return FDC_read_port_12h();  // FDC status register
+      case 0x13: return FDC_read_port_13h();  // FDC data register
       default:
          console.log("FDC: unknown read");
          return 0x00;
    }   
 }
 
-function floppy_write_port(port, data) {      
+function FDC_io_write(port, data) {
 	switch(port)
    {
-      case 0x10: write_10(data); return; // FDC control register 1
-      case 0x11: write_11(data); return; // FDC control register 2
-      case 0x13: write_13(data); return; // FDC data register
+      case 0x10: FDC_write_port_10h(data); return; // FDC control register 1
+      case 0x11: FDC_write_port_11h(data); return; // FDC control register 2
+      case 0x13: FDC_write_port_12h(data); return; // FDC data register
       default:
          console.log("FDC: unknown write");
          return;
    }
 }
 
-function write_10(data) {
+function FDC_write_port_10h(data) {
    // 0x10: Latch register 1
    // 7	 Side select:   0 = side 0, 1 = side 1
    // 6	 Write request: 0 = write, 1 = read   Controls the /WREQ output line on the controller.
@@ -87,7 +87,7 @@ function write_10(data) {
 // 0x11: Latch register 2
 // 213 = turn off self sync bytes 
 // 255 = turn on self sync bytes 
-function write_11(data) {  
+function FDC_write_port_11h(data) {
    FDC_BITS = data;
 }
 
@@ -97,7 +97,7 @@ function write_11(data) {
 // 7-0    Data to write to the controller's buffer. Should be written when bit 7
 // 	    of status register is set.
 
-function write_13(data) {
+function FDC_write_port_12h(data) {
    FDC_DATA = data;
    drives[FDC_DRIVE].write_byte();
 }
@@ -115,7 +115,7 @@ function write_13(data) {
 // 	                          1 = write-protected
 // 	     Status of the WPROT input (for selected drive).
 //
-function read_12() {
+function FDC_read_port_12h() {
    if(FDC_DRIVE === -1) {
       return 0x13; // @Bonstra test on no drive selected 0x13 = not ready + write protected + reserved
    }
@@ -131,7 +131,7 @@ function read_12() {
 // ---------------------------------------
 // 7-0    Data to read from the controller's buffer. Should be read when bit 7
 //        of status register is set.
-function read_13() {     
+function FDC_read_port_13h() {
    if(FDC_DRIVE === -1) return 0xFF; // @Bonstra test on no drive select
    drives[FDC_DRIVE].read_byte()
    return FDC_DATA;

@@ -81,7 +81,7 @@ function io_read(ioport) {
       case 0x12:
       case 0x13:
       case 0x14:
-         return emulate_fdc ? floppy_read_port(port) : (port | 1);   
+         return emulate_fdc ? FDC_io_read(port) : (port | 1);
    }
    console.warn(`read from unknown port ${hex(port)}h`);
    return port | 1; // this is the value returned from unused ports
@@ -126,7 +126,7 @@ function io_write(port, value) {
       case 0x12:
       case 0x13:
       case 0x14:
-         if(emulate_fdc) floppy_write_port(port & 0xFF, value); 
+         if(emulate_fdc) FDC_io_write(port & 0xFF, value);
          return;     
       default:
          console.warn(`write on unknown port ${hex(port)}h value ${hex(value)}h`);
