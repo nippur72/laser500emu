@@ -1,66 +1,8 @@
-/**** utility functions ****/
-
-function dumpMem(start, end, rows) {
-   if(rows==undefined) rows=16;
-   let s="\r\n";
-   for(let r=start;r<=end;r+=rows) {
-      s+= hex(r, 4) + ": ";      
-      for(let c=0;c<rows && (r+c)<=end;c++) {
-         const byte = mem_read(r+c);
-         s+= hex(byte)+" ";
-      }
-      for(let c=0;c<rows && (r+c)<=end;c++) {
-         const byte = mem_read(r+c);
-         s+= (byte>32 && byte<127) ? String.fromCharCode(byte) : '.' ;
-      }
-      s+="\n";
-   }
-   console.log(s);
-}
-
-function hexDump(memory, start, end, rows) {
-   let s="";
-   for(let r=start;r<end;r+=rows) {
-      s+= hex(r, 4) + ": ";      
-      for(let c=0;c<rows;c++) {
-         const byte = memory[r+c];
-         s+= hex(byte)+" ";
-      }
-      for(let c=0;c<rows;c++) {
-         const byte = memory[r+c];
-         s+= (byte>32 && byte<127) ? String.fromCharCode(byte) : '.' ;
-      }
-      s+="\n";
-   }
-   return s;
-}
-
-function hex(value, size) {
-   if(size === undefined) size = 2;
-   let s = "0000" + value.toString(16);
-   return s.substr(s.length - size);
-}
-
-function bin(value, size) {
-   if(size === undefined) size = 8;
-   let s = "0000000000000000" + value.toString(2);
-   return s.substr(s.length - size);
-}
+// **** machine-specific utility functions ****
 
 function cpu_status() {
    const state = cpu.getState();
    return `A=${hex(state.a)} BC=${hex(state.b)}${hex(state.c)} DE=${hex(state.d)}${hex(state.e)} HL=${hex(state.h)}${hex(state.l)} IX=${hex(state.ix,4)} IY=${hex(state.iy,4)} SP=${hex(state.sp,4)} PC=${hex(state.pc,4)} S=${state.flags.S}, Z=${state.flags.Z}, Y=${state.flags.Y}, H=${state.flags.H}, X=${state.flags.X}, P=${state.flags.P}, N=${state.flags.N}, C=${state.flags.C}`;   
-}
-
-function mem_write_word(address, word) {
-   mem_write(address + 0, word & 0xFF);
-   mem_write(address + 1, (word & 0xFF00) >> 8);
-}
-
-function mem_read_word(address) {
-   const lo = mem_read(address + 0);
-   const hi = mem_read(address + 1);
-   return lo+hi*256;
 }
 
 async function crun(filename) {
@@ -294,38 +236,6 @@ function power() {
    setTimeout(()=>cpu.reset(),200);
 }
 
-function stop() {   
-   stopped = true;
-   console.log("emulation stopped");
-}
-
-function go() {
-   stopped = false;
-   oneFrame();
-   console.log("emulation resumed");
-}
-
-function info() {
-   const average = averageFrameTime;
-   console.log(`frame rate: average ${Math.round(average*10,2)/10} ms (${Math.round(1000/average)} Hz)`);
-}
-
-function set_bit(value, bitn) {
-   return value | (1<<bitn);
-}
-
-function reset_bit(value, bitn) {
-   return value & ~(1<<bitn);
-}
-
-function set(value, bitmask) {
-   return value | bitmask; 
-}
-
-function reset(value, bitmask) {
-   return value & (0xFF ^ bitmask);
-}
-
 function saveState() {
    const saveObject = {
       bank4: Array.from(bank4),
@@ -404,14 +314,6 @@ function dumpPointers() {
 let debugBefore = undefined;
 let debugAfter = undefined;
 
-function bit(b,n) {
-   return (b & (1<<n))>0 ? 1 : 0;
-} 
-
-function not_bit(b,n) {
-   return (b & (1<<n))>0 ? 0 : 1;
-} 
-
 function dumpStack() {
    const sp = cpu.getState().sp;
 
@@ -419,12 +321,4 @@ function dumpStack() {
       const word = mem_read_word(t);
       console.log(`${hex(t,4)}: ${hex(word,4)}  (${word})`);
    }
-}
-
-function endsWith(s, value) {
-   return s.substr(-value.length) === value;
-}
-
-function copyArray(source, dest) {
-   source.forEach((e,i)=>dest[i] = e);
 }
