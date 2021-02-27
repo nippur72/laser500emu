@@ -15793,7 +15793,7 @@ CHECK_EXPANSION_BANKS:
    ld   a,(8665h)
    out  (40h),a
 
-   call 6924h
+   call 6924h   ; try boot from disk
    im   1
    ei   
    jp   22dch
