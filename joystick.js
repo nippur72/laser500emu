@@ -59,8 +59,11 @@ function handleJoyStick(key, press)
 }
 
 function updateGamePad() {
-   let gamepad = navigator.getGamepads()[0];
+   let gamepads = navigator.getGamepads();
+   if(gamepads.length < 1) return;
 
+   // joy 0
+   let gamepad = gamepads[0];
    if(gamepad === null) return;
 
    if(gamepad.axes[0] < -0.5) joy0 = reset(joy0, JOY_LEFT);   else joy0 = set(joy0, JOY_LEFT);
