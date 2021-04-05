@@ -45,7 +45,7 @@ LOW RAM MAP
 85F9      latch of I/O image (was :?? bit 3: if 1 then do not read keyboard during interrupt)
 85FA      bit 1: turn on/off inverse text 
           bit 3: turn on/off key beep
-          bit 5: 0=do not read keyboard during interrupt
+          bit 5: 0=cursor off, 1=cursor is on
           bit 3: ??
           bit 2: ??
 85FB      CAPSLOCK: 

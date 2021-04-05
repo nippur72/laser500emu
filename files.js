@@ -1,4 +1,4 @@
-async function load(filename, p) {   
+async function load(filename, p) {
     if(!await storage.fileExists(filename)) {
        console.log(`file "${filename}" not found`);
        return;
@@ -6,7 +6,7 @@ async function load(filename, p) {
 
     const ext = filename.substr(-4).toLowerCase();
 
-         if(ext === ".bin") await load_file(filename, p);
+         if(ext === ".bin") await load_bin(filename, p);
     else if(ext === ".dsk") await load_disk(filename, p);
     else if(ext === ".nic") await load_disk(filename, p);
     else if(ext === ".emu") await load_state(filename);
@@ -38,7 +38,7 @@ function loadBytes(bytes, address, fileName) {
     console.log(`loaded "${fileName}" ${bytes.length} bytes from ${hex(startAddress,4)}h to ${hex(endAddress,4)}h`);
 }
 
-async function load_file(fileName, address) {
+async function load_bin(fileName, address) {
     const bytes = await storage.readFile(fileName);
     loadBytes(bytes, address, fileName);
     cpu.reset();

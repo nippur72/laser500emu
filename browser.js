@@ -149,27 +149,21 @@ async function parseQueryStringCommands() {
       restoreState();
    }
 
-   /*
-   // old version
-   if(options.load !== undefined) {
-      const name = options.load;      
-      fetchProgramAll(name);            
-   }
-   */
-
    if(options.load !== undefined) {
       const name = options.load;
       setTimeout(async ()=>{
+         wait_for_cursor();
          if(name.startsWith("http")) {
             // external load
-            externalLoad("loadPrg", name);
+            let bin = await externalLoad("loadPrg", name);
+            loadBytes(bin);
             pasteLine("RUN\r\n");
          }
          else {
             // internal load
             await fetchProgram(name);
          }
-      }, 4000);
+      }, 500);
    }
 
    if(options.nodisk === true) {

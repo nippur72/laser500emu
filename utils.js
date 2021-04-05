@@ -92,6 +92,13 @@ function pasteBasicChar(char) {
    renderAllLines();
 }
 
+function wait_for_cursor() {
+   while(1) {
+      renderAllLines();
+      if(bit(mem_read(0x85fa),5)==1) return;
+   }
+}
+
 function evkey(pcKey) {
    const ev = {
       code: pcKey,

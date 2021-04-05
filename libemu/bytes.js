@@ -136,3 +136,9 @@ function wait(time) {
       }, time);
    });
 }
+
+function getFileExtension(fileName) {
+   let s = fileName.toLowerCase().split(".");
+   if(s.length == 1) return "";
+   return "." + s[s.length-1];
+}
