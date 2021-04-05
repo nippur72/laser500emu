@@ -95,7 +95,7 @@ function pasteBasicChar(char) {
 function wait_for_cursor() {
    while(1) {
       renderAllLines();
-      if(bit(mem_read(0x85fa),5)==1) return;
+      if((total_cycles > cpuSpeed/4) && bit(mem_read(0x85fa),5)==1) return;
    }
 }
 
