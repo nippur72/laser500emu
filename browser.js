@@ -155,7 +155,7 @@ async function parseQueryStringCommands() {
          wait_for_cursor();
          if(name.startsWith("http")) {
             // external load
-            let bin = await externalLoad("loadPrg", name);
+            let bin = await externalLoad(name);
             loadBytes(bin);
             pasteLine("RUN\r\n");
          }
