@@ -9,6 +9,7 @@ async function load(filename, p) {
          if(ext === ".bin") await load_bin(filename, p);
     else if(ext === ".dsk") await load_disk(filename, p);
     else if(ext === ".nic") await load_disk(filename, p);
+    else if(ext === ".bas") await load_bas(filename);
     else if(ext === ".emu") await load_state(filename);
     else console.log("give filename .bin, .dsk or .emu extension");
 }
@@ -82,4 +83,10 @@ async function load_disk(diskname, drive) {
     drives[drive-1].floppy = bytes;
     console.log(`disk in drive ${drive} has been loaded with "${diskname}" (${bytes.length} bytes)`);
     cpu.reset();
+}
+
+async function load_bas(fileName, address) {
+    const bytes = await storage.readFile(fileName);
+    const text = uint8ToString(bytes);
+    pasteBasic(text);
 }

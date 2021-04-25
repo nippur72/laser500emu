@@ -82,6 +82,16 @@ function io_read(ioport) {
       case 0x13:
       case 0x14:
          return emulate_fdc ? FDC_io_read(port) : (port | 1);
+
+      // fictional serial device
+      case 0x78:
+         // serial data read
+         return serial.cpu_read_data();
+
+      case 0x7a:
+         // serial status, always ready
+         return serial.cpu_read_status();
+
    }
    console.warn(`read from unknown port ${hex(port)}h`);
    return port | 1; // this is the value returned from unused ports
@@ -127,7 +137,19 @@ function io_write(port, value) {
       case 0x13:
       case 0x14:
          if(emulate_fdc) FDC_io_write(port & 0xFF, value);
-         return;     
+         return;
+
+      // fictional serial device
+      case 0x78:
+         // serial data
+         serial.cpu_write_data(value);
+         return;
+
+      case 0x7a:
+         // serial command, ignored
+         serial.cpu_write_command(value);
+         return;
+
       default:
          console.warn(`write on unknown port ${hex(port)}h value ${hex(value)}h`);
    }   

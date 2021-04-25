@@ -1,3 +1,13 @@
+USEFUL SUBROUTINES
+==================
+
+33H READSC Reads a sector from disk
+           Track no. is 8608H
+           Sector no. in 8609H
+           Primary buffer pointer in 860DH (reserve 342 bytes)
+           Data buffer pointer in 860BH (reserve 256 bytes)
+           Reads table pointer in 860FH (at power up the table is modev to RAM A196H-A1FFH) (105 bytes)
+
 LOW RAM MAP
 ===========
 ```

@@ -43,7 +43,7 @@ function pasteLong(str) {
    pasteQueue(lines);
 }
 
-function pasteBasic(text) {   
+function pasteBasic(text) {
    const lines = text.split("\n");   
    for(let t=0; t<lines.length; t++) {
       const linea = lines[t];
@@ -328,4 +328,23 @@ function dumpStack() {
       const word = mem_read_word(t);
       console.log(`${hex(t,4)}: ${hex(word,4)}  (${word})`);
    }
+}
+
+
+// *************************************************************************************
+// connects to bbs.sblendorio.eu
+// requires TERM.COM
+async function bbs() {
+   let modem = new BBS();
+   modem.debug = false;
+
+   modem.onreceive = (data) => data.forEach(e=>serial.receive_from_external(e));
+   serial.on_send_to_external = (data) => modem.send([data]);
+
+   try {
+      await modem.connect("wss://bbs.sblendorio.eu:8082","bbs");
+   }
+   catch(err) {
+      console.log("BBS: websocket connection failed");
+   }   
 }
