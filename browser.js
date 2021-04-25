@@ -86,8 +86,9 @@ dropZone.addEventListener('drop', e => {
 
 async function droppedFile(outName, bytes) {
 
-   const wav = /\.wav$/i;
-   if(wav.test(outName)) {
+   const ext = getFileExtension(outName);
+
+   if(ext === ".wav") {
       // WAV files
       //console.log("WAV file dropped");
       const info = decodeSync(bytes.buffer);
@@ -104,18 +105,23 @@ async function droppedFile(outName, bytes) {
       return;
    }
 
-   const dsk = /\.nic$/i;
-   if(dsk.test(outName)) {
+   if(ext === ".nic") {
       drag_drop_disk(outName, bytes);
       load(outName, 1);
       pasteLine("DIR\r\n");
       return;
    }
 
-   const bin = /\.bin$/i;
-   if(bin.test(outName)) {     
+   if(ext === ".bin") {
       await storage.writeFile(outName, bytes)
-      crun(outName);         
+      crun(outName);
+      return;
+   }
+
+   if(ext === ".bas") {
+      await storage.writeFile(outName, bytes)
+      load(outName);
+      return;
    }
 }
 

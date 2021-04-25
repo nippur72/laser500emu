@@ -127,7 +127,7 @@ function buildPalette() {
    setPalette(11, 0x44, 0xff, 0xff);  // bright cyan
    setPalette(12, 0xff, 0x44, 0x55);  // bright red
    setPalette(13, 0xff, 0x99, 0xff);  // bright magenta
-   setPalette(14, 0xcc, 0xff, 0x00);  // bright yellow
+   setPalette(14, 0xee, 0xff, 0x00);  // bright yellow
    setPalette(15, 0xff, 0xff, 0xff);  // white
 }
 
