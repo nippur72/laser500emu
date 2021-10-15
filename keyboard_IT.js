@@ -1,5 +1,3 @@
-let keyboard_buffer = [];
-
 function pckey_to_laserkey_ITA(code, key, e) {
    // console.log(code, key, e);
 
