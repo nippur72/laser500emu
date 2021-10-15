@@ -56,13 +56,15 @@ function calculateGeometry() {
    canvas.height = SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1);
    canvasContext = canvas.getContext('2d');
 
+   /*
    // screen is the inner canvas that contains the emulated PAL screen
    screenCanvas = document.createElement("canvas");
    screenCanvas.width = SCREEN_W;
    screenCanvas.height = SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1);
    screenContext = screenCanvas.getContext('2d');
+   */
 
-   imageData = screenContext.getImageData(0, 0, SCREEN_W, SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
+   imageData = canvasContext.createImageData(SCREEN_W, SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
    
    bmp = new Uint32Array(imageData.data.buffer);   
 }
@@ -499,7 +501,7 @@ function drawFrame_y()
 
 function updateCanvas() {
    canvasContext.putImageData(imageData, 0, 0);
-   canvasContext.drawImage(screenCanvas, 0, 0, canvas.width, canvas.height);
+   //canvasContext.drawImage(screenCanvas, 0, 0, canvas.width, canvas.height);
 }
 
 function drawFrame_y_border(y) 
