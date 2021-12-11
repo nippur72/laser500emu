@@ -3,7 +3,8 @@
 function mapped_io_read(address) {   
    // KA and KD are lines coming from keyboard 
    // mapped respectively on address and data bus      
-   if(address>=0x2800 && address<=0x2FFF) {      
+   if(address>=0x2800 && address<=0x2FFF) {
+      //console.log(`=== mappeed io read ${hex(address,4)}`);
       return (cassette_bit_in << 7) | keyboard_poll(address);   
    }
    return 0x7f;
@@ -25,5 +26,10 @@ function mapped_io_write(address, value) {
       vdc_graphic_mode_enabled = bit(value,3);
       cassette_bit_out         = bit(value,2);  
       speaker_A                = bit(value,0);
+      //console.log(`=== mappeed io write ${hex(address,4)} ${hex(value)}`);
+      //console.log(`caps_lock_bit            = ${caps_lock_bit           }`);
+      //console.log(`vdc_graphic_mode_enabled = ${vdc_graphic_mode_enabled}`);
+      //console.log(`cassette_bit_out         = ${cassette_bit_out        }`);
+      //console.log(`speaker_A                = ${speaker_A               }`);
    }
 }
