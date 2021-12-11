@@ -104,14 +104,13 @@ function io_write(port, value) {
    if(hi>0 && (p>=0x10 && p<=0x1f)) {
       console.log(`port write ${hex(port & 0xFF)} hi byte set to ${hex(hi)}, value=${hex(value)}`);
    }
-   */   
-   // console.log(`io write ${hex(port)} ${hex(value)}`)  
+   */
    switch(port & 0xFF) {
       case 0x40: banks[0] = value & 0xF; break;
       case 0x41: banks[1] = value & 0xF; break;
       case 0x42: banks[2] = value & 0xF; break;
       case 0x43: banks[3] = value & 0xF; break;
-      case 0x44:          
+      case 0x44:
          vdc_page_7 = ((value & 0b1000) >> 3) === 0;
          vdc_text80_enabled = value & 1; 
          vdc_border_color = (value & 0xF0) >> 4
@@ -120,11 +119,19 @@ function io_write(port, value) {
          else if((value & 0b111) === 0b011) vdc_graphic_mode_number = 3;
          else if((value & 0b111) === 0b110) vdc_graphic_mode_number = 2;
          else if((value & 0b111) === 0b111) vdc_graphic_mode_number = 1;
-         else if((value & 0b110) === 0b100) vdc_graphic_mode_number = 0;                  
+         else if((value & 0b110) === 0b100) vdc_graphic_mode_number = 0;
+         //console.log(`=== io write ${hex(port & 0xFF)} ${hex(value)}`)
+         //console.log(`vdc_page_7 = ${vdc_page_7}`);
+         //console.log(`vdc_text80_enabled = ${vdc_text80_enabled}`);
+         //console.log(`vdc_border_color = ${vdc_border_color}`);
+         //console.log(`vdc_graphic_mode_number = ${vdc_graphic_mode_number}`);
          break;
-      case 0x45: 
+      case 0x45:
          vdc_text80_foreground = (value & 0xF0) >> 4;
-         vdc_text80_background = value & 0x0F;         
+         vdc_text80_background = value & 0x0F;
+         //console.log(`=== io write ${hex(port & 0xFF)} ${hex(value)}`)
+         //console.log(`vdc_text80_foreground = ${vdc_text80_foreground}`);
+         //console.log(`vdc_text80_background = ${vdc_text80_background}`);
          break;
       case 0x0d:
          printerWrite(value);
