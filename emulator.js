@@ -1,5 +1,6 @@
 "use strict";
 
+// TODO joysticks ports like in laser 310 (also fpga ?)
 // TODO restore IN(0x13)=0xFF, IN(0x12)=0x13 when no drive selected (@Bonstra test)
 // TODO add a machine reset (FDC ecc..)
 // TODO build of CP/M ?
