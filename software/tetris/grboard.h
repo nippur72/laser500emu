@@ -3,11 +3,8 @@
 #define CRUNCH_CHAR1  65          /* when a line is crunched, it's filled orange first */
 #define CRUNCH_CHAR2  66          /* and then is erased with black */
 
-#define STARTBOARD_X 13           /* X start position of the board on the screen */
-#define STARTBOARD_Y 1            /* Y start position of the board on the screen */
-
-#define NEXT_X 31
-#define NEXT_Y 19
+#define STARTBOARD_X 15           /* X start position of the board on the screen */
+#define STARTBOARD_Y 2            /* Y start position of the board on the screen */
 
 #define BOARD_CHAR_LEFT  6
 #define BOARD_CHAR_RIGHT 6
@@ -26,6 +23,20 @@
 #define CRUNCH_CHAR_2  32
 #define CRUNCH_COLOR_2 0xF0
 
+#define POS_SCORE_X 29
+#define POS_SCORE_Y 1
+
+#define POS_LEVEL_X 29
+#define POS_LEVEL_Y 7
+
+#define POS_LINES_X 29
+#define POS_LINES_Y 13
+
+#define POS_NEXT_X 3
+#define POS_NEXT_Y 1
+
+#define NEXT_X (POS_NEXT_X+2)
+#define NEXT_Y (POS_NEXT_Y+3)
 
 void updateScore();
 void drawPlayground();
@@ -47,20 +58,6 @@ void gr_crunch_line(byte line, byte crunch_char, byte crunch_color);
 #include "pieces.h"
 #include "ckboard.h"
 
-// waits until the screen_buffer has been copied on the scree by the interrupt routine
-void wait_interrupt() {
-   __asm
-   EXTERN _irq_trigger;
-   ld hl, _irq_trigger
-   wait_interrupt_here:
-   ld a, (hl)
-   cp #0
-   jr z, wait_interrupt_here
-   xor a
-   ld (hl),a
-   __endasm;
-}
-
 extern long int score;
 
 // update score table
@@ -68,13 +65,13 @@ char tmp[32];
 void updateScore() {
    byte color = FG_BG(WHITE,BLACK);
    sprintf(tmp,"%6ld",score);
-   gr4_prints(30,3,tmp,color,FONTS);
+   gr4_prints(POS_SCORE_X+1,POS_SCORE_Y+2,tmp,color,FONTS);
 
    sprintf(tmp,"%6d",total_lines);
-   gr4_prints(30,8,tmp,color,FONTS);
+   gr4_prints(POS_LINES_X+1,POS_LINES_Y+2,tmp,color,FONTS);
 
    sprintf(tmp,"%6d",level);
-   gr4_prints(30,13,tmp,color,FONTS);
+   gr4_prints(POS_LEVEL_X+1,POS_LEVEL_Y+2,tmp,color,FONTS);
 }
 
 #define FRAME_VERT  7
@@ -86,7 +83,7 @@ void updateScore() {
 #define FRAME_SE_CORNER 12
 
 void drawFrame(int x, int y, int w, int h, byte color) {
-   int i;
+   byte i;
    for (i=1; i<w-1; i++) {      
       gr4_tile(x+i, y    , FRAME_VERT, color, FONTS);
       gr4_tile(x+i, y+h-1, FRAME_VERT, color, FONTS);
@@ -102,38 +99,44 @@ void drawFrame(int x, int y, int w, int h, byte color) {
    gr4_tile(x+w-1 ,y+h-1, FRAME_SW_CORNER, color, FONTS);
 }
 
+void fillFrame(int x, int y, int w, int h, byte ch, byte color) {
+   byte i,j;
+   for (i=0; i<w; i++) {
+      for (j=0; j<h; j++) {
+         gr4_tile(x+i, y+j, ch, color, FONTS);
+      }
+   }
+}
+
 // draws the board
 void drawPlayground() {
-   // fill screen
-   gr4_cls(BLACK);   
-
+   set_border(DARK_GREY);
    byte board_color = FG_BG(LIGHT_GREY,RED);
    byte frame_color = FG_BG(LIGHT_GREY,BLACK);
    byte text_color  = FG_BG(YELLOW,BLACK);
 
    // draw tetris board
    SLOT1_VIDEO_START();
-      for(word t=0; t<BROWS+1; t++) {
-         gr4_tile(STARTBOARD_X-1      ,STARTBOARD_Y+t, BOARD_CHAR_LEFT , board_color, FONTS);
-         gr4_tile(STARTBOARD_X+BCOLS  ,STARTBOARD_Y+t, BOARD_CHAR_RIGHT, board_color, FONTS);
+      // tetris frame
+      fillFrame(0,0, 14,24,  16,FG_BG(BLACK, DARK_GREY));
+      fillFrame(STARTBOARD_X,STARTBOARD_Y,BCOLS,BROWS,32,FG_BG(BLACK, BLACK));
+      drawFrame(STARTBOARD_X-1,STARTBOARD_Y-1,BCOLS+2,BROWS+2, frame_color);
+      fillFrame(26,0,15,24,  16,FG_BG(BLACK, DARK_GREY));
+      fillFrame(0, 0,40,1,   16,FG_BG(BLACK, DARK_GREY));
+      fillFrame(0,23,40,1,   16,FG_BG(BLACK, DARK_GREY));
 
-         gr4_tile(STARTBOARD_X-1      -1,STARTBOARD_Y+t, BOARD_CHAR_LEFT , board_color, FONTS);
-         gr4_tile(STARTBOARD_X+BCOLS  +1,STARTBOARD_Y+t, BOARD_CHAR_RIGHT, board_color, FONTS);
-      }
-      for(word t=0;t<BCOLS+4;t++) {
-         gr4_tile(STARTBOARD_X-2+t,STARTBOARD_Y+BROWS, BOARD_CHAR_LEFT , board_color, FONTS);
-         gr4_tile(STARTBOARD_X-2+t,STARTBOARD_Y+BROWS+1, BOARD_CHAR_LEFT , board_color, FONTS);
-      }
-         
-      drawFrame(29, 1,8,4, frame_color);      
-      drawFrame(29, 6,8,4, frame_color);      
-      drawFrame(29,11,8,4, frame_color);      
-      drawFrame(29,16,8,8, frame_color);      
+      drawFrame(POS_SCORE_X, POS_SCORE_Y, 8, 4, frame_color);
+      drawFrame(POS_LEVEL_X, POS_LEVEL_Y, 8, 4, frame_color);
+      drawFrame(POS_LINES_X, POS_LINES_Y, 8, 4, frame_color);
+
+      drawFrame(POS_NEXT_X , POS_NEXT_Y , 8, 8, frame_color);
+      fillFrame(POS_NEXT_X+1 , POS_NEXT_Y+1 , 6, 6, 32, FG_BG(BLACK, BLACK));
       
-      gr4_prints(30, 2,"SCORE",text_color,FONTS);    
-      gr4_prints(30, 7,"LINES",text_color,FONTS);    
-      gr4_prints(30,12,"LEVEL",text_color,FONTS);    
-      gr4_prints(30,17,"NEXT" ,text_color,FONTS);
+      gr4_prints(POS_SCORE_X+1, POS_SCORE_Y+1, "SCORE ", text_color, FONTS);
+      gr4_prints(POS_LEVEL_X+1, POS_LEVEL_Y+1, "LEVEL ", text_color, FONTS);
+
+      gr4_prints(POS_LINES_X+1, POS_LINES_Y+1,"LINES ", text_color, FONTS);
+      gr4_prints(POS_NEXT_X +1, POS_NEXT_Y +1,"NEXT" , text_color, FONTS);
    SLOT1_END();
 }
 
@@ -148,16 +151,10 @@ void gameOver() {
    drawFrame(STARTBOARD_X-2, y-1,14,3, frame_color);
    SLOT1_END();
 
-   gr4_prints(STARTBOARD_X-1,y-0,"  GAME OVER ", FG_BG(YELLOW,BLACK), FONTS);
+   gr4_prints(STARTBOARD_X-1,y-0," GAME  OVER ", FG_BG(YELLOW,BLACK), FONTS);
 
    // sound effect
    bit_fx2(7);
-
-   /*
-   gr4_prints(STARTBOARD_X-2,y-1,"              ", color, FONTS);
-   gr4_prints(STARTBOARD_X-2,y-0,"   GAME OVER  ", color, FONTS);
-   gr4_prints(STARTBOARD_X-2,y+1,"              ", color, FONTS);
-   */
 
    // since it's game over, there's no next piece
    gr_erasepiece(&piece_preview);
@@ -166,10 +163,10 @@ void gameOver() {
    while(1) {
       flip++;
       if(test_key(SCANCODE_ROW_RETN, SCANCODE_ROW_RETN)) break;
-           if(flip <  80 ) color = FG_BG(YELLOW   ,BLACK);
-      else if(flip < 160 ) color = FG_BG(DARK_GREY,BLACK);
+           if(flip <  60 ) color = FG_BG(YELLOW   ,BLACK);
+      else if(flip < 120 ) color = FG_BG(DARK_GREY,BLACK);
       else flip = 0;
-      gr4_prints(STARTBOARD_X+1,y-0,"GAME OVER", color, FONTS);
+      gr4_prints(STARTBOARD_X,y-0,"GAME  OVER", color, FONTS);
    }
 
    //while(!test_key(SCANCODE_ROW_RETN, SCANCODE_ROW_RETN));
