@@ -49,7 +49,6 @@ function mem_write(address, value) {
       case  6: bank6[base] = value; break;
       case  7: bank7[base] = value; break;
 
-
       case  8: break; // TODO expansion slots
       case  9: break; // TODO expansion slots
       case 10: break; // TODO expansion slots
@@ -62,38 +61,38 @@ function mem_write(address, value) {
 }
 
 function io_read(ioport) {  
-   /*
-   const hi = (port & 0xFF00) >> 8;
-   const p = port & 0xFF;
-   if(hi>0 && (p>=0x10 && p<=0x1f)) {
-      console.log(`port read ${hex(port & 0xFF)} hi byte set to ${hex(hi)}`);
-   }
-   */
    const port = ioport & 0xFF;
-   switch(port) {
-      case 0x2b: return joy0; // joy0;  // joystick left, 8 directions
-      case 0x27: return joy1; // joy1;  // joystick left, fire buttons
-      case 0x00: return printerReady;
-      case 0x2d: return 0xff; // joy1;  // joystick right, fire buttons (not emulated)
-      case 0x2e: return 0xff; // joy0;  // joystick right, 8 directions (not emulated)
-      case 0x10:
-      case 0x11:
-      case 0x12:
-      case 0x13:
-      case 0x14:
-         return emulate_fdc ? FDC_io_read(port) : (port | 1);
 
-      // fictional serial device
-      case 0x78:
-         // serial data read
-         return serial.cpu_read_data();
-
-      case 0x7a:
-         // serial status, always ready
-         return serial.cpu_read_status();
-
+   if(joystick_connected && ((port & 0xF0) == 0x20)) {
+      // joysticks
+      let data = 0x1F; // only 5 bits
+      if(((port & 1) == 0) && joy1.up   ) data &=  ~1;
+      if(((port & 1) == 0) && joy1.down ) data &=  ~2;
+      if(((port & 1) == 0) && joy1.left ) data &=  ~4;
+      if(((port & 1) == 0) && joy1.right) data &=  ~8;
+      if(((port & 1) == 0) && joy1.fire ) data &= ~16;
+      if(((port & 2) == 0) && joy1.arm  ) data &= ~16;
+      if(((port & 4) == 0) && joy2.up   ) data &=  ~1;
+      if(((port & 4) == 0) && joy2.down ) data &=  ~2;
+      if(((port & 4) == 0) && joy2.left ) data &=  ~4;
+      if(((port & 4) == 0) && joy2.right) data &=  ~8;
+      if(((port & 4) == 0) && joy2.fire ) data &= ~16;
+      if(((port & 8) == 0) && joy2.arm  ) data &= ~16;
+      return data;
    }
-   console.warn(`read from unknown port ${hex(port)}h`);
+   else if(port == 0x00) {
+      // printer
+      return printerReady;
+   }
+   else if(port >= 0x10 && port <= 0x14) {
+      // floppy disk controller
+      return emulate_fdc ? FDC_io_read(port) : (port | 1);
+   }
+   else if(port == 0x78) return serial.cpu_read_data();   // fictional serial device: read data
+   else if(port == 0x78) return serial.cpu_read_status(); // fictional serial device: status, always ready
+   else {
+      console.warn(`read from unknown port ${hex(port)}h`);
+   }
    return port | 1; // this is the value returned from unused ports
 }
 

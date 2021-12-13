@@ -80,9 +80,11 @@ let vdc_text80_background = 0;
 let vdc_border_color = 0;
 let speaker_A = 0;
 let speaker_B = 0;
-let joy0 = 255;
-let joy1 = 255;
 let caps_lock_bit = 0;
+
+let joy1 = new Joystick();
+let joy2 = new Joystick();
+let joystick_connected = true;
 
 let emulate_fdc = true;
 let tape_monitor = true;
