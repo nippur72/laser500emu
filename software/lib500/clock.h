@@ -4,4 +4,5 @@ typedef unsigned long clock_t;
 
 void install_timer_irq();
 clock_t clock();
+void wait_interrupt();
 
