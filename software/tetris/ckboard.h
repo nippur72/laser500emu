@@ -7,7 +7,7 @@
 #include "pieces.h"
 
 #define BCOLS 10                   // number of board columns
-#define BROWS 21                   // number of board rows
+#define BROWS 20                   // number of board rows
 #define EMPTY 255                  // empty character on the board
 
 byte board[BROWS][BCOLS];          // the board
