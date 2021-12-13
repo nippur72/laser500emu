@@ -5,6 +5,12 @@ Z80.js-master/
 Thumbs.db
 ehthumbs.db
 ehthumbs_vista.db
+*.cas
+*.sym
+*.lis
+*.map
+
+
 
 # Folder config file
 Desktop.ini
