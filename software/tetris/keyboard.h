@@ -10,7 +10,7 @@
 #define KEY_DROP   ' '
 #define KEY_ROTATE 'I'
 
-#define KEY_REPEAT_COUNTER_MAX 400     /* key autorepeat timer value */
+#define KEY_REPEAT_COUNTER_MAX 200     // key autorepeat timer value
 
 // keyboard scan codes
 #define SCANCODE_ROW_UP    0x6aff
@@ -71,9 +71,7 @@ byte player_input() {
    static byte last_key = 0;
    static int repeat_counter = 0;
 
-   // TODO restore joystick when emu is fixed
-   // byte key = read_keyboard() | read_joystick();
-   byte key = read_keyboard();
+   byte key = read_keyboard() | read_joystick();
 
    if(key == KEY_LEFT || key == KEY_RIGHT || key == KEY_DOWN) {
       repeat_counter++;
