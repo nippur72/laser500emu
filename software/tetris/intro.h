@@ -39,9 +39,9 @@ void drawLogo() {
 
 // introduction screen
 void introScreen() {
-   set_border(BLACK);
-   gr_mode(GR_MODE_4);
-   gr4_cls(BLACK);
+   set_border(BLACK);   
+   gr_mode(GR_MODE_4);   
+   gr4_fast_cls(0,BLACK);
 
    drawLogo();
 
