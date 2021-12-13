@@ -11,11 +11,6 @@
 // https://github.com/nippur72/laser500-emu/tree/main/software/tetris
 //
 
-// TODO intro screen
-// TODO joystick
-// TODO game over effects
-// TODO GR2 instead of GR4 ?
-// TODO make ckboard 16 bytes aligned ??
 // TODO fonts import javascript conversion script
 
 // libraries from C/Z88DK
@@ -25,12 +20,12 @@
 #include <sound.h>         // for z88dk sound effects
 
 #define COUNTER_MAX            500    // the speed counter at level 0
-#define COUNTER_FACTOR         5      // speed decrease factor: speed -= speed / factor
+#define COUNTER_FACTOR         7      // speed decrease factor: speed -= speed / factor
 
 #include <lib500.h>
 #include "pieces.h"
 
-#define STYLE 1
+#define STYLE 3
 
 #if STYLE == 1
    byte piece_chars[NUMPIECES] = {
@@ -71,6 +66,27 @@ byte piece_colors[NUMPIECES] = {
    FG_BG( YELLOW        , BROWN     ),  // O
    FG_BG( LIGHT_GREEN   , GREEN     ),  // S
    FG_BG( LIGHT_RED     , RED       )   // Z
+};
+#endif
+
+#if STYLE == 3
+byte piece_chars[NUMPIECES] = {
+   0, // L (orange in the original tetris)
+   1, // J
+   2, // T
+   3, // I
+   2, // O
+   1, // S
+   0, // Z
+};
+byte piece_colors[NUMPIECES] = {
+   FG_BG( LIGHT_GREY    , WHITE      ), // L (orange in the original tetris)
+   FG_BG( VIOLET        , BLUE       ),  // J
+   FG_BG( LIGHT_MAGENTA , MAGENTA    ),  // T
+   FG_BG( LIGHT_CYAN    , CYAN       ),  // I
+   FG_BG( YELLOW        , BROWN      ),  // O
+   FG_BG( LIGHT_GREEN   , GREEN      ),  // S
+   FG_BG( LIGHT_RED     , RED        )   // Z
 };
 #endif
 
@@ -166,14 +182,11 @@ void handle_player_input() {
          new_pos.y++;
          if(collides(&new_pos)) {
             break;
-         }
+         }         
          gr_erasepiece(&player);
-         gr_drawpiece(&new_pos);
-         set_border(BLACK);
+         gr_drawpiece(&new_pos);         
          ck_drawpiece(&new_pos);
          sprite_copy(&player,&new_pos);
-         // TODO screen_buffer_ready = 1;
-         // TODO wait_interrupt();
       }
       drop_counter=drop_counter_max;  // force an automatic drop
       return;
