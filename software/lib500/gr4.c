@@ -62,7 +62,7 @@ byte *_gr4_tile_dest;
 
 void _gr4_tile() {
    _gr4_tile_source = &_gr4_tile_tileset[_gr4_tile_tile*8];
-   _gr4_tile_dest = (byte *) 0x4000 + _gr4_tile_x*2 + gr3_rowaddress[_gr4_tile_y*8];
+   _gr4_tile_dest = (byte *) (0x4000 + _gr4_tile_x*2 + gr3_rowaddress[_gr4_tile_y*8]);
 
    __asm
 
