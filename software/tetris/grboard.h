@@ -1,21 +1,10 @@
 #include <lib500.h>
 
-#define CRUNCH_CHAR1  65          /* when a line is crunched, it's filled orange first */
-#define CRUNCH_CHAR2  66          /* and then is erased with black */
-
 #define STARTBOARD_X 15           /* X start position of the board on the screen */
 #define STARTBOARD_Y 2            /* Y start position of the board on the screen */
 
 #define BOARD_CHAR_LEFT  6
 #define BOARD_CHAR_RIGHT 6
-
-//#define NCOLS 40                  /* number of screen columns */
-//#define NROWS 24                  /* number of screen rows, also board height */
-
-#define BACKGROUND BLACK            /* board background value */
-
-#define EMPTY_GR_CHAR  32
-#define EMPTY_GR_COLOR 0x00
 
 #define CRUNCH_CHAR_1  13
 #define CRUNCH_COLOR_1 0x07
@@ -46,7 +35,6 @@ void gr_drawpiece(sprite *pl);
 void gr_erasepiece(sprite *p);
 
 void gr_update_board();
-void gr_scroll_down(byte endline);
 void gr_crunch_line(byte line, byte crunch_char, byte crunch_color);
 
 // grahpic board
@@ -58,7 +46,7 @@ void gr_crunch_line(byte line, byte crunch_char, byte crunch_color);
 #include "pieces.h"
 #include "ckboard.h"
 
-extern long int score;
+extern unsigned long int score;
 
 // update score table
 char tmp[32];
@@ -82,7 +70,7 @@ void updateScore() {
 #define FRAME_SW_CORNER 11
 #define FRAME_SE_CORNER 12
 
-void drawFrame(int x, int y, int w, int h, byte color) {
+void drawFrame(byte x, byte y, byte w, byte h, byte color) {
    byte i;
    for (i=1; i<w-1; i++) {      
       gr4_tile(x+i, y    , FRAME_VERT, color, FONTS);
@@ -99,7 +87,7 @@ void drawFrame(int x, int y, int w, int h, byte color) {
    gr4_tile(x+w-1 ,y+h-1, FRAME_SW_CORNER, color, FONTS);
 }
 
-void fillFrame(int x, int y, int w, int h, byte ch, byte color) {
+void fillFrame(byte x, byte y, byte w, byte h, byte ch, byte color) {
    byte i,j;
    for (i=0; i<w; i++) {
       for (j=0; j<h; j++) {
@@ -110,8 +98,7 @@ void fillFrame(int x, int y, int w, int h, byte ch, byte color) {
 
 // draws the board
 void drawPlayground() {
-   set_border(DARK_GREY);
-   byte board_color = FG_BG(LIGHT_GREY,RED);
+   set_border(DARK_GREY);   
    byte frame_color = FG_BG(LIGHT_GREY,BLACK);
    byte text_color  = FG_BG(YELLOW,BLACK);
 
@@ -168,8 +155,6 @@ void gameOver() {
       else flip = 0;
       gr4_prints(STARTBOARD_X,y-0,"GAME  OVER", color, FONTS);
    }
-
-   //while(!test_key(SCANCODE_ROW_RETN, SCANCODE_ROW_RETN));
 }
 
 // erase piece from the screen
@@ -179,7 +164,7 @@ void gr_erasepiece(sprite *p) {
    int py = p->y;
 
    // are we erasing the "next" piece ?
-   if(px==255) {
+   if(py==PIECE_IS_NEXT) {
       px = NEXT_X;
       py = NEXT_Y;
    }
@@ -190,9 +175,10 @@ void gr_erasepiece(sprite *p) {
 
    SLOT1_VIDEO_START();
    for(byte t=0; t<4; t++) {
-      int x = px + data[t].offset_x;
-      int y = py + data[t].offset_y;
-      gr4_tile(x,y,EMPTY_GR_CHAR,EMPTY_GR_COLOR,FONTS);
+      int x = px + data->offset_x;
+      int y = py + data->offset_y;
+      data++;
+      gr4_tile((byte)x,(byte)y,EMPTY_GR_CHAR,EMPTY_GR_COLOR,FONTS);
    }
    SLOT1_END();
 }
@@ -204,7 +190,7 @@ void gr_drawpiece(sprite *p) {
    int py = p->y;
 
    // are we drawing the "next" piece ?
-   if(px==255) {
+   if(py==PIECE_IS_NEXT) {
       px = NEXT_X;
       py = NEXT_Y;
    }
@@ -215,11 +201,12 @@ void gr_drawpiece(sprite *p) {
 
    SLOT1_VIDEO_START();
    for(byte t=0; t<4; t++) {
-      int x = px + data[t].offset_x;
-      int y = py + data[t].offset_y;
+      int x = px + data->offset_x;
+      int y = py + data->offset_y;
+      data++;
       byte ch  = piece_chars[p->piece];
       byte col = piece_colors[p->piece];
-      gr4_tile(x,y,ch,col,FONTS);
+      gr4_tile((byte)x,(byte)y,ch,col,FONTS);
    }
    SLOT1_END();
 }
@@ -232,32 +219,6 @@ void gr_crunch_line(byte line, byte crunch_char, byte crunch_color) {
    }
    SLOT1_END();
 }
-
-// scroll down the board by 1 position from top to specified line
-/*
-void gr_scroll_down(byte endline) {
-   // TODO
-   byte tile,ch,col;
-   SLOT1_VIDEO_START();
-   for(byte line=endline;line>0;line--) {
-      for(byte i=0;i<BCOLS;i++) {
-         tile = board[line][i];
-         if(tile == EMPTY) {
-            ch = EMPTY_GR_CHAR;
-            col = EMPTY_GR_COLOR;
-         } else {
-            ch = piece_chars[tile];
-            col = piece_colors[tile];
-         }
-         gr4_tile(STARTBOARD_X+i, STARTBOARD_Y+line, ch, col, FONTS);
-      }
-   }
-   SLOT1_END();
-
-   // clears the top line
-   gr_crunch_line(0, EMPTY_GR_CHAR, EMPTY_GR_COLOR);
-}
-*/
 
 void gr_update_board() {
    byte tile,ch,col;

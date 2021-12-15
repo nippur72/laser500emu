@@ -8,7 +8,7 @@
 
 #define BCOLS 10                   // number of board columns
 #define BROWS 20                   // number of board rows
-#define EMPTY 255                  // empty character on the board
+#define EMPTY NUMPIECES            // the empty character is the character after all tetrominoes
 
 byte board[BROWS][BCOLS];          // the board
 
@@ -16,14 +16,14 @@ byte board[BROWS][BCOLS];          // the board
 void ck_init();
 void ck_drawpiece(sprite *pl);
 void ck_erasepiece(sprite *pl);
-int collides(sprite *pl);
+byte collides(sprite *pl);
 byte is_line_filled(byte line);
 void ck_erase_line(byte line);
 void ck_scroll_down(byte endline);
 
 // fills the check board with EMPTY
 void ck_init() {
-   for(int r=0;r<BROWS;r++) {
+   for(byte r=0;r<BROWS;r++) {
       ck_erase_line(r);
    }
 }
@@ -32,8 +32,9 @@ void ck_init() {
 void ck_drawpiece(sprite *pl) {
    tile_offset *data = get_piece_offsets(pl->piece, pl->angle);
    for(byte t=0; t<4; t++) {
-      int x = pl->x + data[t].offset_x; 
-      int y = pl->y + data[t].offset_y; 
+      int x = pl->x + data->offset_x;
+      int y = pl->y + data->offset_y;
+      data++;
       board[y][x] = pl->piece;
    }
 }
@@ -42,18 +43,20 @@ void ck_drawpiece(sprite *pl) {
 void ck_erasepiece(sprite *pl) {
    tile_offset *data = get_piece_offsets(pl->piece, pl->angle);
    for(byte t=0; t<4; t++) {
-      int x = pl->x + data[t].offset_x; 
-      int y = pl->y + data[t].offset_y; 
+      int x = pl->x + data->offset_x;
+      int y = pl->y + data->offset_y;
+      data++;
       board[y][x] = EMPTY;
    }
 }
 
 // returns 1 if the piece collides with something
-int collides(sprite *pl) {
+byte collides(sprite *pl) {
    tile_offset *data = get_piece_offsets(pl->piece, pl->angle);
    for(byte t=0; t<4; t++) {
-      int x = pl->x + data[t].offset_x; 
-      int y = pl->y + data[t].offset_y;       
+      int x = pl->x + data->offset_x;
+      int y = pl->y + data->offset_y;
+      data++;
       if(x<0) return 1;                  // does it collide with left border?
       if(x>=BCOLS) return 1;             // does it collide with right border?
       if(y>=BROWS) return 1;             // does it collide with bottom? 

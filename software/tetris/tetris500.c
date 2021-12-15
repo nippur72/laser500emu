@@ -25,52 +25,10 @@
 #include <lib500.h>
 #include "pieces.h"
 
-#define STYLE 3
+#define EMPTY_GR_CHAR  32
+#define EMPTY_GR_COLOR FG_BG(BLACK, BLACK)
 
-#if STYLE == 1
-   byte piece_chars[NUMPIECES] = {
-      16, // L (orange in the original tetris)
-      16, // J
-      16, // T
-      16, // I
-      16, // O
-      16, // S
-      16, // Z
-   };
-   byte piece_colors[NUMPIECES] = {
-      FG_BG( 0 , WHITE         ),  // L (orange in the original tetris)
-      FG_BG( 0 , VIOLET        ),  // J
-      FG_BG( 0 , LIGHT_MAGENTA ),  // T
-      FG_BG( 0 , LIGHT_CYAN    ),  // I
-      FG_BG( 0 , YELLOW        ),  // O
-      FG_BG( 0 , LIGHT_GREEN   ),  // S
-      FG_BG( 0 , LIGHT_RED     )   // Z
-   };
-#endif
-
-#if STYLE == 2
-byte piece_chars[NUMPIECES] = {
-   0,  // L (orange in the original tetris)
-   1,  // J
-   2,  // T
-   3,  // I
-   4,  // O
-   15, // S
-   14, // Z
-};
-byte piece_colors[NUMPIECES] = {
-   FG_BG( WHITE         , DARK_GREY ),  // L (orange in the original tetris)
-   FG_BG( VIOLET        , BLUE      ),  // J
-   FG_BG( LIGHT_MAGENTA , MAGENTA   ),  // T
-   FG_BG( LIGHT_CYAN    , CYAN      ),  // I
-   FG_BG( YELLOW        , BROWN     ),  // O
-   FG_BG( LIGHT_GREEN   , GREEN     ),  // S
-   FG_BG( LIGHT_RED     , RED       )   // Z
-};
-#endif
-
-#if STYLE == 3
-byte piece_chars[NUMPIECES] = {
+byte piece_chars[NUMPIECES+1] = {
    0, // L (orange in the original tetris)
    1, // J
    2, // T
@@ -78,23 +36,25 @@ byte piece_chars[NUMPIECES] = {
    2, // O
    1, // S
    0, // Z
+   EMPTY_GR_CHAR // space
 };
-byte piece_colors[NUMPIECES] = {
+byte piece_colors[NUMPIECES+1] = {
    FG_BG( LIGHT_GREY    , WHITE      ), // L (orange in the original tetris)
    FG_BG( VIOLET        , BLUE       ),  // J
    FG_BG( LIGHT_MAGENTA , MAGENTA    ),  // T
    FG_BG( LIGHT_CYAN    , CYAN       ),  // I
    FG_BG( YELLOW        , BROWN      ),  // O
    FG_BG( LIGHT_GREEN   , GREEN      ),  // S
-   FG_BG( LIGHT_RED     , RED        )   // Z
+   FG_BG( LIGHT_RED     , RED        ),  // Z
+   EMPTY_GR_COLOR                        // empty character
 };
-#endif
 
 void check_crunched_lines();
-void scroll_down(byte endline);
 
 #define COLLIDES     1
 #define NOT_COLLIDES 0
+
+#define PIECE_IS_NEXT 255      /* tells a piece is not on the board but on the "next" display */
 
 #include "sprite.h"
 
@@ -105,10 +65,10 @@ sprite new_pos;          // new player position when making a 1-step move
 word drop_counter;       // counter used to set the pace 
 word drop_counter_max;   // maximum value of the counter 
 
-long int score;          // player's score 
-int level;               // level 
-int lines_remaining;     // lines to complete the level 
-int total_lines;         // total number of lines 
+unsigned long int score;          // player's score
+unsigned int level;               // level
+unsigned int lines_remaining;     // lines to complete the level
+unsigned int total_lines;         // total number of lines
 
 // game files
 #include "pieces.h"
@@ -123,7 +83,7 @@ int total_lines;         // total number of lines
 // piece is taken from the "next" which in turn is generated randomly
 // returns "COLLIDES" if a new piece can't be generated (the board is full)
 
-int generate_new_piece() {
+byte generate_new_piece() {
    // move "next" piece onto the board
    player.piece = piece_preview.piece;
    player.angle = piece_preview.angle;
@@ -132,8 +92,8 @@ int generate_new_piece() {
 
    // get a new "next" piece
    gr_erasepiece(&piece_preview);
-   piece_preview.piece = rand() % NUMPIECES;
-   piece_preview.angle = rand() % NUMROT;
+   piece_preview.piece = (byte) rand() % NUMPIECES;
+   piece_preview.angle = (byte) rand() % NUMROT;
    gr_drawpiece(&piece_preview);
 
    if(collides(&player)) {
@@ -241,7 +201,7 @@ void gameLoop() {
    }
 }
 
-int scores[5] = {0, 40, 100, 300, 1200};   // variable score on number of lines crunched
+unsigned int scores[5] = {0, 40, 100, 300, 1200};   // variable score on number of lines crunched
 
 byte lines_cruched[BROWS];                 // stores which lines have been crunched 
 
@@ -321,8 +281,8 @@ void initGame() {
    drawPlayground();
    updateScore();   
 
-   piece_preview.x = 255;   // piece is on "next"
-   piece_preview.y = 255;
+   piece_preview.x = PIECE_IS_NEXT;
+   piece_preview.y = PIECE_IS_NEXT;  // piece is on "next" display
 
    // generate pieces twice: one for "next" and one for player   
    generate_new_piece();
