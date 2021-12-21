@@ -168,7 +168,7 @@ void gr4_tile(byte x, byte y, byte tile, byte color, byte *tileset) {
 }
 */
 
-void gr4_prints(byte x, byte y, byte *s, byte color, byte *tileset) {
+void gr4_prints(byte x, byte y, char *s, byte color, byte *tileset) {
    SLOT1_VIDEO_START();
    byte c;
    while(c=*s++) {
