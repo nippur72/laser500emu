@@ -9,6 +9,7 @@
 #define BCOLS 10                   // number of board columns
 #define BROWS 20                   // number of board rows
 #define EMPTY NUMPIECES            // the empty character is the character after all tetrominoes
+#define MARKED 255                 // mark position on the board while moving (to reduce flickering)
 
 byte board[BROWS][BCOLS];          // the board
 
@@ -47,6 +48,17 @@ void ck_erasepiece(sprite *pl) {
       int y = pl->y + data->offset_y;
       data++;
       board[y][x] = EMPTY;
+   }
+}
+
+// draw a piece on the check board, marking it with high bit set
+void ck_markpiece(sprite *pl) {
+   tile_offset *data = get_piece_offsets(pl->piece, pl->angle);
+   for(byte t=0; t<4; t++) {
+      int x = pl->x + data->offset_x;
+      int y = pl->y + data->offset_y;
+      data++;
+      board[y][x] = MARKED;
    }
 }
 

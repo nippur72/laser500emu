@@ -3,9 +3,6 @@
 #define STARTBOARD_X 15           /* X start position of the board on the screen */
 #define STARTBOARD_Y 2            /* Y start position of the board on the screen */
 
-#define BOARD_CHAR_LEFT  6
-#define BOARD_CHAR_RIGHT 6
-
 #define CRUNCH_CHAR_1  13
 #define CRUNCH_COLOR_1 0x07
 
@@ -179,6 +176,32 @@ void gr_erasepiece(sprite *p) {
       int y = py + data->offset_y;
       data++;
       gr4_tile((byte)x,(byte)y,EMPTY_GR_CHAR,EMPTY_GR_COLOR,FONTS);
+   }
+   SLOT1_END();
+}
+
+// erase piece from the screen
+void gr_erasepiece_unmarked(sprite *p) {
+   tile_offset *data = get_piece_offsets(p->piece, p->angle);
+   int px = p->x;
+   int py = p->y;
+
+   px += STARTBOARD_X;
+   py += STARTBOARD_Y;
+
+   SLOT1_VIDEO_START();
+   for(byte t=0; t<4; t++) {
+      int x = px + data->offset_x;
+      int y = py + data->offset_y;
+      
+      int cx = p->x + data->offset_x;      
+      int cy = p->y + data->offset_y;
+
+      data++;
+
+      if(board[cy][cx] != MARKED) {  
+         gr4_tile((byte)x,(byte)y,EMPTY_GR_CHAR,EMPTY_GR_COLOR,FONTS);
+      }
    }
    SLOT1_END();
 }
