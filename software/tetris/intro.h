@@ -45,7 +45,7 @@ void introScreen() {
 
    drawLogo();
 
-   gr4_prints(7,13,"(C) 2021 ANTONINO PORCINO"   , FG_BG(YELLOW,BLACK), FONTS);
+   gr4_prints(7,13,"WRITTEN BY ANTONINO PORCINO" , FG_BG(YELLOW,BLACK), FONTS);
    gr4_prints(5,18,"USE ARROWS+SPACE OR JOYSTICK", FG_BG(WHITE,BLACK), FONTS);
    gr4_prints(9,20,"PRESS RETURN TO START"       , FG_BG(WHITE,BLACK), FONTS);
 
