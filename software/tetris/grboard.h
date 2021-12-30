@@ -156,7 +156,8 @@ void gameOver() {
 
 // erase piece from the screen
 void gr_erasepiece(sprite *p) {
-   tile_offset *data = get_piece_offsets(p->piece, p->angle);
+   // tile_offset *data = get_piece_offsets(p->piece, p->angle);   // TODO sdcc bug if this declaration made here
+
    int px = p->x;
    int py = p->y;
 
@@ -170,10 +171,12 @@ void gr_erasepiece(sprite *p) {
       py += STARTBOARD_Y;
    }
 
+   tile_offset *data = get_piece_offsets(p->piece, p->angle);   // TODO sdcc bug if this declaration moved to the top of the function
+
    SLOT1_VIDEO_START();
    for(byte t=0; t<4; t++) {
       int x = px + data->offset_x;
-      int y = py + data->offset_y;
+      int y = py + data->offset_y;      
       data++;
       gr4_tile((byte)x,(byte)y,EMPTY_GR_CHAR,EMPTY_GR_COLOR,FONTS);
    }
