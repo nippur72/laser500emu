@@ -56,7 +56,7 @@ function updateGamePad() {
    if(gamepad.axes[1] < -0.5) joy1.up    = 1; else joy1.up    = 0;
    if(gamepad.axes[1] >  0.5) joy1.down  = 1; else joy1.down  = 0;
 
-   if(gamepad.buttons[0].pressed) joy1.fire  = 1; else joy1.fire  = 0;
+   if(gamepad.buttons[0].pressed) joy1.arm   = 1; else joy1.arm   = 0;
    if(gamepad.buttons[1].pressed) joy1.fire  = 1; else joy1.fire  = 0;
 }
 
