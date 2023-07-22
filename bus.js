@@ -66,18 +66,19 @@ function io_read(ioport) {
    if(joystick_connected && ((port & 0xF0) == 0x20)) {
       // joysticks
       let data = 0x1F; // only 5 bits
-      if(((port & 1) == 0) && joy1.up   ) data &=  ~1;
-      if(((port & 1) == 0) && joy1.down ) data &=  ~2;
-      if(((port & 1) == 0) && joy1.left ) data &=  ~4;
-      if(((port & 1) == 0) && joy1.right) data &=  ~8;
-      if(((port & 1) == 0) && joy1.fire ) data &= ~16;
-      if(((port & 2) == 0) && joy1.arm  ) data &= ~16;
-      if(((port & 4) == 0) && joy2.up   ) data &=  ~1;
-      if(((port & 4) == 0) && joy2.down ) data &=  ~2;
-      if(((port & 4) == 0) && joy2.left ) data &=  ~4;
-      if(((port & 4) == 0) && joy2.right) data &=  ~8;
-      if(((port & 4) == 0) && joy2.fire ) data &= ~16;
-      if(((port & 8) == 0) && joy2.arm  ) data &= ~16;
+      if(((port & 1) == 0) && joy_right.up   ) data &=  ~1;
+      if(((port & 1) == 0) && joy_right.down ) data &=  ~2;
+      if(((port & 1) == 0) && joy_right.left ) data &=  ~4;
+      if(((port & 1) == 0) && joy_right.right) data &=  ~8;
+      if(((port & 1) == 0) && joy_right.fire ) data &= ~16;
+      if(((port & 2) == 0) && joy_right.arm  ) data &= ~16;
+
+      if(((port & 4) == 0) && joy_left.up   ) data &=  ~1;
+      if(((port & 4) == 0) && joy_left.down ) data &=  ~2;
+      if(((port & 4) == 0) && joy_left.left ) data &=  ~4;
+      if(((port & 4) == 0) && joy_left.right) data &=  ~8;
+      if(((port & 4) == 0) && joy_left.fire ) data &= ~16;
+      if(((port & 8) == 0) && joy_left.arm  ) data &= ~16;
       return data;
    }
    else if(port == 0x00) {

@@ -986,3 +986,42 @@ function posedge_clk()
       };
    })();
 */
+
+// debugs PC the first 2048 t-states 
+(function() {
+   let counter = 0;   
+   zap();
+   cpu.reset();   
+   debugBefore = ()=> {      
+      if(counter < 2048) {   
+         const pc = cpu.getState().pc;
+         console.log(`t=${counter} PC=${hex(pc,4)}`);         
+      }
+      counter++;
+   }
+})();
+
+console.log(
+   "*** YOU JUST FOUND AN EASTER EGG!! ***\r\rAUTHORS:\r\rANTONINO PORCINO   (SOFTWARE)\rCLAUDIO PARMIGIANI (HARDWARE)\r"
+      .split("")
+      .map(e=>e.charCodeAt(0))
+      .map(e=>((e ^ 0xAA) & 0xFF))
+      .map(e=>`0x${e.toString(16)}`)
+      .join(",")
+);
+
+function joyport(port) {
+   let msg = [];
+
+   if((port & 0xF0) != 0x20) {
+      msg.push("no joy");
+   }
+   else {
+      if((port & 1) == 0) msg.push("joy 1 dirs/fire");
+      if((port & 2) == 0) msg.push("joy 1 arm");
+      if((port & 4) == 0) msg.push("joy 2 dirs/fire");
+      if((port & 8) == 0) msg.push("joy 2 arm"); 
+   }
+   console.log(`port &h${port.toString(16)}: ${msg.join(",")}`);
+}
+for(let p=0x15;p<0x30;p++) joyport(p);

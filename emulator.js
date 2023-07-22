@@ -83,8 +83,8 @@ let speaker_A = 0;
 let speaker_B = 0;
 let caps_lock_bit = 0;
 
-let joy1 = new Joystick();
-let joy2 = new Joystick();
+let joy_left = new Joystick();
+let joy_right = new Joystick();
 let joystick_connected = true;
 
 let emulate_fdc = true;
