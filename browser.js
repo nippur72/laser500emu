@@ -106,9 +106,9 @@ async function droppedFile(outName, bytes) {
    }
 
    if(ext === ".nic") {
-      drag_drop_disk(outName, bytes);
-      load(outName, 1);
-      pasteLine("DIR\r\n");
+      await drag_drop_disk(outName, bytes);
+      await load(outName, 1);
+      // pasteLine("DIR\r\n");
       return;
    }
 
@@ -170,6 +170,15 @@ async function parseQueryStringCommands() {
             await fetchProgram(name);
          }
       }, 500);
+   }
+
+   if(options.nic !== undefined) {
+      // ?load=http://github.com/nippur72/laser500emu/blob/gh-pages/software/disks/vt-dos.nic
+      const name = options.nic;
+      if(name.startsWith("http")) {            
+         let nic = await externalLoad(name);
+         await droppedFile(name, nic);
+      }      
    }
 
    if(options.nodisk === true) {
