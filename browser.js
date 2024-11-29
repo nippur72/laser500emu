@@ -275,3 +275,9 @@ function rewind_tape() {
 function stop_tape() {   
    tapePtr = tapeLen;   
 }
+
+function downloadBytes(fileName, buffer) {
+   let blob = new Blob([buffer], {type: "application/octet-stream"});
+   saveAs(blob, fileName);
+   console.log(`downloaded "${fileName}"`);
+}
