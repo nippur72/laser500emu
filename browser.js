@@ -281,3 +281,11 @@ function downloadBytes(fileName, buffer) {
    saveAs(blob, fileName);
    console.log(`downloaded "${fileName}"`);
 }
+
+function downloadRam(start, end) {
+   const ram = [];
+   for(let t=start; t<=end; t++) {
+      ram.push(mem_read(t));            
+   }
+   downloadBytes(`ram.${hex(start,4)}-${hex(end,4)}.bin`, new Uint8Array(ram));
+}
