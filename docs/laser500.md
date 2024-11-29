@@ -71,6 +71,7 @@ LOW RAM MAP
 8612      PORT_10_LATCH: port 10h latch (?)
 861D      (pointer) warm reset routine (reset key)
 861F      warm boot flag, if equal to (&H861D)+(&H816E)+&HE1 then is graceful reset, otherwise is boot
+8662      (pointer) program start address during cassette operations
 8664      ?? port 41 latch old value
 8665      PORT_40_LATCH: SYSVAR_bank0
 8666      PORT_41_LATCH: SYSVAR_bank1
@@ -78,7 +79,7 @@ LOW RAM MAP
 8668      PORT_43_LATCH: SYSVAR_bank3
 8669      PORT_44_LATCH: SYSVAR_port44 (VDC display mode/border color)
 866A      PORT_45_LATCH: port 45h latch (VDC foreground/background color)
-
+866B      program type F0h or F1h during cassette operations
 866C      ?? used in tape RDBYET routine
 
 8995-     Start of BASIC program
