@@ -5,7 +5,7 @@
 void set_drive(byte drive, byte side, byte track, byte sector) {
    *TRACK  = track;
    *SECTOR = sector;
-   //*SIDE   = side;
+   *SIDE   = side;
 }
 #pragma restore
 
@@ -24,6 +24,7 @@ byte read_track() NAKED {
    ei
 
    ld   h,0
+   ret
    __endasm;
 }
 
@@ -42,5 +43,6 @@ byte write_track() NAKED {
    ei
 
    ld   h,0
+   ret
    __endasm;
 }

@@ -18,6 +18,9 @@
 #define IO_LATCH       ((byte *)0x85f9)
 #define MAPPED_IO_ADDR ((byte *)0x6800)
 
+// I/O Ports
+#define PRINTER_PORT       0x0d
+#define PRINTER_READY_PORT 0x00
 
 // memory banks
 #define BANK_ROM_0       0
