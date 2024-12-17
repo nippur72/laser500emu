@@ -160,7 +160,8 @@ class Drive {
 
    read_byte() {
       if(this.track_x2 % 2 == 1) return 0; // does not read on even tracks: TODO simulate 80 track disk
-      const track = this.track_x2 / 2;
+      //const track = this.track_x2 / 2;
+      const track = this.track_x2 >> 1;
       const pos = this.getpos(track, FDC_SIDE) + this.track_offset;
       if(FDC_ENBL && FDC_WREQ_n) {
          FDC_DATA = this.floppy[pos];
@@ -171,7 +172,8 @@ class Drive {
    write_byte()
    {
       if(this.track_x2 % 2 == 1) return 0; // does not read on even tracks: TODO simulate 80 track disk
-      const track = this.track_x2 / 2;
+      //const track = this.track_x2 / 2
+      const track = this.track_x2 >> 1;
       const pos = this.getpos(track, FDC_SIDE) + this.track_offset;
       if(FDC_ENBL && !FDC_WREQ_n) {
          this.floppy[pos] = FDC_DATA;

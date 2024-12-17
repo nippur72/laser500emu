@@ -3643,8 +3643,10 @@ LABEL_16ea:
 1766 3a6b86    ld      a,(866bh)
 1769 fef1      cp      0f1h
 176b 2004      jr      nz,1771h
+; maschinenprogramm starten
 176d 2a6286    ld      hl,(8662h)
 1770 e9        jp      (hl)
+; BASIC - Programm
 1771 cdf223    call    23f2h
 1774 23        inc     hl
 1775 23        inc     hl
@@ -3753,7 +3755,7 @@ LABEL_16ea:
 184d cd9e18    call    189eh
 1850 38e0      jr      c,1832h
 1852 10f9      djnz    184dh
-1854 fe80      cp      80h
+1854 fe80      cp      80h         ; is it sync byte? 
 1856 20da      jr      nz,1832h
 1858 cd6518    call    1865h
 185b 38d5      jr      c,1832h

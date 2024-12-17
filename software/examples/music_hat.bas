@@ -1,0 +1,23 @@
+REM https://www.pcjs.org/software/pcx86/app/ibm/basic/1.00/
+REM A> BASIC
+REM LOAD "music"
+
+10 READ A,B$
+20 PRINT B$
+30 READ F,D
+35 IF F=-1 THEN END
+40 IF F<>0 THEN F=F-42
+42 D=D/2
+50 SOUND F,D
+60 GOTO 30
+3000 REM The IBM Personal Computer Music Scroll
+3010 REM Version 1.00 (C)Copyright IBM Corp 1981
+3020 REM Licensed Material - Program Property of IBM
+3030 DATA -2,"Mexican Hat Dance - Traditional "
+3040 DATA 52,2,57,2,0,2,52,2,57,2,0,2,52,2,57,6,0,4,52,2,57,2,59,2,57,2,56,4
+3050 DATA 57,2,59,2,0,8,52,2,56,2,0,2,52,2,56,2,0,2,52,2,56,6,0,4,52,2
+3060 DATA 56,2,57,2,56,2,54,4,56,2,57,2,0,6,64,2,63,2,64,2,61,2,60,2,61,2
+3070 DATA 57,2,56,2,57,2,52,2,0,4,49,2,50,2,52,2,54,2,56,2,57,2,59,2,61,2
+3080 DATA 62,2,59,2,0,4,62,2,61,2,62,2,59,2,58,2,59,2,56,2,55,2,56,2,52,2
+3090 DATA 0,4,64,2,63,2,64,2,66,2,64,2,62,2,61,2,59,2,57,2
+3100 DATA -1,-1

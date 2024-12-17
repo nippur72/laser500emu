@@ -12,5 +12,4 @@ JUMPTOBDOS        EQU $0005   ; (3 bytes) JP BDOS
 include "ccp.calkins.asm"
 include "cbios.asm"
 
-; common routines
 

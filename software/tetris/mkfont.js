@@ -3,11 +3,193 @@ function encode(s) {
    for(let t=0;t<s.length;t++) {
       
       if(s.charAt(t) != ".") {
-         b |= 1<<t;
+         //b |= 1<<t;
+         b |= 1<<(7-t);
       }      
    }
    let msg = `00000000`+b.toString(2);   
    console.log(`   0b${msg.substr(msg.length-8)},`);
+}
+
+// tile 0
+encode("XXXXXXXX");
+encode("X......X");
+encode("X......X");
+encode("X......X");
+encode("X......X");
+encode("X......X");
+encode("X......X");
+encode("XXXXXXXX");
+
+// tile 1
+encode("XXXXXXXX");
+encode("X......X");
+encode("X.XXXX.X");
+encode("X.X..X.X");
+encode("X.X..X.X");
+encode("X.XXXX.X");
+encode("X......X");
+encode("XXXXXXXX");
+
+// tile 2
+encode("XXXXXXXX");
+encode("X......X");
+encode("X.XXXX.X");
+encode("X.XXXX.X");
+encode("X.XXXX.X");
+encode("X.XXXX.X");
+encode("X......X");
+encode("XXXXXXXX");
+
+// tile 3
+encode("XXXXXXXX");
+encode("X......X");
+encode("X......X");
+encode("X..XX..X");
+encode("X..XX..X");
+encode("X......X");
+encode("X......X");
+encode("XXXXXXXX");
+
+// tile 4
+encode("XXXXXXXX");
+encode("X......X");
+encode("X.X..X.X");
+encode("X......X");
+encode("X......X");
+encode("X.X..X.X");
+encode("X......X");
+encode("XXXXXXXX");
+
+// tile 5
+encode("XXXXXXXX");
+encode("XX....XX");
+encode("X.X..X.X");
+encode("X..XX..X");
+encode("X..XX..X");
+encode("X.X..X.X");
+encode("XX....XX");
+encode("XXXXXXXX");
+
+// tile 6 (brick)
+encode("XXXXXXXX");
+encode(".....X..");
+encode(".....X..");
+encode(".....X..");
+encode("XXXXXXXX");
+encode(".X......");
+encode(".X......");
+encode(".X......");
+
+// tile 7  (orizontal frame)
+encode("........");
+encode("........");
+encode("XXXXXXXX");
+encode("........");
+encode("XXXXXXXX");
+encode("XXXXXXXX");
+encode("........");
+encode("........");
+
+// tile 8  (vertical frame)
+encode("..X.XX..");
+encode("..X.XX..");
+encode("..X.XX..");
+encode("..X.XX..");
+encode("..X.XX..");
+encode("..X.XX..");
+encode("..X.XX..");
+encode("..X.XX..");
+
+// tile 9
+encode("........");
+encode("........");
+encode("XXXX....");
+encode("...XX...");
+encode("XX..XX..");
+encode("XXX.XX..");
+encode("..X.XX..");
+encode("..X.XX..");
+
+// tile 10
+encode("........");
+encode("........");
+encode("....XXXX");
+encode("...X....");
+encode("..X..XXX");
+encode("..X.XXXX");
+encode("..X.XX..");
+encode("..X.XX..");
+
+// tile 11
+encode("..X.XX..");
+encode(".XX.XX..");
+encode("XX..XX..");
+encode("...XXX..");
+encode("XXXXX...");
+encode("XXXX....");
+encode("........");
+encode("........");
+
+// tile 12
+encode("..X.XX..");
+encode("..X.XXX.");
+encode("..X..XXX");
+encode("..XX....");
+encode("...XXXXX");
+encode("....XXXX");
+encode("........");
+encode("........");
+
+// tile 13
+encode("XXXXXXXX");
+encode("XXXXXXXX");
+encode("XX....XX");
+encode("XX....XX");
+encode("XX....XX");
+encode("XX....XX");
+encode("XXXXXXXX");
+encode("XXXXXXXX");
+
+// tile 14
+encode("XXXXXXXX");
+encode("X..XX..X");
+encode("X.X..X.X");
+encode("XX....XX");
+encode("XX....XX");
+encode("X.X..X.X");
+encode("X..XX..X");
+encode("XXXXXXXX");
+
+// tile 15
+encode("XXXXXXXX");
+encode("X.X..X.X");
+encode("XXX..XXX");
+encode("X......X");
+encode("X......X");
+encode("XXX..XXX");
+encode("X.X..X.X");
+encode("XXXXXXXX");
+
+// tile 16
+encode("X.......");
+encode("X.......");
+encode("X.......");
+encode("X.......");
+encode("X.......");
+encode("X.......");
+encode("X.......");
+encode("XXXXXXXX");
+
+for(let j=17;j<=31;j++) {
+  encode("........");
+  encode("........");
+  encode("........");
+  encode("........");
+  encode("........");
+  encode("........");
+  encode("........");
+  encode("........");
 }
 
 // char $0a.");

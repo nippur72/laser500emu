@@ -616,16 +616,16 @@ let inv = false;
    let phase = 0;
    let freq = tone;
 
-   speakerSound.onaudioprocess = function(e) {
+   audio.speakerSound.onaudioprocess = function(e) {
       const output = e.outputBuffer.getChannelData(0);
          
-      for(let i=0; i<bufferSize; i++) {         
-         const audio = phase <= (duty * 2 * Math.PI) ? 0.75 : -0.75;
-         output[i] = inv ? audio : -audio;
+      for(let i=0; i<audio.AUDIO_BUFSIZE; i++) {         
+         const a = phase <= (duty * 2 * Math.PI) ? 0.75 : -0.75;
+         output[i] = inv ? a : -a;
 
          phase += (2 * Math.PI * freq / 48000);
          if(phase > 2 * Math.PI) {
-            const bitm = Math.random()< 0.5 ? 1 : 4;
+            const bitm = Math.random()< 0.5 ? 1 : 2;
             freq = tone * bitm;            
          }
          phase = phase % (2 * Math.PI);            
@@ -1025,3 +1025,159 @@ function joyport(port) {
    console.log(`port &h${port.toString(16)}: ${msg.join(",")}`);
 }
 for(let p=0x15;p<0x30;p++) joyport(p);
+
+/*
+EXPERIMENTING WITH THE CASSETTE PORT
+
+I did some tests on the cassette port, here is what I've found so far:
+
+1) the port works better with four specific frequencies (most likely due to circuit resonance... I don't know exactly why): 800 Hz, 2000 Hz, 3000 Hz and 4000 Hz. Moving from such values results in a degraded received signal
+
+2) above ~1400 Hz the signal gets inverted (flips upside down)
+
+Metodology: On the VZ I wrote an oscilloscope program that decodes a burst of 512 full tape pulses (HIGH-LOW), calculates the wavelength of each pulse and displays the accumulated result on the X-axis. 
+
+The test signal was a continuous random stream of pulses I then fed the cassette input with a square wave signal with random frequency alternating between two frequencies f and f/2.
+  stream of pulses I then fed the cassette input with a square wave signal with random frequency alternating between two frequencies f and f/2.
+*/
+
+let tone = 500.78;
+let duty = 0.5;
+let inv = false;
+let freq = tone;
+
+(function test_sound() {
+   const BUFSIZE = 2048;
+   const audioContext = new window.AudioContext();
+   const speakerSound = audioContext.createScriptProcessor(BUFSIZE, 1, 1);
+
+   let phase = 0;
+
+   speakerSound.onaudioprocess = function(e) {
+      const output = e.outputBuffer.getChannelData(0);
+         
+      for(let i=0; i<BUFSIZE; i++) {         
+         // make a square wave out of 0-2pi phase
+         const a = phase <= (duty * 2 * Math.PI) ? 0.75 : -0.75;
+         
+         // invert if requested
+         output[i] = inv ? a : -a;
+
+         // advance phase by the frequency value
+         phase += (2 * Math.PI * freq / audioContext.sampleRate);
+
+         // when the full cycle is complete, random choose next pulse
+         if(phase > 2 * Math.PI) {
+            const pulse_width = Math.random()< 0.5 ? 1 : 2;
+            freq = tone * pulse_width;            
+         }
+
+         // makes phase stay in the range 0-2pi
+         phase = phase % (2 * Math.PI);            
+      }          
+   }
+
+   speakerSound.connect(audioContext.destination);
+   // to stop
+   //speakerSound.disconnect(audioContext.destination);
+})();
+
+
+
+
+
+class Audio {
+   constructor(bufsize) {
+      this.AUDIO_BUFSIZE = bufsize;  // must match psg.c
+      this.playing = false;
+      this.buffers = [];
+      this.
+      this.sampleRate = this.audioContext.sampleRate;
+      this.
+
+      this.speakerSound.onaudioprocess = (e) => {
+         const output = e.outputBuffer.getChannelData(0);
+
+         if(this.buffers.length === 0) {
+            // console.log("warning: audio queue is empty");
+            return;
+         }
+         else if(this.buffers.length > 2) {
+            // console.log(`warning: audio queue is getting longer: ${audio_buffers_queue.length}`);
+            this.buffers = [];
+            return;
+         }
+
+         const buffer = this.buffers[0];
+         this.buffers = this.buffers.slice(1);
+
+         for(let i=0; i<this.AUDIO_BUFSIZE; i++) {
+            output[i] = buffer[i];
+         }
+      }
+   }
+
+   playBuffer(buffer) {
+      if(!this.playing) return;
+      this.buffers.push([ ...buffer ]);  // push a cloned copy
+   }
+
+   start() {
+      this.speakerSound.connect(this.audioContext.destination);
+      this.playing = true;
+      this.buffers = [];
+   }
+
+   stop() {
+      this.speakerSound.disconnect(this.audioContext.destination);
+      this.playing = false;
+   }
+
+   resume() {
+      if(this.audioContext.state === 'suspended') {
+         this.audioContext.resume().then(() => {
+            this.buffers = [];
+            // console.log('sound playback resumed successfully');
+         });
+      }
+   }
+}
+
+// extract CPM ccp
+debugBefore = (function() {   
+   return function() {         
+      const pc = cpu.getState().pc;
+      if(pc === 0xDA00) {
+         // when PC is at this addres, CCP is going to be called
+         downloadRam(0xC400, 0xE8FF);
+      }      
+   };
+})();
+
+// extract CPM ccp
+debugBefore = ()=> {         
+   const pc = cpu.getState().pc;
+   if(pc === 0xDA00) {
+      // when PC is at this addres, CCP is going to be called
+      downloadRam(0xC400, 0xE8FF);
+   }      
+};
+
+// extract chinese CPM ccp
+debugBefore = ()=> {         
+   const pc = cpu.getState().pc;
+   if(pc === 0x22A0) {
+      // when PC is at this addres, CCP is going to be called
+      downloadRam(0xC400, 0xEAFF);
+   }      
+};
+
+
+// extract boot sector
+debugBefore = ()=> {         
+   const pc = cpu.getState().pc;
+   if(pc === 0xA200) {
+      // when PC is at this addres, CCP is going to be called
+      downloadRam(0xA200, 0xA2FF);
+   }      
+};

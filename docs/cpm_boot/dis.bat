@@ -1,0 +1,1 @@
+..\..\..\..\z80\yazd\yazd.exe cpm_bootsec.bin --list --lowercase --addr:0xA200 > cpm_boot.asm

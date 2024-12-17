@@ -1,0 +1,23 @@
+; constant definition for LASER 500 CP/M
+
+; screen constants
+VIDEO     EQU $7800            ; video bank 7 in slot 1: $7800-$7FFF
+NCOLS     EQU 80               ; number of screen columns
+NROWS     EQU 24               ; number of screen rows
+
+; rom banks
+ROM0_PAGE  EQU 0
+ROM1_PAGE  EQU 1
+IO_PAGE    EQU 2
+RAM4_PAGE  EQU 4
+RAM5_PAGE  EQU 5
+RAM6_PAGE  EQU 6
+VIDEO_PAGE EQU 7
+
+; slots
+BANK0      EQU $40
+BANK1      EQU $41
+BANK2      EQU $42
+BANK3      EQU $43
+
+

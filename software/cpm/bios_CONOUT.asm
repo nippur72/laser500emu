@@ -7,87 +7,131 @@
 
 
 
-EXTERN _CONOUT
+VIDEO     EQU $7800            
+NCOLS     EQU 80               
+NROWS     EQU 24               
 
-VIDEO EQU $7800
-NCOLS EQU 80
-NROWS EQU 24
 
-CURSOR_COL: DEFB 43
-CURSOR_ROW: DEFB 22
+ROM0_PAGE  EQU 0
+ROM1_PAGE  EQU 1
+IO_PAGE    EQU 2
+RAM4_PAGE  EQU 4
+RAM5_PAGE  EQU 5
+RAM6_PAGE  EQU 6
+VIDEO_PAGE EQU 7
 
-_CONOUT:
+
+BANK0      EQU $40
+BANK1      EQU $41
+BANK2      EQU $42
+BANK3      EQU $43
+
+
+
+
+
+
+
+
+
+EXTERN CAPSLOCK       
+
+PUBLIC _CCOL          
+PUBLIC _CROW          
+PUBLIC _CONOUT        
+
+_CCOL   EQU CCOL      
+_CROW   EQU CROW      
+_CONOUT EQU CONOUT    
+
+CCOL: DEFB 0         
+CROW: DEFB 0         
+
 CONOUT:
     DI
-    LD   A,L
+    CALL VBANK_ON
+    CALL CURSOR_TOGGLE
     CALL HANDLE_CHARS
+    CALL CURSOR_TOGGLE
+    CALL VBANK_OFF
     EI
     RET
 
 HANDLE_CHARS:
     
+	CP 6
+	JR Z,CHAR_CAPSLOCK
 	CP 8
 	JR Z,CHAR_BACKSPACE
+	CP 9
+	JR Z,CHAR_TAB
 	CP 10
 	JR Z,CHAR_LF
+	CP 12
+	JR Z,CHAR_FF
 	CP 13
 	JR Z,CHAR_CR
-	CP 28
-	JR Z,CHAR_HOME
-	CP 31
-	JR Z,CHAR_CLS
-
-    
-    
-    
-    
-    
-    
-    
-    
+   
+	CP 14
+	JR Z,CHAR_RIGHT
+	CP 15
+	JR Z,CHAR_UP
+   
 
 NORMAL_CHARACTER:
-    PUSH AF
-    CALL VBANK_ON
-    CALL CALC_CURSOR_ADDR
-    POP  AF
+    PUSH AF                
+    CALL CALC_CURSOR_ADDR  
+    POP  AF                
     LD   (HL),A            
     CALL CURSOR_RIGHT      
-    CALL CURSOR_TOGGLE     
-    CALL VBANK_OFF
+    RET
+
+CHAR_CAPSLOCK:
+    LD   A,(CAPSLOCK)
+    CPL
+    LD   (CAPSLOCK),A
+    
     RET
 
 CHAR_BACKSPACE:
+    CALL  CURSOR_LEFT      
     RET
 
+CHAR_RIGHT:
+    CALL CURSOR_RIGHT
+    RET
+
+CHAR_UP:
+    CALL CURSOR_UP
+    RET
+
+CHAR_TAB:
+    CALL CURSOR_RIGHT
+    LD   A,(CCOL)
+    AND  0X07               
+    RET  Z
+    JR   CHAR_TAB
+
 CHAR_LF:
+    CALL  CURSOR_DOWN
     RET
 
 CHAR_CR:
+    XOR   A           
+    LD    (CCOL),A    
     RET
 
-CHAR_HOME:
-    CALL CURSOR_TOGGLE     
-CHAR_HOME_AFTERTOGGLE:
-    XOR  A                 
-    LD   (CURSOR_COL),A    
-    LD   (CURSOR_ROW),A    
-    CALL CURSOR_TOGGLE     
-    RET
-
-CHAR_CLS:
+CHAR_FF:
     LD HL,VIDEO
     LD DE,VIDEO+1
-    LD BC,80*24
-    LD A,32                
+    LD BC, 2031      
+    LD A,32          
     LD (HL),A
     LDIR
-    JP CHAR_HOME_AFTERTOGGLE
-
-
-
-
-
+    XOR  A           
+    LD   (CCOL),A    
+    LD   (CROW),A    
+    RET
 
 
 
@@ -95,7 +139,7 @@ CHAR_CLS:
 
 CALC_CURSOR_ADDR:
     PUSH DE
-    LD   A,(CURSOR_ROW)
+    LD   A,(CROW)
     SLA  A
     LD   L,A
     LD   H,0
@@ -107,7 +151,7 @@ CALC_CURSOR_ADDR:
     PUSH DE
     POP  HL
     LD   D, 0
-    LD   A,(CURSOR_COL)
+    LD   A,(CCOL)
     LD   E,A
     ADD  HL,DE
     POP  DE
@@ -118,10 +162,46 @@ CALC_CURSOR_ADDR:
 
 
 CURSOR_TOGGLE:
+    PUSH AF
     CALL CALC_CURSOR_ADDR
     LD   A,(HL)
     XOR  128
     LD   (HL),A
+    POP  AF
+    RET
+
+
+
+
+
+CURSOR_DOWN:
+    LD A,(CROW)
+IF_168_START:
+	CP NROWS-1
+	JR NZ,IF_168_ELSE
+       CALL SCROLL_UP
+	JR IF_168_END
+IF_168_ELSE:
+       INC A
+       LD (CROW),A
+IF_168_END:
+    RET
+
+
+
+
+
+CURSOR_UP:
+    LD A,(CROW)
+IF_182_START:
+	CP 0
+	JR NZ,IF_182_ELSE
+ RET 
+IF_182_ELSE:
+IF_182_END:
+ 
+    DEC A
+    LD (CROW),A
     RET
 
 
@@ -129,27 +209,55 @@ CURSOR_TOGGLE:
 
 
 CURSOR_RIGHT:
-    LD A,(CURSOR_COL)
-IF_125_START:
+    LD A,(CCOL)
+IF_196_START:
 	CP NCOLS-1
-	JR NZ,IF_125_ELSE
+	JR NZ,IF_196_ELSE
        XOR A
-       LD (CURSOR_COL),A
-       LD A,(CURSOR_ROW)
-IF_129_START:
+       LD (CCOL),A
+       LD A,(CROW)
+IF_200_START:
 	CP NROWS-1
-	JR NZ,IF_129_ELSE
+	JR NZ,IF_200_ELSE
           CALL SCROLL_UP
-	JR IF_129_END
-IF_129_ELSE:
+	JR IF_200_END
+IF_200_ELSE:
           INC A
-          LD (CURSOR_ROW),A
-IF_129_END:
-	JR IF_125_END
-IF_125_ELSE:
+          LD (CROW),A
+IF_200_END:
+	JR IF_196_END
+IF_196_ELSE:
        INC A
-       LD (CURSOR_COL),A
-IF_125_END:
+       LD (CCOL),A
+IF_196_END:
+    RET
+
+
+
+
+
+CURSOR_LEFT:
+    LD A,(CCOL)
+    DEC A
+    LD (CCOL),A
+IF_220_START:
+	CP -1
+	JR NZ,IF_220_ELSE
+       LD A,NCOLS-1
+       LD (CCOL),A
+       LD A,(CROW)
+       DEC A
+       LD (CROW),A
+IF_226_START:
+	CP -1
+	JR NZ,IF_226_ELSE
+          XOR A
+          LD (CCOL),A
+          LD (CROW),A
+IF_226_ELSE:
+IF_226_END:
+IF_220_ELSE:
+IF_220_END:
     RET
 
 
@@ -165,19 +273,19 @@ SCROLL_UP:
     PUSH HL
 
     
-    LD A,(CURSOR_COL) 
+    LD A,(CCOL) 
     LD L,A
-    LD A,(CURSOR_ROW) 
+    LD A,(CROW) 
     LD H,A
     PUSH HL
 
     LD A,0
     LD (COUNTER),A
-    LD (CURSOR_COL),A
-DO_163_START:
+    LD (CCOL),A
+DO_253_START:
         
         LD A,(COUNTER)
-        LD (CURSOR_ROW),A
+        LD (CROW),A
         CALL CALC_CURSOR_ADDR
         LD E,L
         LD D,H
@@ -185,7 +293,7 @@ DO_163_START:
         
         LD A,(COUNTER)
         INC A
-        LD (CURSOR_ROW),A
+        LD (CROW),A
         CALL CALC_CURSOR_ADDR
 
         
@@ -199,8 +307,8 @@ DO_163_START:
         INC  A
         LD   (COUNTER),A
 	CP 23
-	JR NZ,DO_163_START
-DO_163_END:
+	JR NZ,DO_253_START
+DO_253_END:
 
 
     LD A,32       
@@ -213,9 +321,9 @@ DO_163_END:
     
     POP HL
     LD A,L 
-    LD (CURSOR_COL),A
+    LD (CCOL),A
     LD A,H 
-    LD (CURSOR_ROW),A
+    LD (CROW),A
 
     POP HL
     POP DE
@@ -235,21 +343,6 @@ VBANK_OFF:
     OUT  (BANK1),A
     POP  AF
     RET
-
-
-ROM0_PAGE  EQU 0
-ROM1_PAGE  EQU 1
-IO_PAGE    EQU 2
-RAM4_PAGE  EQU 4
-RAM5_PAGE  EQU 5
-RAM6_PAGE  EQU 6
-VIDEO_PAGE EQU 7
-
-
-BANK0      EQU $40
-BANK1      EQU $41
-BANK2      EQU $42
-BANK3      EQU $43
 
 ROWTABLE:
     DEFW 30720
@@ -276,6 +369,4 @@ ROWTABLE:
     DEFW 32160
     DEFW 32416
     DEFW 32672
-
-
 
