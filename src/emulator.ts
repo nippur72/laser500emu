@@ -1074,14 +1074,6 @@ import { initializeIcons } from "@fluentui/react";
 // Register icons and pull the fonts from the default SharePoint cdn.
 initializeIcons();
 
-/*
-import { EmulatorGUI } from "./GUI.mts";
-
-const mountNode = document.getElementById("mountnode");
-const root = createRoot(mountNode!);
-root.render(createElement(EmulatorGUI));
-*/
-
 window.addEventListener("resize", onResize);
 window.addEventListener("dblclick", goFullScreen);
 

@@ -64,6 +64,7 @@ async function save_file(filename, start, end) {
     laser500.cpu.reset();
 }
 
+/*
 async function save_disk(diskname, drive) {
     if(drive === undefined) drive = 1;
     if(drive < 1 || drive >2) {
@@ -75,6 +76,7 @@ async function save_disk(diskname, drive) {
     console.log(`disk in drive ${drive} saved as "${diskname}" (${bytes.length} bytes)`);
     laser500.cpu.reset();
 }
+*/
 
 async function load_disk(diskname, drive) {
     if(drive === undefined) drive = 1;
