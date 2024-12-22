@@ -1,6 +1,6 @@
 import React from "react";
 
-import { PrimaryButton, DefaultButton, Dropdown, IDropdownOption, Pivot, PivotItem, Label, Stack, IStackTokens, MessageBar } from '@fluentui/react';
+import { PrimaryButton, DefaultButton, Dropdown, IDropdownOption, Pivot, PivotItem, Label, Stack, IStackTokens, MessageBar, Link } from '@fluentui/react';
 import { Modal } from "@fluentui/react";
 import { ChoiceGroup, IChoiceGroupOption } from "@fluentui/react";
 import { Checkbox } from "@fluentui/react";
@@ -15,7 +15,7 @@ const numericalSpacingStackTokens: IStackTokens = {
    padding: 10,
 };
 
-interface GUISTate {
+interface GUIState {
    menuOpen: boolean;
    selectedPivot: string|undefined;
 
@@ -29,9 +29,11 @@ interface GUISTate {
    drive1_image_name: string;
    drive2_write_protected: boolean;
    drive2_image_name: string;
+
+   memoryConfig: "L350"|"L500"|"L700";
 }
 
-const initialState: GUISTate = {
+const initialState: GUIState = {
    menuOpen: false,
    selectedPivot: undefined,
 
@@ -49,6 +51,7 @@ function freshState() {
       drive2_write_protected: laser500.drives[1].write_enabled === 1 ? false : true,
       drive1_image_name: laser500.drives[0].fileName,
       drive2_image_name: laser500.drives[1].fileName,
+      memoryConfig: laser500.isLaser700 ? "L700": laser500.isLaser500 ? "L500" : "L350" as GUIState["memoryConfig"], 
    };
 }
 
@@ -68,9 +71,10 @@ type Action =
    | { type: 'SAVE_DISK', drive: number }
    | { type: 'RECORD_TAPE' }
    | { type: 'STOP_RECORD_TAPE' }
+   | { type: 'SET_MEMCONFIG', config: string | number | undefined }
 ;
 
-function reducer(state: GUISTate, action: Action): GUISTate {
+function reducer(state: GUIState, action: Action): GUIState {
    switch (action.type) {
       case 'PIVOT_SET':
          return { ...state, selectedPivot: action.itemKey };
@@ -169,8 +173,10 @@ export function EmulatorGUI() {
 
    function tasto_premuto(ev) {
       if(ev.code === "KeyM" && ev.altKey && ev.ctrlKey) {
-         dispatch({ type: 'TOGGLE_MENU' });
-      }
+         ev.preventDefault();
+         dispatch({ type: 'TOGGLE_MENU' });         
+         return;
+      }      
    }
 
    useEffect(() => {
@@ -269,6 +275,18 @@ export function EmulatorGUI() {
                         onChange={()=>dispatch({ type: 'TOGGLE_DRIVE_WPROT', drive: 2 })} 
                      />
                      
+                  </PivotItem>
+
+                  <PivotItem headerText="Joysticks" itemKey="joysticks"></PivotItem>
+                  <PivotItem headerText="Printer" itemKey="printer"></PivotItem>
+                  <PivotItem headerText="Serial" itemKey="serial"></PivotItem>                  
+                  <PivotItem headerText="Misc" itemKey="misc"></PivotItem>                  
+
+                  <PivotItem headerText="About" itemKey="about">
+                     <Label>Laser 500 emulator, written by Antonino Porcino (nino.porcino@gmail.com)</Label><br />
+                     <Link href="https://nippur72.github.io/laser500emu" target="_blank">Online emulator</Link><br />
+                     <Link href="https://github.com/nippur72/laser500emu/" target="_blank">Github repo</Link><br />
+                     <Link href="https://www.facebook.com/groups/263150584310074" target="_blank">Facebook group</Link><br />                     
                   </PivotItem>
 
                </Pivot>
@@ -462,33 +480,12 @@ export class EmulatorGUI extends Component<State> {
                   <div>Save printer output</div>
                </PivotItem>
 
-               <PivotItem headerText="Video" headerButtonProps={{'data-order': 6}}>
-                  <div>Brighness contrast saturation</div>
-                  <div>Monochrome output</div>
-                  <div>Take snapshot</div>
-               </PivotItem>
 
                <PivotItem headerText="Text files" headerButtonProps={{'data-order': 7}}>
                   <Uploader value="Load text file" onUpload={(e)=>this.handleUploadText(e)} accept=".txt,.bas" />
                   {/* paste clipboard * /}
                </PivotItem>
 
-               <PivotItem headerText="About" headerButtonProps={{'data-order': 8}}>
-                  <Label>Laser 310 emulator, (C) 2021 Antonino Porcino</Label>
-               </PivotItem>
-
-            </Pivot>
-
-            <Stack horizontal horizontalAlign="space-between">
-               <DefaultButton onClick={()=>this.powerOffOn()}>Reset</DefaultButton>
-               <PrimaryButton onClick={()=>this.buttonCloseClick()}>Close</PrimaryButton>
-            </Stack>
-
-         </div>
-      </Modal>
-      );
-   }
-}
 */
 
 
