@@ -853,8 +853,6 @@ export let storage = new BrowserStorage("laser500");
 (window as any).upload   = (fn) => storage.upload(fn);
 (window as any).laser500 = laser500;
 
-let USE_WASM = false;
-
 /******************/
 
 const F14M = 14778730*(944/950);  // takes into account the 6 cycles lost in the HSYNC circuit
@@ -1010,14 +1008,6 @@ function writeAudioSamples(cpuCycles) {
 export let audio = new Audio(4096);
 audio.start();
 
-/*
-async function init() {
-   laser500.cpu = await z80_bundle();
-   if(USE_WASM) cpu.init();
-   main();
-}
-*/
-
 async function main() {
    // prints welcome message on the console
    // welcome();
@@ -1040,9 +1030,6 @@ async function main() {
    }
    */
 }
-
-//if(USE_WASM) init();
-//else main();
 
 export function stop() {
    audio.stop();
