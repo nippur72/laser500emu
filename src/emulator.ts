@@ -778,20 +778,22 @@ export const laser500 = {
    // 32K ROM
    // rom1,rom2 are defined in roms.js
 
+   // bank 3 only on laser 350, makes it respond as 0xFF as in real hardware
+   bank3: new Uint8Array(16384).fill(0xFF),
+
    // 64K RAM
    bank4: new Uint8Array(16384), // page 4
    bank5: new Uint8Array(16384), // page 5
    bank6: new Uint8Array(16384), // page 6
    bank7: new Uint8Array(16384), // page 7
 
-   // bank 3 only on laser 350, makes it respond as 0xFF as in real hardware
-   bank3: new Uint8Array(16384).fill(0xFF),
-
-   // unused banks
+   // Laser 700 additional 64K RAM
    bank8: new Uint8Array(16384).fill(0xFF),
    bank9: new Uint8Array(16384).fill(0xFF),
    bankA: new Uint8Array(16384).fill(0xFF),
    bankB: new Uint8Array(16384).fill(0xFF),
+
+   // unused (cartridge)
    bankC: new Uint8Array(16384).fill(0x7F),
    bankD: new Uint8Array(16384).fill(0x7F),
    bankE: new Uint8Array(16384).fill(0x7F),
@@ -822,6 +824,10 @@ export const laser500 = {
    stopped: false, // allows to stop/resume the emulation
 
    drives: drives,
+
+   isLaser350: false,
+   isLaser500: true,
+   isLaser700: false,
 
    power: function() {      
       zap();      

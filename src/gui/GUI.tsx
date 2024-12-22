@@ -143,10 +143,24 @@ function reducer(state: GUISTate, action: Action): GUISTate {
          laser500.tape.csave();
          return { ...state, ...freshState() };
 
+      case 'SET_MEMCONFIG': {         
+         const conf = action.config;
+         laser500.isLaser350 = conf === "L350";
+         laser500.isLaser500 = conf === "L500";
+         laser500.isLaser700 = conf === "L700";
+         return { ...state, ...freshState() };
+      }
+
       default:
          throw 'unknown action';         
    }
 }
+
+const memoryOptions: IDropdownOption<any>[] = [
+   { key: "L350", text: "Laser 350 (16K RAM)" },
+   { key: "L500", text: "Laser 500 (64K RAM)" },
+   { key: "L700", text: "Laser 700 (128K RAM)" },
+];
 
 // TODO: video: saturation, palette, scanlines, mono/color
 
@@ -171,6 +185,21 @@ export function EmulatorGUI() {
       <Modal isOpen={state.menuOpen}>
          <div style={{ padding: '2em' }}>
                <Pivot style={{ height: '500px', minWidth: '768px' }} selectedKey={state.selectedPivot} onLinkClick={(item)=>dispatch({ type: 'PIVOT_SET', itemKey: item?.props.itemKey })}>
+
+                  <PivotItem headerText="Memory" itemKey="memory">
+                     <Dropdown 
+                        label="Memory" 
+                        options={memoryOptions} 
+                        selectedKey={state.memoryConfig} 
+                        onChange={(e,item)=>dispatch({ type: 'SET_MEMCONFIG', config: item?.key })} />
+                  </PivotItem>
+
+                  <PivotItem headerText="Video" itemKey="video">
+                     <div>Brighness contrast saturation</div>
+                     <div>Monochrome output</div>
+                     <div>Take snapshot</div>
+                  </PivotItem>
+
                   <PivotItem headerText="Tape" itemKey="tape">
                      <br />
                      <Checkbox label="Audible tape sounds (tape monitor)"
@@ -262,19 +291,6 @@ import { VZ_to_WAV } from "laser500-wav/dist/tape_creator";
 */
 
 /*
-let machineOptions: IDropdownOption<any>[] = [
-   { key: "vz200pal" , text: "VZ200 (Laser 210) PAL"  },
-   { key: "vz300pal" , text: "VZ300 (Laser 310) PAL"  },
-   { key: "vz200ntsc", text: "VZ200 (Laser 210) NTSC" },
-   { key: "vz300ntsc", text: "VZ300 (Laser 310) NTSC" }
-];
-
-let memoryOptions: IDropdownOption<any>[] = [
-   { key: "8K"  , text: "8K RAM"  },
-   { key: "18K" , text: "18K RAM" },
-   { key: "24K" , text: "24K RAM" },
-   { key: "34K" , text: "34K RAM" }
-];
 
 let joystickOptions: IChoiceGroupOption[] = [
    { key: 'A', text: 'Option A' },

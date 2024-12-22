@@ -49,26 +49,18 @@ export function mem_write(address: number, value: number): void {
       case  1: break; // writing in rom
       case  2: mapped_io_write(base, value); break;
 
-      /*
-      // laser 350
-      case  3: bank3[base] = value; break;
-      case  4: break;
-      case  5: break;
-      case  6: break;
-      case  7: break;
-      */
+      case  3: if(laser500.isLaser350) laser500.bank3[base] = value; break; 
 
-      // laser 500
-      case  3: break; // page 3 is disabled as works only in Laser 350      
-      case  4: laser500.bank4[base] = value; break;
-      case  5: laser500.bank5[base] = value; break;
-      case  6: laser500.bank6[base] = value; break;
-      case  7: laser500.bank7[base] = value; break;
+      case  4: if(!laser500.isLaser350) laser500.bank4[base] = value; break;
+      case  5: if(!laser500.isLaser350) laser500.bank5[base] = value; break;
+      case  6: if(!laser500.isLaser350) laser500.bank6[base] = value; break;
+      case  7: if(!laser500.isLaser350) laser500.bank7[base] = value; break;
 
-      case  8: break; // TODO expansion slots
-      case  9: break; // TODO expansion slots
-      case 10: break; // TODO expansion slots
-      case 11: break; // TODO expansion slots
+      case  8: if(laser500.isLaser700) laser500.bank8[base] = value; break; 
+      case  9: if(laser500.isLaser700) laser500.bank9[base] = value; break; 
+      case 10: if(laser500.isLaser700) laser500.bankA[base] = value; break; 
+      case 11: if(laser500.isLaser700) laser500.bankB[base] = value; break; 
+
       case 12: break; // TODO expansion slots
       case 13: break; // TODO expansion slots
       case 14: break; // TODO expansion slots
