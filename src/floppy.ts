@@ -1,6 +1,6 @@
 import { saveAs } from "file-saver";
 import { vtdos_11_image } from "./vtdos11_disk";
-import { downloadBytes } from "./bytes";
+import { areUint8ArraysDifferent, downloadBytes } from "./bytes";
 
 // FDC internal registers
 
@@ -148,14 +148,16 @@ export function EmptyDisk(sides: number) {
    const NIC_SECTOR_SIZE = NIC_TRACK_SIZE / 16;
    const NIC_TRACKS = 40;
    const FLOPPY_SIDE = NIC_TRACK_SIZE * NIC_TRACKS;
-   const FLOPPY_SIZE = sides * FLOPPY_SIDE;
-   return new Uint8Array(FLOPPY_SIZE);
+   const FLOPPY_SIZE = sides * FLOPPY_SIDE;   
+   return new Uint8Array(FLOPPY_SIZE).fill(0xFF); //.map(e=>(Math.random()*256)&0xFF);
 }
 
 export class Drive {
    track_x2: number;
    track_offset: number;
    floppy: Uint8Array;
+   original_image: Uint8Array;
+
    write_enabled: number;
    fileName: string;
    NIC_TRACK_SIZE: number;
@@ -169,6 +171,8 @@ export class Drive {
       this.track_x2 = 80;
       this.track_offset = 0;
       this.floppy = image;
+      this.original_image = new Uint8Array(image);
+
       this.write_enabled = 0;      
       this.fileName = fileName;
       this.NIC_TRACK_SIZE = 8192; // 327680 / 40
@@ -236,6 +240,10 @@ export class Drive {
 
    save_image_to_file() {
       downloadBytes(this.fileName, this.floppy);
+   }
+
+   is_modified() {
+      return areUint8ArraysDifferent(this.floppy, this.original_image);
    }
 }
 

@@ -17,6 +17,8 @@ const numericalSpacingStackTokens: IStackTokens = {
 
 interface GUISTate {
    menuOpen: boolean;
+   selectedPivot: string|undefined;
+
    tapeMonitor: boolean;
    emulate_fdc: boolean;
    isTapePlaying: boolean;
@@ -31,6 +33,8 @@ interface GUISTate {
 
 const initialState: GUISTate = {
    menuOpen: false,
+   selectedPivot: undefined,
+
    ...freshState()
 }
 
@@ -44,12 +48,13 @@ function freshState() {
       drive1_write_protected: laser500.drives[0].write_enabled === 1 ? false : true,
       drive2_write_protected: laser500.drives[1].write_enabled === 1 ? false : true,
       drive1_image_name: laser500.drives[0].fileName,
-      drive2_image_name: laser500.drives[1].fileName 
+      drive2_image_name: laser500.drives[1].fileName,
    };
 }
 
 type Action = 
-     { type: 'TOGGLE_MENU' } 
+   | { type: 'PIVOT_SET', itemKey: string|undefined }
+   | { type: 'TOGGLE_MENU' } 
    | { type: 'TOGGLE_TAPE_MONITOR' } 
    | { type: 'TOGGLE_EMULATE_FDC' } 
    | { type: 'TOGGLE_DRIVE_WPROT', drive: number } 
@@ -67,6 +72,9 @@ type Action =
 
 function reducer(state: GUISTate, action: Action): GUISTate {
    switch (action.type) {
+      case 'PIVOT_SET':
+         return { ...state, selectedPivot: action.itemKey };
+
       case 'TOGGLE_MENU':
          return { ...state, menuOpen: !state.menuOpen };
 
@@ -140,6 +148,8 @@ function reducer(state: GUISTate, action: Action): GUISTate {
    }
 }
 
+// TODO: video: saturation, palette, scanlines, mono/color
+
 export function EmulatorGUI() {
    const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -154,11 +164,14 @@ export function EmulatorGUI() {
       return () => document.removeEventListener('keydown', tasto_premuto);
    }, []);    
 
+   const drive1_is_modified = laser500.drives[0].is_modified();
+   const drive2_is_modified = laser500.drives[1].is_modified();
+
    return (
       <Modal isOpen={state.menuOpen}>
          <div style={{ padding: '2em' }}>
-               <Pivot style={{ height: '500px', minWidth: '768px' }}>
-                  <PivotItem headerText="Tape">
+               <Pivot style={{ height: '500px', minWidth: '768px' }} selectedKey={state.selectedPivot} onLinkClick={(item)=>dispatch({ type: 'PIVOT_SET', itemKey: item?.props.itemKey })}>
+                  <PivotItem headerText="Tape" itemKey="tape">
                      <br />
                      <Checkbox label="Audible tape sounds (tape monitor)"
                         checked={state.tapeMonitor} 
@@ -186,7 +199,7 @@ export function EmulatorGUI() {
                      </MessageBar>
                   </PivotItem>                  
 
-                  <PivotItem headerText="Disk">
+                  <PivotItem headerText="Disk" itemKey="disk">
                      <br />
                      <Checkbox label="Disk drive interface attached"
                         checked={state.emulate_fdc} 
@@ -195,7 +208,7 @@ export function EmulatorGUI() {
 
                      <br />
                      drive 1: <br /> 
-                     Mounted image file: {state.drive1_image_name} <br /> 
+                     Mounted image file: {state.drive1_image_name} {drive1_is_modified ? '(*modified)' : ''}<br /> 
                      <UploaderSingle 
                         value="Select disk image" 
                         onUpload={fileInfo=>dispatch({ type: 'DISK_IMAGE', drive: 1, fileInfo })} 
@@ -212,7 +225,7 @@ export function EmulatorGUI() {
 
                      <br />
                      drive 2: <br />
-                     Mounted image file: {state.drive2_image_name}  <br />   
+                     Mounted image file: {state.drive2_image_name} {drive2_is_modified ? '(*modified)' : ''}<br />   
                      <UploaderSingle 
                         value="Select disk image" 
                         onUpload={fileInfo=>dispatch({ type: 'DISK_IMAGE', drive: 2, fileInfo })} 

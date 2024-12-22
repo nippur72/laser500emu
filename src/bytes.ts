@@ -136,3 +136,13 @@ export function uint8ToString(b: Uint8Array) {
    }
    return s;
 }
+
+export function areUint8ArraysDifferent(arr1: Uint8Array, arr2: Uint8Array): boolean {
+   // Check if lengths are different
+   if (arr1.length !== arr2.length) {
+       return true; // Arrays are different
+   }
+   
+   // Use every to compare elements
+   return !arr1.every((value, index) => value === arr2[index]);
+}
