@@ -1,28 +1,6 @@
 // TODO reconcile BBS serial port with CP/M serial port
 // TODO tape use download instead of saveAs
-
-// TypeScript rewrite file checks:
-// OK: audio.mts
-// RAW: bbs.mts                          
-// OK: bus.mts                          
-// OK: bytes.mts                        
-// RAW: emulator.mts                     
-// RAW: files.mts                        
-// RAW: filesystem.mts                   
-// RAW: floppy.mts                       
-// OK: joystick.mts                     
-// RAW: keyboard.mts                     
-// RAW: keyboard_IT.mts                  
-// RAW: keys.mts                         
-// OK: mapped_io.mts                    
-// RAW: mdawson.mts                      
-// OK: printer.mts                      
-// OK: roms.mts                         
-// OK: serial.mts                       
-// OK: tape.mts                         
-// OK: video.mts                        
-// RAW: video-fpga.mts.disabled          
-// OK: vtdos11_disk.mts                     
+// TODO eradicate rgbmasksize, rgbmaskopacity
 
 import { bit, downloadBytes, getFileExtension, hex, mem_read_word, mem_write_word, reset_bit, set_bit } from "./bytes";
 
