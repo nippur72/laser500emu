@@ -125,8 +125,8 @@ function FDC_read_port_12h() {
    }
 
    let buffer_status = 1; // always ready
-   let write_enabled = drives[FDC_DRIVE].write_enabled;
-   const data = (buffer_status << 7) | write_enabled;
+   let write_protected = drives[FDC_DRIVE].write_protected;
+   const data = (buffer_status << 7) | write_protected;
    return data;
 }
 
@@ -158,7 +158,7 @@ export class Drive {
    floppy: Uint8Array;
    original_image: Uint8Array;
 
-   write_enabled: number;
+   write_protected: number;
    fileName: string;
    NIC_TRACK_SIZE: number;
    NIC_SECTOR_SIZE: number;
@@ -173,7 +173,7 @@ export class Drive {
       this.floppy = image;
       this.original_image = new Uint8Array(image);
 
-      this.write_enabled = 0;      
+      this.write_protected = 0;      
       this.fileName = fileName;
       this.NIC_TRACK_SIZE = 8192; // 327680 / 40
       this.NIC_SECTOR_SIZE = this.NIC_TRACK_SIZE / 16;
@@ -215,7 +215,7 @@ export class Drive {
       // if(this.track_x2 % 2 == 1) return 0; 
       const track = this.track_x2 >> 1;
       const pos = this.getpos(track, FDC_SIDE) + this.track_offset;
-      if(FDC_ENBL && !FDC_WREQ_n) {
+      if(FDC_ENBL && !FDC_WREQ_n && !this.write_protected) {
          if(pos < this.floppy.length) this.floppy[pos] = FDC_DATA;
          this.track_offset = (this.track_offset + 1) % this.NIC_TRACK_SIZE;
       }

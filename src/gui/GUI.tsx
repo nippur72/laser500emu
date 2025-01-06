@@ -47,8 +47,8 @@ function freshState() {
       isTapePlaying: laser500.tape.isPlaying(),
       tapeFileName: laser500.tape.tapeFileName,
       csaving: laser500.csaving,
-      drive1_write_protected: laser500.drives[0].write_enabled === 1 ? false : true,
-      drive2_write_protected: laser500.drives[1].write_enabled === 1 ? false : true,
+      drive1_write_protected: laser500.drives[0].write_protected === 1,
+      drive2_write_protected: laser500.drives[1].write_protected === 1,
       drive1_image_name: laser500.drives[0].fileName,
       drive2_image_name: laser500.drives[1].fileName,
       memoryConfig: laser500.isLaser700 ? "L700": laser500.isLaser500 ? "L500" : "L350" as GUIState["memoryConfig"], 
@@ -88,7 +88,7 @@ function reducer(state: GUIState, action: Action): GUIState {
 
       case 'TOGGLE_DRIVE_WPROT': {
          const drive = action.drive-1;
-         laser500.drives[drive].write_enabled = laser500.drives[drive].write_enabled ? 0 : 1;
+         laser500.drives[drive].write_protected = laser500.drives[drive].write_protected ? 0 : 1;
          return { ...state, ...freshState() };
       }
 
