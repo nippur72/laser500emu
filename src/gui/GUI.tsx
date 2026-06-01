@@ -56,7 +56,7 @@ function freshState() {
 }
 
 type Action = 
-   | { type: 'PIVOT_SET', itemKey: string|undefined }
+   | { type: 'PIVOT_SET', itemKey: string|undefined }  // used to set the menu tab (called "Pivot")
    | { type: 'TOGGLE_MENU' } 
    | { type: 'TOGGLE_TAPE_MONITOR' } 
    | { type: 'TOGGLE_EMULATE_FDC' } 
@@ -160,7 +160,7 @@ function reducer(state: GUIState, action: Action): GUIState {
    }
 }
 
-const memoryOptions: IDropdownOption<any>[] = [
+const memoryOptions: IChoiceGroupOption[] = [
    { key: "L350", text: "Laser 350 (16K RAM)" },
    { key: "L500", text: "Laser 500 (64K RAM)" },
    { key: "L700", text: "Laser 700 (128K RAM)" },
@@ -193,11 +193,11 @@ export function EmulatorGUI() {
                <Pivot style={{ height: '500px', minWidth: '768px' }} selectedKey={state.selectedPivot} onLinkClick={(item)=>dispatch({ type: 'PIVOT_SET', itemKey: item?.props.itemKey })}>
 
                   <PivotItem headerText="Memory" itemKey="memory">
-                     <Dropdown 
+                     <ChoiceGroup 
                         label="Memory" 
                         options={memoryOptions} 
                         selectedKey={state.memoryConfig} 
-                        onChange={(e,item)=>dispatch({ type: 'SET_MEMCONFIG', config: item?.key })} />
+                        onChange={(e,option)=>dispatch({ type: 'SET_MEMCONFIG', config: option?.key })} />
                   </PivotItem>
 
                   <PivotItem headerText="Video" itemKey="video">
