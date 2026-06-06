@@ -611,8 +611,7 @@ async function parseQueryStringCommands() {
          wait_for_cursor();
          if(name.startsWith("http")) {
             // external load
-            let bin = await externalLoad(name) as number[];
-            loadBytes(bin);
+            await externalLoad(name);
             pasteLine("RUN\r\n");
          }
          else {
@@ -626,8 +625,10 @@ async function parseQueryStringCommands() {
       // ?load=http://github.com/nippur72/laser500emu/blob/gh-pages/software/disks/vt-dos.nic
       const name = options.nic;
       if(name.startsWith("http")) {            
-         const nic = await externalLoad(name) as Uint8Array; // TODO check
-         await droppedFile(name, nic);
+         const nic = await externalLoad(name);
+         if (nic) {
+            await droppedFile(name, nic);
+         }
       }      
    }
 
@@ -752,7 +753,7 @@ import { Audio } from "./audio";
 import { BrowserStorage} from "./filesystem";
 import { updateGamePad } from "./joystick";
 import { charset, rom1, rom2 } from "./roms";
-import { externalLoad } from "./mdawson";
+import { externalLoad } from "./externalLoad";
 import { Serial } from "./serial";
 import { Tape } from "./tape";
 import { mapped_io_read, mapped_io_write } from "./mapped_io";
