@@ -10,7 +10,7 @@ export class Audio {
       this.AUDIO_BUFSIZE = bufsize;  // must match psg.c
       this.playing = false;
       this.buffers = [];
-      this.audioContext = new window.AudioContext();
+      this.audioContext = new window.AudioContext({ latencyHint: 'interactive' });
       this.sampleRate = this.audioContext.sampleRate;
       this.speakerSound = this.audioContext.createScriptProcessor(this.AUDIO_BUFSIZE, 1, 1);
 
@@ -18,13 +18,12 @@ export class Audio {
          const output = e.outputBuffer.getChannelData(0);
 
          if(this.buffers.length === 0) {
-            // console.log("warning: audio queue is empty");
+            output.fill(0);
             return;
          }
-         else if(this.buffers.length > 2) {
-            // console.log(`warning: audio queue is getting longer: ${audio_buffers_queue.length}`);
-            this.buffers = [];
-            return;
+         else if(this.buffers.length > 3) {
+            // Keep only the most recent buffer to minimize latency
+            this.buffers = this.buffers.slice(-1);
          }
 
          const buffer = this.buffers[0];
