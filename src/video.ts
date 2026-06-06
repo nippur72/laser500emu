@@ -940,12 +940,8 @@ function setPixel160(x: number, y: number, color: number) {
 }
 
 function setPixel96(x: number, y: number, color: number) {   
-   if(DOUBLE_SCANLINES) {    
-      setPixel160(x,y*2+0,color);
-      setPixel160(x,y*2+1,color);
-   } else {
-      setPixel160(x,y,color);      
-   }
+   setPixel160(x,y*2+0,color);
+   setPixel160(x,y*2+1,color);
 }
 
 // Courtesy of MAME/MESS emulator
