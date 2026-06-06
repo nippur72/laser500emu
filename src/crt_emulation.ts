@@ -1,3 +1,6 @@
+// the original shader was taken from https://www.shadertoy.com/view/XsjSzR
+// and improved better RGB mask and PAL colour bleed simulation
+
 let gl: WebGLRenderingContext | null = null;
 let glProgramPassThrough: WebGLProgram | null = null;
 let glProgramCRT: WebGLProgram | null = null;
