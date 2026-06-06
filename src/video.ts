@@ -4,6 +4,8 @@
 import { laser500 } from "./emulator";
 import { charset } from "./roms";
 
+export const emulate_CRT = false;
+
 export const video = {
    hide_scanlines: false,
    saturation: 1.0,
@@ -34,6 +36,9 @@ let canvas, canvasContext;
 let screenCanvas, screenContext;
 let imageData, bmp;
 
+import { initWebGL, renderWebGL } from "./crt_emulation";
+let useWebGL = false;
+
 
 export function calculateGeometry(): void {
    if(video.border_top     !== undefined && (video.border_top    > 65 || video.border_top    < 0)) video.border_top    = undefined;
@@ -55,23 +60,31 @@ export function calculateGeometry(): void {
       SCREEN_H = 313;
    }
 
-   // canvas is the outer canvas where the aspect ratio is corrected
-   canvas = document.getElementById("canvas");
-   canvas.width = SCREEN_W;
-   canvas.height = SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1);
-   canvasContext = canvas.getContext('2d');
+    // canvas is the outer canvas where the aspect ratio is corrected
+    canvas = document.getElementById("canvas");
 
-   /*
-   // screen is the inner canvas that contains the emulated PAL screen
-   screenCanvas = document.createElement("canvas");
-   screenCanvas.width = SCREEN_W;
-   screenCanvas.height = SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1);
-   screenContext = screenCanvas.getContext('2d');
-   */
+    if (!useWebGL && !canvasContext) {
+       useWebGL = initWebGL(canvas);
+       if (!useWebGL) {
+          canvasContext = canvas.getContext('2d');
+       }
+    } else if (!useWebGL) {
+       canvasContext = canvas.getContext('2d');
+    }
 
-   imageData = canvasContext.createImageData(SCREEN_W, SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
-   
-   bmp = new Uint32Array(imageData.data.buffer);   
+    if (useWebGL) {
+       const rect = canvas.getBoundingClientRect();
+       const dpr = window.devicePixelRatio || 1;
+       canvas.width = Math.round(rect.width * dpr) || SCREEN_W;
+       canvas.height = Math.round(rect.height * dpr) || (SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
+       imageData = new ImageData(SCREEN_W, SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
+    } else {
+       canvas.width = SCREEN_W;
+       canvas.height = SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1);
+       imageData = canvasContext.createImageData(SCREEN_W, SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
+    }
+    
+    bmp = new Uint32Array(imageData.data.buffer);   
 }
 
 calculateGeometry();
@@ -507,8 +520,20 @@ export function drawFrame_y()
 }
 
 function updateCanvas() {
-   canvasContext.putImageData(imageData, 0, 0);
-   //canvasContext.drawImage(screenCanvas, 0, 0, canvas.width, canvas.height);
+   if (useWebGL) {
+      // Resize WebGL backbuffer to match physical display size for crisp, visible scanlines
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const width = Math.round(rect.width * dpr);
+      const height = Math.round(rect.height * dpr);
+      if (width > 0 && height > 0 && (canvas.width !== width || canvas.height !== height)) {
+         canvas.width = width;
+         canvas.height = height;
+      }
+      renderWebGL(canvas, emulate_CRT, SCREEN_W, SCREEN_H, DOUBLE_SCANLINES, imageData);
+   } else {
+      canvasContext.putImageData(imageData, 0, 0);
+   }
 }
 
 function drawFrame_y_border(y) 
