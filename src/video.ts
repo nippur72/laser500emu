@@ -36,7 +36,8 @@ let canvas, canvasContext;
 let screenCanvas, screenContext;
 let imageData, bmp;
 
-import { initWebGL, renderWebGL } from "./crt_emulation";
+import { CRTEmulator } from "@nippur72/crt-emulator";
+let crtEmulator: CRTEmulator | null = null;
 let useWebGL = false;
 
 let resizeObserver: ResizeObserver | null = null;
@@ -93,7 +94,8 @@ export function calculateGeometry(): void {
     canvas = document.getElementById("canvas");
 
     if (emulate_CRT && !useWebGL && !canvasContext) {
-       useWebGL = initWebGL(canvas);
+       crtEmulator = new CRTEmulator(canvas);
+       useWebGL = crtEmulator.init();
        if (!useWebGL) {
           canvasContext = canvas.getContext('2d');
        }
@@ -547,8 +549,8 @@ export function drawFrame_y()
 }
 
 function updateCanvas() {
-   if (useWebGL) {
-      renderWebGL(canvas, SCREEN_W, SCREEN_H, DOUBLE_SCANLINES, imageData);
+   if (useWebGL && crtEmulator) {
+      crtEmulator.render(SCREEN_W, SCREEN_H, DOUBLE_SCANLINES, imageData);
    } else {
       canvasContext.putImageData(imageData, 0, 0);
    }

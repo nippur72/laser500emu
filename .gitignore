@@ -1,5 +1,4 @@
-node_modules/*
-!node_modules/@nippur72
+node_modules/
 Z80.js-master/
 # Windows thumbnail cache files
 Thumbs.db
