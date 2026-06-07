@@ -4,7 +4,7 @@
 import { laser500 } from "./emulator";
 import { charset } from "./roms";
 
-export const emulate_CRT = true;
+export const emulate_CRT = false;
 
 export const video = {
    hide_scanlines: false,
