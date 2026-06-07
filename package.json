@@ -1,6 +1,7 @@
 {
   "name": "laser500emu",
   "version": "0.0.1",
+  "type": "module",
   "description": "Laser 350/500/700 emulator",
   "main": "index.html",
   "scripts": {

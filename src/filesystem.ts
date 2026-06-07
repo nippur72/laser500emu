@@ -1,3 +1,6 @@
+import * as idbKeyval from "idb-keyval";
+import { saveAs } from "file-saver";
+
 export class BrowserStorage
 {
    STORAGE_KEY: string;
@@ -12,35 +15,35 @@ export class BrowserStorage
 
    // ===================== private methods ============================================
 
-   async readFile(fileName) {
+   async readFile(fileName: string): Promise<any> {
       const bytes = await this.idb.get(fileName, this.store);
       return bytes;
    }
 
-   async writeFile(fileName, bytes) {
+   async writeFile(fileName: string, bytes: any): Promise<void> {
       await this.idb.set(fileName, bytes, this.store);
    }
 
-   async removeFile(fileName) {
+   async removeFile(fileName: string): Promise<void> {
       await this.idb.del(fileName, this.store);
    }
 
-   async fileExists(fileName) {
+   async fileExists(fileName: string): Promise<boolean> {
       return await this.idb.get(fileName, this.store) !== undefined;
    }
 
    // ===================== command line commands ======================================
 
-   async dir() {
+   async dir(): Promise<void> {
       const fileNames = await this.idb.keys(this.store);
       fileNames.forEach(async fn=>{
-         const file = await this.readFile(fn);
+         const file = await this.readFile(fn as string);
          const length = file.length;
          console.log(`${fn} (${length} bytes)`);
       });
    }
 
-   async remove(filename) {
+   async remove(filename: string): Promise<void> {
       if(await this.fileExists(filename)) {
          await this.removeFile(filename);
          console.log(`removed "${filename}"`);
@@ -50,7 +53,7 @@ export class BrowserStorage
       }
    }
 
-   async download(fileName) {
+   async download(fileName: string): Promise<void> {
       if(!await this.fileExists(fileName)) {
          console.log(`file "${fileName}" not found`);
          return;
@@ -61,7 +64,7 @@ export class BrowserStorage
       console.log(`downloaded "${fileName}"`);
    }
 
-   async upload(fileName) {
+   async upload(fileName: string): Promise<void> {
       throw "not impemented";
    }
 }

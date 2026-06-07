@@ -750,6 +750,9 @@ function downloadRam(start, end) {
 
 
 import { Audio } from "./audio";
+import Z80 from "./Z80.js";
+
+// TODO: Revert to standard npm package import if/when @nippur72/libemu supports ES exports natively.
 import { BrowserStorage} from "./filesystem";
 import { updateGamePad } from "./joystick";
 import { charset, rom1, rom2 } from "./roms";

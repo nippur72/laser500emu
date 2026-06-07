@@ -1,5 +1,6 @@
 import { mem_read, mem_write } from "./bus";
 import { audio, getAverageFrameTime, laser500, oneFrame } from "./emulator";
+import { saveAs } from "file-saver";
 
 export function dumpMem(start: number, end: number, rows: number=16) {
    let s="\r\n";

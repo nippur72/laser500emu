@@ -1,4 +1,7 @@
 import { cpuSpeed, laser500 } from "./emulator";
+import { decodeSync } from "wav-decoder";
+import WavEncoder from "wav-encoder";
+import { saveAs } from "file-saver";
 
 const csaveBufferSize = 44100 * 5 * 60; // five minutes max
 
@@ -80,7 +83,7 @@ export class Tape {
          channelData: [ audio ]
       };
 
-      const buffer = encodeSync(wavData, { bitDepth: 16, float: false });
+      const buffer = WavEncoder.encode.sync(wavData, { bitDepth: 16, float: false } as any);
 
       let blob = new Blob([buffer], {type: "application/octet-stream"});
       const fileName = "tape_recording.wav";
