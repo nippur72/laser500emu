@@ -14,11 +14,11 @@ function toGLSLFloat(x: number): string {
 }
 
 export function fsCRTSource(
-   hardScan = -4.0,    // -8.0 = soft, -16.0 = medium, -20.0 = sharp retro
+   hardScan = -8.0,    // -8.0 = soft, -16.0 = medium, -20.0 = sharp retro
    hardPix = -2.0,     // -2.0 = soft, -4.0 = hard
    warp = 0.04,        // 0.0 = normal >0 warped
    maskDark = 0.5,     // 0.5
-   maskLight = 1.2,    // 1.5
+   maskLight = 1.0,    // 1.5
    maskScale = 1.25,   // 1.0 = fine, 2.0 = medium, 3.0 = coarse
    chromaBleed = 1.0,  // 0.0 = none, 1.0 = normal PAL bleed, 2.0 = strong PAL bleed
    maskWidth = 3.0,    // horizontal period of the triad

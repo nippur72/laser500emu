@@ -4,7 +4,7 @@
 import { laser500 } from "./emulator";
 import { charset } from "./roms";
 
-export const emulate_CRT = false;
+export const emulate_CRT = true;
 
 export const video = {
    hide_scanlines: false,
@@ -39,6 +39,35 @@ let imageData, bmp;
 import { initWebGL, renderWebGL } from "./crt_emulation";
 let useWebGL = false;
 
+let resizeObserver: ResizeObserver | null = null;
+let isResizeListenerAdded = false;
+
+export function resizeWebGLCanvas(): void {
+   if (useWebGL && canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const width = Math.round(rect.width * dpr) || SCREEN_W;
+      const height = Math.round(rect.height * dpr) || (SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
+      if (canvas.width !== width || canvas.height !== height) {
+         canvas.width = width;
+         canvas.height = height;
+      }
+   }
+}
+
+function setupResizeObserver(): void {
+   if (typeof ResizeObserver !== 'undefined') {
+      if (!resizeObserver && canvas) {
+         resizeObserver = new ResizeObserver(() => {
+            resizeWebGLCanvas();
+         });
+         resizeObserver.observe(canvas);
+      }
+   } else if (!isResizeListenerAdded) {
+      window.addEventListener('resize', resizeWebGLCanvas);
+      isResizeListenerAdded = true;
+   }
+}
 
 export function calculateGeometry(): void {
    if(video.border_top     !== undefined && (video.border_top    > 65 || video.border_top    < 0)) video.border_top    = undefined;
@@ -73,12 +102,10 @@ export function calculateGeometry(): void {
     }
 
     if (useWebGL) {
-       const rect = canvas.getBoundingClientRect();
-       const dpr = window.devicePixelRatio || 1;
-       canvas.width = Math.round(rect.width * dpr) || SCREEN_W;
-       canvas.height = Math.round(rect.height * dpr) || (SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
-       imageData = new ImageData(SCREEN_W, SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
-    } else {
+        resizeWebGLCanvas();
+        imageData = new ImageData(SCREEN_W, SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
+        setupResizeObserver();
+     } else {
        canvas.width = SCREEN_W;
        canvas.height = SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1);
        imageData = canvasContext.createImageData(SCREEN_W, SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
@@ -521,15 +548,6 @@ export function drawFrame_y()
 
 function updateCanvas() {
    if (useWebGL) {
-      // Resize WebGL backbuffer to match physical display size for crisp, visible scanlines
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      const width = Math.round(rect.width * dpr);
-      const height = Math.round(rect.height * dpr);
-      if (width > 0 && height > 0 && (canvas.width !== width || canvas.height !== height)) {
-         canvas.width = width;
-         canvas.height = height;
-      }
       renderWebGL(canvas, emulate_CRT, SCREEN_W, SCREEN_H, DOUBLE_SCANLINES, imageData);
    } else {
       canvasContext.putImageData(imageData, 0, 0);
