@@ -2,7 +2,6 @@
 // and improved better RGB mask and PAL colour bleed simulation
 
 let gl: WebGLRenderingContext | null = null;
-let glProgramPassThrough: WebGLProgram | null = null;
 let glProgramCRT: WebGLProgram | null = null;
 let glVertexBuffer: WebGLBuffer | null = null;
 let glTex: WebGLTexture | null = null;
@@ -14,7 +13,7 @@ function toGLSLFloat(x: number): string {
 }
 
 export function fsCRTSource(
-   hardScan = -8.0,    // -8.0 = soft, -16.0 = medium, -20.0 = sharp retro
+   hardScan = -6.0,    // -8.0 = soft, -16.0 = medium, -20.0 = sharp retro
    hardPix = -2.0,     // -2.0 = soft, -4.0 = hard
    warp = 0.04,        // 0.0 = normal >0 warped
    maskDark = 0.5,     // 0.5
@@ -257,15 +256,6 @@ export function initWebGL(canvas: HTMLCanvasElement): boolean {
          }
       `;
 
-      const fsPassThroughSource = `
-         precision mediump float;
-         varying vec2 vTexCoord;
-         uniform sampler2D uSampler;
-         void main(void) {
-            gl_FragColor = texture2D(uSampler, vTexCoord);
-         }
-      `;
-
       const loadShader = (type: number, source: string): WebGLShader | null => {
          const shader = gl!.createShader(type);
          if (!shader) return null;
@@ -280,10 +270,9 @@ export function initWebGL(canvas: HTMLCanvasElement): boolean {
       };
 
       const vs = loadShader(gl.VERTEX_SHADER, vsSource);
-      const fsPass = loadShader(gl.FRAGMENT_SHADER, fsPassThroughSource);
       const fsCRT = loadShader(gl.FRAGMENT_SHADER, fsCRTSource());
 
-      if (!vs || !fsPass || !fsCRT) return false;
+      if (!vs || !fsCRT) return false;
 
       const createProgram = (vsShader: WebGLShader, fsShader: WebGLShader): WebGLProgram | null => {
          const program = gl!.createProgram();
@@ -299,10 +288,9 @@ export function initWebGL(canvas: HTMLCanvasElement): boolean {
          return program;
       };
 
-      glProgramPassThrough = createProgram(vs, fsPass);
       glProgramCRT = createProgram(vs, fsCRT);
 
-      if (!glProgramPassThrough || !glProgramCRT) return false;
+      if (!glProgramCRT) return false;
 
       // Setup vertices quad
       const vertices = new Float32Array([
@@ -337,13 +325,12 @@ export function initWebGL(canvas: HTMLCanvasElement): boolean {
 
 export function renderWebGL(
    canvas: HTMLCanvasElement,
-   emulate_CRT: boolean,
    SCREEN_W: number,
    SCREEN_H: number,
    DOUBLE_SCANLINES: boolean,
    imageData: ImageData
 ): void {
-   if (!useWebGL || !gl) return;
+   if (!useWebGL || !gl || !glProgramCRT) return;
 
    gl.viewport(0, 0, canvas.width, canvas.height);
    gl.clearColor(0, 0, 0, 1);
@@ -354,31 +341,26 @@ export function renderWebGL(
    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, SCREEN_W, SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1), 0, gl.RGBA, gl.UNSIGNED_BYTE, imageData.data);
 
-   const program = emulate_CRT ? glProgramCRT : glProgramPassThrough;
-   if (program) {
-      gl.useProgram(program);
+   gl.useProgram(glProgramCRT);
 
-      const uSamplerLoc = gl.getUniformLocation(program, "uSampler");
-      gl.uniform1i(uSamplerLoc, 0);
+   const uSamplerLoc = gl.getUniformLocation(glProgramCRT, "uSampler");
+   gl.uniform1i(uSamplerLoc, 0);
 
-      if (emulate_CRT) {
-         const uResolutionLoc = gl.getUniformLocation(program, "uResolution");
-         gl.uniform2f(uResolutionLoc, canvas.width, canvas.height);
+   const uResolutionLoc = gl.getUniformLocation(glProgramCRT, "uResolution");
+   gl.uniform2f(uResolutionLoc, canvas.width, canvas.height);
 
-         const uTextureResolutionLoc = gl.getUniformLocation(program, "uTextureResolution");
-         gl.uniform2f(uTextureResolutionLoc, SCREEN_W, SCREEN_H);
-      }
+   const uTextureResolutionLoc = gl.getUniformLocation(glProgramCRT, "uTextureResolution");
+   gl.uniform2f(uTextureResolutionLoc, SCREEN_W, SCREEN_H);
 
-      const aPositionLoc = gl.getAttribLocation(program, "aPosition");
-      const aTexCoordLoc = gl.getAttribLocation(program, "aTexCoord");
+   const aPositionLoc = gl.getAttribLocation(glProgramCRT, "aPosition");
+   const aTexCoordLoc = gl.getAttribLocation(glProgramCRT, "aTexCoord");
 
-      gl.enableVertexAttribArray(aPositionLoc);
-      gl.enableVertexAttribArray(aTexCoordLoc);
+   gl.enableVertexAttribArray(aPositionLoc);
+   gl.enableVertexAttribArray(aTexCoordLoc);
 
-      gl.bindBuffer(gl.ARRAY_BUFFER, glVertexBuffer);
-      gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 16, 0);
-      gl.vertexAttribPointer(aTexCoordLoc, 2, gl.FLOAT, false, 16, 8);
+   gl.bindBuffer(gl.ARRAY_BUFFER, glVertexBuffer);
+   gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 16, 0);
+   gl.vertexAttribPointer(aTexCoordLoc, 2, gl.FLOAT, false, 16, 8);
 
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-   }
+   gl.drawArrays(gl.TRIANGLES, 0, 6);
 }

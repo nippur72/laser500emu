@@ -92,7 +92,7 @@ export function calculateGeometry(): void {
     // canvas is the outer canvas where the aspect ratio is corrected
     canvas = document.getElementById("canvas");
 
-    if (!useWebGL && !canvasContext) {
+    if (emulate_CRT && !useWebGL && !canvasContext) {
        useWebGL = initWebGL(canvas);
        if (!useWebGL) {
           canvasContext = canvas.getContext('2d');
@@ -548,7 +548,7 @@ export function drawFrame_y()
 
 function updateCanvas() {
    if (useWebGL) {
-      renderWebGL(canvas, emulate_CRT, SCREEN_W, SCREEN_H, DOUBLE_SCANLINES, imageData);
+      renderWebGL(canvas, SCREEN_W, SCREEN_H, DOUBLE_SCANLINES, imageData);
    } else {
       canvasContext.putImageData(imageData, 0, 0);
    }
