@@ -750,9 +750,8 @@ function downloadRam(start, end) {
 
 
 import { Audio } from "./audio";
-import Z80 from "./Z80.js";
+import { Z80 } from "z80-js";
 
-// TODO: Revert to standard npm package import if/when @nippur72/libemu supports ES exports natively.
 import { BrowserStorage} from "./filesystem";
 import { updateGamePad } from "./joystick";
 import { charset, rom1, rom2 } from "./roms";
@@ -829,7 +828,7 @@ export const laser500 = {
    emulate_fdc: true,
    tape_monitor: true,
 
-   cpu: new Z80({ mem_read, mem_write, io_read, io_write }),
+   cpu: Z80({ mem_read, mem_write, io_read, io_write }),
 
    printer: new ConsolePrinter(),
    tape: new Tape(),

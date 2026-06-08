@@ -109,7 +109,6 @@
   "exclude": [
     "node_modules/",
     "oldjs/",
-    "Z80.js-master/",
     "software/"
   ],
   "include": [
