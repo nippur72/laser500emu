@@ -9,6 +9,7 @@ import { laser500 } from "../emulator";
 import { Uploader, UploaderSingle } from "./UploadButton";
 import { FileInfo, readFiles } from "./readfile"
 import { Drive, EmptyDisk } from "../floppy";
+import { emulate_CRT, setEmulateCRT } from "../video";
 
 const numericalSpacingStackTokens: IStackTokens = {
    childrenGap: 10,
@@ -31,6 +32,7 @@ interface GUIState {
    drive2_image_name: string;
 
    memoryConfig: "L350"|"L500"|"L700";
+   emulateCRT: boolean;
 }
 
 const initialState: GUIState = {
@@ -52,6 +54,7 @@ function freshState() {
       drive1_image_name: laser500.drives[0].fileName,
       drive2_image_name: laser500.drives[1].fileName,
       memoryConfig: laser500.isLaser700 ? "L700": laser500.isLaser500 ? "L500" : "L350" as GUIState["memoryConfig"], 
+      emulateCRT: emulate_CRT,
    };
 }
 
@@ -72,6 +75,7 @@ type Action =
    | { type: 'RECORD_TAPE' }
    | { type: 'STOP_RECORD_TAPE' }
    | { type: 'SET_MEMCONFIG', config: string | number | undefined }
+   | { type: 'TOGGLE_CRT_EMULATION' }
 ;
 
 function reducer(state: GUIState, action: Action): GUIState {
@@ -155,6 +159,10 @@ function reducer(state: GUIState, action: Action): GUIState {
          return { ...state, ...freshState() };
       }
 
+      case 'TOGGLE_CRT_EMULATION':
+         setEmulateCRT(!emulate_CRT);
+         return { ...state, ...freshState() };
+
       default:
          throw 'unknown action';         
    }
@@ -201,6 +209,12 @@ export function EmulatorGUI() {
                   </PivotItem>
 
                   <PivotItem headerText="Video" itemKey="video">
+                     <br />
+                     <Checkbox label="CRT emulation"
+                        checked={state.emulateCRT} 
+                        onChange={()=>dispatch({ type: 'TOGGLE_CRT_EMULATION' })} 
+                     />
+                     <br />
                      <div>Brighness contrast saturation</div>
                      <div>Monochrome output</div>
                      <div>Take snapshot</div>

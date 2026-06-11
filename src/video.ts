@@ -5,7 +5,7 @@ import { laser500 } from "./emulator";
 import { charset } from "./roms";
 import { CRTEmulator } from "@nippur72/crt-emulator";
 
-export const emulate_CRT = false;
+export let emulate_CRT = false;
 
 export const video = {
    hide_scanlines: false,
@@ -40,36 +40,6 @@ let imageData, bmp;
 let crtEmulator: CRTEmulator | null = null;
 let useWebGL = false;
 
-let resizeObserver: ResizeObserver | null = null;
-let isResizeListenerAdded = false;
-
-export function resizeWebGLCanvas(): void {
-   if (useWebGL && canvas) {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      const width = Math.round(rect.width * dpr) || SCREEN_W;
-      const height = Math.round(rect.height * dpr) || (SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
-      if (canvas.width !== width || canvas.height !== height) {
-         canvas.width = width;
-         canvas.height = height;
-      }
-   }
-}
-
-function setupResizeObserver(): void {
-   if (typeof ResizeObserver !== 'undefined') {
-      if (!resizeObserver && canvas) {
-         resizeObserver = new ResizeObserver(() => {
-            resizeWebGLCanvas();
-         });
-         resizeObserver.observe(canvas);
-      }
-   } else if (!isResizeListenerAdded) {
-      window.addEventListener('resize', resizeWebGLCanvas);
-      isResizeListenerAdded = true;
-   }
-}
-
 export function calculateGeometry(): void {
    if(video.border_top     !== undefined && (video.border_top    > 65 || video.border_top    < 0)) video.border_top    = undefined;
    if(video.border_bottom  !== undefined && (video.border_bottom > 56 || video.border_bottom < 0)) video.border_bottom = undefined;
@@ -103,10 +73,12 @@ export function calculateGeometry(): void {
        canvasContext = canvas.getContext('2d');
     }
 
-    if (useWebGL) {
-        resizeWebGLCanvas();
+    if (useWebGL && crtEmulator) {
         imageData = new ImageData(SCREEN_W, SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1));
-        setupResizeObserver();
+        crtEmulator.setupResizeObserver(() => ({
+           width: SCREEN_W,
+           height: SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1)
+        }));
      } else {
        canvas.width = SCREEN_W;
        canvas.height = SCREEN_H * (DOUBLE_SCANLINES ? 2 : 1);
@@ -117,6 +89,32 @@ export function calculateGeometry(): void {
 }
 
 calculateGeometry();
+
+export function setEmulateCRT(enabled: boolean) {
+   if (emulate_CRT === enabled) return;
+
+   // Recreate the canvas element to reset its context (2D vs WebGL)
+   const oldCanvas = document.getElementById("canvas") as HTMLCanvasElement;
+   if (oldCanvas) {
+      const newCanvas = oldCanvas.cloneNode(true) as HTMLCanvasElement;
+      oldCanvas.parentNode?.replaceChild(newCanvas, oldCanvas);
+   }
+
+   // Reset state variables
+   emulate_CRT = enabled;
+   useWebGL = false;
+   if (crtEmulator) {
+      crtEmulator.destroy();
+      crtEmulator = null;
+   }
+   canvasContext = null;
+
+   // Reinitialize geometry and contexts
+   calculateGeometry();
+
+   // Trigger a window resize event to adjust the canvas layout
+   window.dispatchEvent(new Event('resize'));
+}
 
 const palette = new Uint32Array(16);
 const halfpalette = new Uint32Array(16);
