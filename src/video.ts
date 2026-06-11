@@ -3,6 +3,7 @@
 
 import { laser500 } from "./emulator";
 import { charset } from "./roms";
+import { CRTEmulator } from "@nippur72/crt-emulator";
 
 export const emulate_CRT = false;
 
@@ -36,7 +37,6 @@ let canvas, canvasContext;
 let screenCanvas, screenContext;
 let imageData, bmp;
 
-import { CRTEmulator } from "@nippur72/crt-emulator";
 let crtEmulator: CRTEmulator | null = null;
 let useWebGL = false;
 
