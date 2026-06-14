@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 
 import { PrimaryButton, DefaultButton, Dropdown, IDropdownOption, Pivot, PivotItem, Label, Stack, IStackTokens, MessageBar, Link } from '@fluentui/react';
 import { Modal } from "@fluentui/react";
@@ -202,6 +203,45 @@ const memoryOptions: IChoiceGroupOption[] = [
 export function EmulatorGUI() {
    const [state, dispatch] = useReducer(reducer, initialState);
 
+   const [menuButtonVisible, setMenuButtonVisible] = useState(false);
+
+   useEffect(() => {
+      if (state.menuOpen) {
+         setMenuButtonVisible(false);
+         return;
+      }
+
+      let timer: number;
+
+      const resetTimer = (delay: number) => {
+         clearTimeout(timer);
+         timer = window.setTimeout(() => {
+            setMenuButtonVisible(false);
+         }, delay);
+      };
+
+      const handleMouseMove = () => {
+         setMenuButtonVisible(true);
+         resetTimer(1500);
+      };
+
+      const canvasContainer = document.getElementById("canvas-container");
+      if (canvasContainer) {
+         canvasContainer.addEventListener("mousemove", handleMouseMove);
+         canvasContainer.addEventListener("mouseenter", handleMouseMove);
+         canvasContainer.addEventListener("touchstart", handleMouseMove);
+      }
+
+      return () => {
+         clearTimeout(timer);
+         if (canvasContainer) {
+            canvasContainer.removeEventListener("mousemove", handleMouseMove);
+            canvasContainer.removeEventListener("mouseenter", handleMouseMove);
+            canvasContainer.removeEventListener("touchstart", handleMouseMove);
+         }
+      };
+   }, [state.menuOpen]);
+
    function tasto_premuto(ev) {
       if(ev.code === "KeyM" && ev.altKey && ev.ctrlKey) {
          ev.preventDefault();
@@ -230,8 +270,48 @@ export function EmulatorGUI() {
    const drive1_is_modified = laser500.drives[0].is_modified();
    const drive2_is_modified = laser500.drives[1].is_modified();
 
+   const overlayNode = document.getElementById("overlay-node");
+
    return (
-      <Modal isOpen={state.menuOpen}>
+      <>
+         <style dangerouslySetInnerHTML={{__html: `
+            .menu-btn {
+               position: absolute;
+               top: 15px;
+               left: 15px;
+               width: 40px;
+               height: 40px;
+               border-radius: 50%;
+               background: rgba(0, 0, 0, 0.6);
+               border: 1px solid rgba(255, 255, 255, 0.3);
+               color: rgba(255, 255, 255, 0.85);
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               cursor: pointer;
+               z-index: 1000;
+               transition: opacity 0.5s ease-in-out, background-color 0.2s, border-color 0.2s, transform 0.1s;
+               outline: none;
+               box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+               opacity: 0;
+               pointer-events: none;
+            }
+            .menu-btn.visible {
+               opacity: 1;
+               pointer-events: auto;
+            }
+            .menu-btn:hover {
+               opacity: 1;
+               pointer-events: auto;
+               background: rgba(30, 30, 30, 0.9);
+               border-color: rgba(255, 255, 255, 0.6);
+               color: #ffffff;
+            }
+            .menu-btn:active {
+               transform: scale(0.92);
+            }
+         `}} />
+         <Modal isOpen={state.menuOpen}>
          <div style={{ padding: '2em' }}>
                <Pivot style={{ height: '500px', minWidth: '768px' }} selectedKey={state.selectedPivot} onLinkClick={(item)=>dispatch({ type: 'PIVOT_SET', itemKey: item?.props.itemKey })}>
 
@@ -477,6 +557,20 @@ export function EmulatorGUI() {
                </Stack>
          </div>
       </Modal>
+      {!state.menuOpen && overlayNode && createPortal(
+         <button 
+            className={`menu-btn ${menuButtonVisible ? 'visible' : ''}`}
+            onClick={() => dispatch({ type: 'TOGGLE_MENU' })}
+            title="Open Menu (Ctrl+Alt+M)"
+            aria-label="Open Menu"
+         >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+               <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+         </button>,
+         overlayNode
+      )}
+      </>
    );
 }
 
