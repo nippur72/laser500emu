@@ -39,6 +39,7 @@ export class Tape {
    cloadAudioSamples(n: number) {
       if(this.tapePtr >= this.tapeLen) {
          laser500.cassette_bit_in = 1;
+         this.stopPlay();
          return;
       }
 
