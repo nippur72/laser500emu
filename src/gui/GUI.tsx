@@ -76,6 +76,7 @@ type Action =
    | { type: 'STOP_RECORD_TAPE' }
    | { type: 'SET_MEMCONFIG', config: string | number | undefined }
    | { type: 'TOGGLE_CRT_EMULATION' }
+   | { type: 'UPDATE_TAPE_STATUS' }
 ;
 
 function reducer(state: GUIState, action: Action): GUIState {
@@ -84,11 +85,37 @@ function reducer(state: GUIState, action: Action): GUIState {
          return { ...state, selectedPivot: action.itemKey };
 
       case 'TOGGLE_MENU':
-         return { ...state, menuOpen: !state.menuOpen };
+         return { ...state, menuOpen: !state.menuOpen, ...freshState() };
 
-      case 'TOGGLE_TAPE_MONITOR':
+      // ************* tape pivot actions *************
+
+      case 'TOGGLE_TAPE_MONITOR': {
          laser500.tape_monitor = !laser500.tape_monitor;
          return { ...state, ...freshState() };
+      }
+
+      case 'STOP_TAPE': {
+         laser500.tape.stopPlay();
+         return { ...state, ...freshState() };
+      }
+
+      case 'UPLOAD_WAV': {
+         const fi = action.fileInfo;
+         laser500.tape.load_wav_file(fi.name, fi.buffer);         
+         return { ...state, ...freshState() };
+      }
+
+      case 'STOP_RECORD_TAPE': {
+         laser500.tape.cstop();
+         return { ...state, ...freshState() };
+      }
+
+      case 'RECORD_TAPE': {
+         laser500.tape.csave();
+         return { ...state, ...freshState() };
+      }
+
+      // **************** disk pivot actions ***************  
 
       case 'TOGGLE_DRIVE_WPROT': {
          const drive = action.drive-1;
@@ -99,24 +126,6 @@ function reducer(state: GUIState, action: Action): GUIState {
       case 'TOGGLE_EMULATE_FDC':
          laser500.emulate_fdc = !laser500.emulate_fdc;
          return { ...state, ...freshState() };
-
-      case 'STOP_TAPE':
-         laser500.tape.stopPlay();
-         return { ...state, ...freshState() };
-
-      case 'REBOOT':
-         laser500.power ();
-         return { ...state, ...freshState() };
-
-      case 'RESET':
-         laser500.cpu.reset();
-         return { ...state, ...freshState() };
-
-      case 'UPLOAD_WAV': {
-         const fi = action.fileInfo;
-         laser500.tape.load_wav_file(fi.name, fi.buffer);         
-         return { ...state, ...freshState() };
-      }
 
       case 'DISK_IMAGE': {
          const fi = action.fileInfo;
@@ -143,13 +152,7 @@ function reducer(state: GUIState, action: Action): GUIState {
          return { ...state, ...freshState() };
       }
 
-      case 'STOP_RECORD_TAPE':
-         laser500.tape.cstop();
-         return { ...state, ...freshState() };
-   
-      case 'RECORD_TAPE':
-         laser500.tape.csave();
-         return { ...state, ...freshState() };
+      // ************* machine pivot actions *************
 
       case 'SET_MEMCONFIG': {         
          const conf = action.config;
@@ -159,9 +162,29 @@ function reducer(state: GUIState, action: Action): GUIState {
          return { ...state, ...freshState() };
       }
 
+      // ********* video pivot actions ********
+      
       case 'TOGGLE_CRT_EMULATION':
          setEmulateCRT(!emulate_CRT);
          return { ...state, ...freshState() };
+
+      // ******* other actions *********
+         
+      case 'REBOOT':
+         laser500.power ();
+         return { ...state, ...freshState() };
+
+      case 'RESET':
+         laser500.cpu.reset();
+         return { ...state, ...freshState() };
+
+      case 'UPDATE_TAPE_STATUS': {
+         const isPlaying = laser500.tape.isPlaying();
+         if (isPlaying !== state.isTapePlaying) {
+            return { ...state, isTapePlaying: isPlaying };
+         }
+         return state;
+      }
 
       default:
          throw 'unknown action';         
@@ -191,6 +214,18 @@ export function EmulatorGUI() {
       document.addEventListener('keydown', tasto_premuto);
       return () => document.removeEventListener('keydown', tasto_premuto);
    }, []);    
+
+   useEffect(() => {
+      if (!state.menuOpen || !state.isTapePlaying) return;
+
+      const interval = setInterval(() => {
+         if (!laser500.tape.isPlaying()) {
+            dispatch({ type: 'UPDATE_TAPE_STATUS' });
+         }
+      }, 1000);
+
+      return () => clearInterval(interval);
+   }, [state.menuOpen, state.isTapePlaying]);
 
    const drive1_is_modified = laser500.drives[0].is_modified();
    const drive2_is_modified = laser500.drives[1].is_modified();
