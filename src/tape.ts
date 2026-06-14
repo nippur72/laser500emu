@@ -1,5 +1,5 @@
 import { cpuSpeed, laser500 } from "./emulator";
-import { saveAs } from "file-saver";
+import { saveAs } from "./save-file";
 import { decodeWav, encodeWav } from "./wav-file";
 
 const csaveBufferSize = 44100 * 5 * 60; // five minutes max

@@ -13,8 +13,9 @@ accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
 
 interface UploaderProps {
    accept: string;
-   value: string;
+   value?: string;
    onUpload(files: FileList): void;
+   children?: React.ReactNode;
 }
 
 function Uploader(props: UploaderProps) {
@@ -24,6 +25,9 @@ function Uploader(props: UploaderProps) {
       const files = inputElementRef.current?.files;
       if(!files) return;
       if(props.onUpload) props.onUpload(files);
+      if(inputElementRef.current) {
+         inputElementRef.current.value = "";
+      }
    }
 
    function showDialog() {
@@ -39,15 +43,22 @@ function Uploader(props: UploaderProps) {
             onChange={onChange}
             accept={props.accept}
          ></input>
-         <DefaultButton onClick={showDialog}>{props.value}</DefaultButton>
+         {props.children ? (
+            <span onClick={showDialog} style={{ display: 'inline-block' }}>
+               {props.children}
+            </span>
+         ) : (
+            <DefaultButton onClick={showDialog}>{props.value}</DefaultButton>
+         )}
       </span>
    );
 }
 
 interface UploaderSingleProps {
    accept: string;
-   value: string;
+   value?: string;
    onUpload(files: FileInfo): void;
+   children?: React.ReactNode;
 }
 
 async function get_first_file(files: FileList) {
@@ -66,6 +77,7 @@ function UploaderSingle(props: UploaderSingleProps) {
          if(!singleFile) return;
          props.onUpload(singleFile);
       }}>         
+      {props.children}
    </Uploader>
 }
 

@@ -1,5 +1,5 @@
 import * as idbKeyval from "idb-keyval";
-import { saveAs } from "file-saver";
+import { saveAs } from "./save-file";
 
 export class BrowserStorage
 {

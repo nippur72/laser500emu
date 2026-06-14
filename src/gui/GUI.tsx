@@ -256,31 +256,161 @@ export function EmulatorGUI() {
                   </PivotItem>
 
                   <PivotItem headerText="Tape" itemKey="tape">
+                     <style dangerouslySetInnerHTML={{__html: `
+                        .tape-deck-btn {
+                           width: 50px;
+                           height: 50px;
+                           min-width: 50px;
+                           display: inline-flex;
+                           align-items: center;
+                           justify-content: center;
+                           border: 1px solid #c8c6c4;
+                           border-radius: 6px;
+                           cursor: pointer;
+                           margin-right: 12px;
+                           transition: all 0.15s ease-in-out;
+                           background: linear-gradient(180deg, #ffffff 0%, #f3f2f1 100%);
+                           box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.12);
+                           color: #605e5c;
+                           outline: none;
+                           padding: 0;
+                        }
+                        .tape-deck-btn:hover:not(:disabled) {
+                           background: #f3f2f1;
+                           border-color: #a19f9d;
+                           box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+                           transform: translateY(-1px);
+                        }
+                        .tape-deck-btn:active:not(:disabled) {
+                           transform: translateY(2px);
+                           box-shadow: inset 0 3px 6px rgba(0,0,0,0.2);
+                        }
+                        .tape-deck-btn:disabled {
+                           opacity: 0.4;
+                           cursor: not-allowed;
+                        }
+                        .tape-deck-btn.btn-active-rec {
+                           background: #fde7e9 !important;
+                           border-color: #f1707b !important;
+                           box-shadow: inset 0 3px 6px rgba(0,0,0,0.2) !important;
+                           transform: translateY(2px) !important;
+                        }
+                        .tape-deck-btn.btn-active-play {
+                           background: #dff6dd !important;
+                           border-color: #8cbd18 !important;
+                           box-shadow: inset 0 3px 6px rgba(0,0,0,0.2) !important;
+                           transform: translateY(2px) !important;
+                        }
+                        .tape-deck-btn.btn-active-play:disabled {
+                           opacity: 1 !important;
+                           cursor: not-allowed;
+                        }
+                        .tape-status-display {
+                           background-color: #faf9f8;
+                           border: 1px solid #edebe9;
+                           border-radius: 6px;
+                           padding: 10px 14px;
+                           font-family: Consolas, Monaco, monospace;
+                           font-size: 13px;
+                           color: #323130;
+                           margin-top: 15px;
+                           margin-bottom: 20px;
+                           display: flex;
+                           align-items: center;
+                           box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+                        }
+                     `}} />
                      <br />
-                     <Checkbox label="Audible tape sounds (tape monitor)"
-                        checked={state.tapeMonitor} 
-                        onChange={()=>dispatch({ type: 'TOGGLE_TAPE_MONITOR' })} 
-                     />
-                     <br />
-                     { state.isTapePlaying 
-                        ? <DefaultButton onClick={()=>dispatch({ type: 'STOP_TAPE' })}>Stop tape ({state.tapeFileName})</DefaultButton> 
-                        : <UploaderSingle value="Play .WAV file" onUpload={fileInfo=>dispatch({ type: 'UPLOAD_WAV', fileInfo })} accept=".wav" /> 
-                     }
-                     <br />
-                     <br />
+                      <br />
 
-                     {
-                        state.csaving 
-                        ? <DefaultButton onClick={()=>dispatch({ type: 'STOP_RECORD_TAPE' })}>Stop recording</DefaultButton> 
-                        : <DefaultButton onClick={()=>dispatch({ type: 'RECORD_TAPE' })}>Record (max 5 mins)</DefaultButton> 
-                     }
+                      {/* STATUS DISPLAY */}
+                      <div className="tape-status-display" style={{ marginTop: '0px', marginBottom: '15px' }}>
+                         <span style={{ 
+                            width: '8px', 
+                            height: '8px', 
+                            borderRadius: '50%', 
+                            backgroundColor: state.csaving ? '#e81123' : state.isTapePlaying ? '#107c41' : '#a19f9d',
+                            marginRight: '10px',
+                            display: 'inline-block',
+                            boxShadow: state.csaving ? '0 0 4px #e81123' : state.isTapePlaying ? '0 0 4px #107c41' : 'none',
+                         }}></span>
+                         <span>
+                            {state.csaving ? (
+                               <span><strong>[RECORDING]</strong> tape_recording.wav</span>
+                            ) : state.isTapePlaying ? (
+                               <span><strong>[PLAYING]</strong> {state.tapeFileName}</span>
+                            ) : (
+                               <span><strong>[STOPPED]</strong> No active tape</span>
+                            )}
+                         </span>
+                      </div>
+ 
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                         {/* REC BUTTON */}
+                         <button
+                            type="button"
+                            title="Record (max 5 mins)"
+                            onClick={() => {
+                               if (!state.csaving) {
+                                  dispatch({ type: 'RECORD_TAPE' });
+                               }
+                            }}
+                            disabled={state.isTapePlaying}
+                            className={`tape-deck-btn ${state.csaving ? 'btn-active-rec' : ''}`}
+                         >
+                            <svg viewBox="0 0 24 24" width="22" height="22">
+                               <circle cx="12" cy="12" r="7" fill={state.csaving ? '#e81123' : '#a80000'} />
+                            </svg>
+                         </button>
+ 
+                         {/* PLAY BUTTON */}
+                         <UploaderSingle 
+                            accept=".wav" 
+                            onUpload={fileInfo => dispatch({ type: 'UPLOAD_WAV', fileInfo })}
+                         >
+                            <button
+                               type="button"
+                               title="Play .WAV file"
+                               disabled={state.csaving || state.isTapePlaying}
+                               className={`tape-deck-btn ${state.isTapePlaying ? 'btn-active-play' : ''}`}
+                            >
+                               <svg viewBox="0 0 24 24" width="22" height="22">
+                                  <path d="M8 5v14l11-7z" fill={state.isTapePlaying ? '#107c41' : '#605e5c'} />
+                               </svg>
+                            </button>
+                         </UploaderSingle>
+ 
+                         {/* STOP BUTTON */}
+                         <button
+                            type="button"
+                            title="Stop playing or recording"
+                            onClick={() => {
+                               if (state.isTapePlaying) {
+                                  dispatch({ type: 'STOP_TAPE' });
+                               } else if (state.csaving) {
+                                  dispatch({ type: 'STOP_RECORD_TAPE' });
+                               }
+                            }}
+                            className="tape-deck-btn"
+                         >
+                            <svg viewBox="0 0 24 24" width="22" height="22">
+                               <rect x="6" y="6" width="12" height="12" fill="#323130" />
+                            </svg>
+                         </button>
+                      </div>
 
-                     <br />
-                     <br />
-
-                     <MessageBar delayedRender={false} role="none">
-                        BASIC commands for tape are: CLOAD, CRUN, CSAVE and CVERIFY.
-                     </MessageBar>
+                      <br />
+                      <br />
+                      <Checkbox label="Audible tape sounds (tape monitor)"
+                         checked={state.tapeMonitor} 
+                         onChange={()=>dispatch({ type: 'TOGGLE_TAPE_MONITOR' })} 
+                      />
+                      <br />
+                      <br />
+ 
+                      <MessageBar delayedRender={false} role="none">
+                         BASIC commands for tape are: CLOAD, CRUN, CSAVE and CVERIFY.
+                      </MessageBar>
                   </PivotItem>                  
 
                   <PivotItem headerText="Disk" itemKey="disk">

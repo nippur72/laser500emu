@@ -1,4 +1,3 @@
-import { saveAs } from "file-saver";
 import { vtdos_11_image } from "./vtdos11_disk";
 import { areUint8ArraysDifferent, downloadBytes } from "./bytes";
 
