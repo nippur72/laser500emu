@@ -5,7 +5,7 @@ import { laser500 } from "./emulator";
 import { charset } from "./roms";
 import { CRTEmulator, CRTEmulatorOptions } from "@nippur72/crt-emulator";
 
-export let emulate_CRT = true;
+export let emulate_CRT = false;
 
 export const defaultCrtOptions: Required<CRTEmulatorOptions> = {
    hardScan: -6.0,

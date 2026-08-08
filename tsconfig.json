@@ -112,7 +112,6 @@
     "software/"
   ],
   "include": [
-     "src/index.ts",
-     "src/global.d.ts"
+     "src/**/*"
   ]
 }

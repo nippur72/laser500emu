@@ -88,7 +88,7 @@ Options can be given in the form of query string commands on the URL of the emul
 e.g. `https://nippur72.github.io/laser500emu?scanlines=true&nodisk=true`
 
 - `restore=true` restore previous emulator state
-- `load=programName` load and run the specified program from the `software` directory of the emulator GitHub repo. If no relative path is specified, `programName` will be searched in all subdirectories. 
+- `load=programName` load and run the specified program from the `software` directory of the emulator GitHub repo, either by relative path (e.g. `bin/cross_bomber.bin`) or by an external `http(s)` URL. 
 - `nodisk=true` disconnect emulated disk drive interface (default is attached)
 - `notapemonitor=true` disables audio playback from tape (tape monitor)
 - `charset=english|german|french` modify the hardware switches used to address the charset ROM (default is english).  
