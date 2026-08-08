@@ -1,5 +1,4 @@
 import React, { useRef } from "react";
-import { DefaultButton } from '@fluentui/react';
 import { FileInfo, readFiles } from "./readfile";
 
 /*
@@ -48,7 +47,7 @@ function Uploader(props: UploaderProps) {
                {props.children}
             </span>
          ) : (
-            <DefaultButton onClick={showDialog}>{props.value}</DefaultButton>
+            <button className="retro-btn" onClick={showDialog}>{props.value}</button>
          )}
       </span>
    );

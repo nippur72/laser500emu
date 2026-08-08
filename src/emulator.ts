@@ -1,6 +1,5 @@
 // TODO serial: reconcile BBS serial port with CP/M serial port
 // TODO tape: separate button for downloading 
-// TODO eradicate rgbmasksize, rgbmaskopacity
 // TODO capture printer
 // TODO joystick: on gui
 // TODO audio: mute option
@@ -57,7 +56,7 @@
 // TODO be able to emulate CTRL+power up
 // TODO sprite routine?
 
-import { bit, downloadBytes, getFileExtension, hex, mem_read_word, mem_write_word, reset_bit, set_bit } from "./bytes";
+import { bit, downloadBytes, getFileExtension, hex, mem_read_word, mem_write_word, reset_bit, set_bit, uint8ToString } from "./bytes";
 
 import { video, drawFrame_y, calculateGeometry } from "./video";
 
@@ -69,17 +68,6 @@ const autoload = undefined;
 function cpu_status() {
    const state = laser500.cpu.getState();
    return `A=${hex(state.a)} BC=${hex(state.b)}${hex(state.c)} DE=${hex(state.d)}${hex(state.e)} HL=${hex(state.h)}${hex(state.l)} IX=${hex(state.ix,4)} IY=${hex(state.iy,4)} SP=${hex(state.sp,4)} PC=${hex(state.pc,4)} S=${state.flags.S}, Z=${state.flags.Z}, Y=${state.flags.Y}, H=${state.flags.H}, X=${state.flags.X}, P=${state.flags.P}, N=${state.flags.N}, C=${state.flags.C}`;   
-}
-
-async function crun(filename) {
-   load(filename);
-   //await print_string("\nrun:\n");
-   pasteLine("RUN\r\n");
-}
-
-async function drag_drop_disk(diskname, bytes) {
-   console.log(`dropped disk "${diskname}"`);
-   await storage.writeFile(diskname, bytes);
 }
 
 function pasteLine(text) {
@@ -326,50 +314,7 @@ function saveState() {
    window.localStorage.setItem(`laser500emu_state`, JSON.stringify(saveObject));
 }
 
-interface EmulatorState 
-{
-   bank4: number[];
-   bank5: number[];
-   bank6: number[];
-   bank7: number[];
-   banks: number[];
-}
 
-function restoreState() {   
-   throw "not implemented, TODO";
-   /*
-   try
-   {
-      let ss = window.localStorage.getItem(`laser500emu_state`);
-
-      if(ss === null) return;   
-
-      const s = JSON.parse(ss) as EmulatorState;      
-      
-      laser500.bank4 = new Uint8Array([ ... s.bank4 ]);
-      laser500.bank5 = new Uint8Array([ ... s.bank5 ]);
-      laser500.bank6 = new Uint8Array([ ... s.bank6 ]);
-      laser500.bank7 = new Uint8Array([ ... s.bank7 ]);
-      laser500.banks = new Uint8Array([ ... s.banks ]);         
-
-      laser500.vdc_graphic_mode_enabled= s.vdc_graphic_mode_enabled;
-      laser500.vdc_graphic_mode_number = s.vdc_graphic_mode_number;
-      laser500.vdc_page_7              = s.vdc_page_7;
-      laser500.vdc_text80_enabled      = s.vdc_text80_enabled;
-      laser500.vdc_text80_foreground   = s.vdc_text80_foreground;
-      laser500.vdc_text80_background   = s.vdc_text80_background;
-      laser500.vdc_border_color        = s.vdc_border_color;
-      laser500.caps_lock_bit           = s.caps_lock_bit,
-      laser500.emulate_fdc             = s.emulate_fdc; 
-
-      laser500.cpu.setState(s.cpu);
-   }
-   catch(error)
-   {
-
-   }
-   */
-}
 
 function dumpPointers() {
    console.log(`
@@ -527,7 +472,7 @@ async function droppedFile(droppedFileName: string, bytes: Uint8Array) {
 
    if(ext === ".wav") {
       // WAV files
-      //console.log("WAV file dropped");
+      console.log("WAV file dropped");
 
       laser500.tape.load_wav_file(droppedFileName, bytes.buffer);
 
@@ -538,21 +483,22 @@ async function droppedFile(droppedFileName: string, bytes: Uint8Array) {
    }
 
    if(ext === ".nic") {
-      await drag_drop_disk(droppedFileName, bytes);
-      await load(droppedFileName, 1);
-      // pasteLine("DIR\r\n");
+      console.log("floppy disk (.nic file) dropped");
+      // mount directly, same as the GUI does
+      laser500.drives[0] = new Drive(bytes, droppedFileName);
       return;
    }
 
    if(ext === ".bin") {
-      await storage.writeFile(droppedFileName, bytes)
-      crun(droppedFileName);
+      // load raw bytes directly into RAM (BASIC start 0x8995) and run
+      loadBytes(Array.from(bytes), undefined, droppedFileName);
+      laser500.cpu.reset();
+      pasteLine("RUN\r\n");
       return;
    }
 
    if(ext === ".bas") {
-      await storage.writeFile(droppedFileName, bytes)
-      load(droppedFileName);
+      pasteBasic(uint8ToString(bytes));
       return;
    }
 }
@@ -579,57 +525,77 @@ function getQueryStringObject(options) {
    return o;
 }
 
+export type CharsetOption = "english" | "german" | "french" | "bincode";
+
+export function setCharset(charset: CharsetOption | string) {
+   if (charset === "english") laser500.charset_offset = 0;
+   else if (charset === "bincode") laser500.charset_offset = 2048;
+   else if (charset === "german") laser500.charset_offset = 4096;
+   else if (charset === "french") laser500.charset_offset = 6144;
+   else console.warn(`option charset=${charset} not recognized`);
+}
+
+export function getCharset(): CharsetOption {
+   if (laser500.charset_offset === 4096) return "german";
+   if (laser500.charset_offset === 6144) return "french";
+   if (laser500.charset_offset === 2048) return "bincode";
+   return "english";
+}
+
 interface QueryStringOptions {
-   restore?: boolean;
-   load?: string;
-   nic?: string;
-   nodisk?: boolean;   
-   notapemonitor?: boolean,
-   scanlines?: boolean,
-   saturation?: number,
-   charset?: "english"|"bincode"|"german"|"french",
-   bt?: number,
-   bb?: number,
-   bh?: number,
-   rgbmaskopacity?: number,
-   rgbmasksize?: number,
-   keyboard_ITA?: boolean,
-   aspect?: number
+   load?: string;          // program to load and run at startup (URL or software/ path)
+   nic?: string;           // disk image (.nic) to mount at startup (URL)
+   fd1?: string;           // disk image (.nic) to mount on drive 1 (URL or software/ path)
+   fd2?: string;           // disk image (.nic) to mount on drive 2 (URL or software/ path)
+   nodisk?: boolean;       // start with the floppy disk controller detached
+   notapemonitor?: boolean;// start with tape monitor audio disabled
+   scanlines?: boolean,    // (parsed but currently unused) scanline effect
+   saturation?: number,    // color saturation 0..1 (1 = full color)
+   charset?: "english"|"bincode"|"german"|"french", // character ROM variant
+   bt?: number,            // border top scanlines (0..65)
+   bb?: number,            // border bottom scanlines (0..56)
+   bh?: number,            // border horizontal width (0..40)
+   keyboard_ITA?: boolean, // Italian keyboard layout (TODO, unused)
+   aspect?: number         // canvas aspect ratio override
 }
 
 async function parseQueryStringCommands() {
    options = getQueryStringObject(options);
 
-   if(options.restore !== false) {
-      // try to restore previous state, if any
-      restoreState();
-   }
-
    const name = options.load;
    if(name !== undefined) {      
       setTimeout(async ()=>{
          wait_for_cursor();
-         if(name.startsWith("http")) {
-            // external load
-            await externalLoad(name);
-            pasteLine("RUN\r\n");
-         }
-         else {
-            // internal load
-            await fetchProgram(name);
+         const bytes = await fetchFile(name);
+         if(bytes !== undefined) {
+            await droppedFile(name, bytes);
          }
       }, 500);
    }
 
    if(options.nic !== undefined) {
-      // ?load=http://github.com/nippur72/laser500emu/blob/gh-pages/software/disks/vt-dos.nic
+      // ?nic=http://github.com/nippur72/laser500emu/blob/gh-pages/software/disks/vt-dos.nic
       const name = options.nic;
-      if(name.startsWith("http")) {            
-         const nic = await externalLoad(name);
-         if (nic) {
-            await droppedFile(name, nic);
-         }
-      }      
+      const nic = await fetchFile(name);
+      if(nic !== undefined) {
+         await droppedFile(name, nic);
+      }
+   }
+
+   if(options.fd1 !== undefined) {
+      const name = options.fd1;
+      const nic = await fetchFile(name);
+      if(nic !== undefined) {
+         laser500.drives[0] = new Drive(nic, name);
+      }
+   }
+
+   if(options.fd2 !== undefined) {
+      const name = options.fd2;
+      const nic = await fetchFile(name);
+      if(nic !== undefined) {
+         laser500.drives[1] = new Drive(nic, name);
+      }
    }
 
    if(options.nodisk === true) {
@@ -654,11 +620,7 @@ async function parseQueryStringCommands() {
    }
 
    if(options.charset !== undefined) {
-           if(options.charset == "english") laser500.charset_offset = 0;
-      else if(options.charset == "bincode") laser500.charset_offset = 2048;
-      else if(options.charset == "german")  laser500.charset_offset = 4096;
-      else if(options.charset == "french")  laser500.charset_offset = 6144;
-      else console.warn(`option charset=${options.charset} not recognized`);
+      setCharset(options.charset);
    }
 
    if(options.bt !== undefined || 
@@ -672,51 +634,6 @@ async function parseQueryStringCommands() {
       if(options.aspect !== undefined) aspect              = Number(options.aspect);
       calculateGeometry();
       onResize();
-   }
-
-   if(options.rgbmaskopacity !== undefined || options.rgbmasksize !== undefined) {
-      if(options.rgbmaskopacity !== undefined) video.rgbmask_opacity = Number(options.rgbmaskopacity);
-      if(options.rgbmasksize    !== undefined) video.rgbmask_size    = Number(options.rgbmasksize);
-      calculateGeometry();
-      onResize();
-   }
-}
-
-/*
-async function fetchProgramAll(name) {
-   const candidates = [
-      name,
-      `${name}.bin`,
-      `${name}/${name}`,
-      `${name}/${name}.bin`,      
-      `bin/${name}`,
-      `bin/${name}.bin`,
-      `bin/${name}/${name}`,
-      `bin/${name}/${name}.bin`      
-   ];
-
-   for(let t=0;t<candidates.length;t++) {
-      if(await fetchProgram(candidates[t])) return;   
-   }
-
-   console.log(`cannot load "${name}"`);
-}
-*/
-
-async function fetchProgram(name)
-{
-   //console.log(`wanting to load ${name}`);
-   try
-   {
-      const response = await fetch(`software/${name}`);
-      if(response.status === 404) return false;
-      const bytes = new Uint8Array(await response.arrayBuffer());
-      droppedFile(name, bytes);
-      return true;
-   }
-   catch(err)
-   {
-      return false;      
    }
 }
 
@@ -752,10 +669,9 @@ function downloadRam(start, end) {
 import { Audio } from "./audio";
 import { Z80 } from "z80-js";
 
-import { BrowserStorage} from "./filesystem";
 import { updateGamePad } from "./joystick";
 import { charset, rom1, rom2 } from "./roms";
-import { externalLoad } from "./externalLoad";
+import { fetchFile } from "./externalLoad";
 import { Serial } from "./serial";
 import { Tape } from "./tape";
 import { mapped_io_read, mapped_io_write } from "./mapped_io";
@@ -763,10 +679,10 @@ import { keyDown, keyUp } from "./keys";
 
 import { buildPalette } from "./video";
 import { mem_read, mem_write, io_read, io_write, clear_bus_ops, get_bus_ops } from "./bus";
-import { load, loadBytes } from "./files";
+import { loadBytes } from "./files";
 import { ConsolePrinter } from "./printer";
 
-import { drives } from "./floppy";
+import { Drive, drives } from "./floppy";
 
 //import { printer } from "./printer.mjs";
 
@@ -824,6 +740,7 @@ export const laser500 = {
    speaker_B: 0,
    
    joystick_connected: true,
+   swap_joysticks: false,
    
    emulate_fdc: true,
    tape_monitor: true,
@@ -858,15 +775,9 @@ export const laser500 = {
    }   
 };
 
-export let storage = new BrowserStorage("laser500");
-
 // publish globals
 (window as any).csave    = laser500.tape.csave;
 (window as any).cstop    = laser500.tape.cstop;
-(window as any).dir      = ()   => storage.dir();
-(window as any).remove   = (fn) => storage.remove(fn);
-(window as any).download = (fn) => storage.download(fn);
-(window as any).upload   = (fn) => storage.upload(fn);
 (window as any).laser500 = laser500;
 
 /******************/
@@ -888,7 +799,6 @@ let total_cycles = 0;
 
 let options: QueryStringOptions = {
    load: undefined,
-   restore: false,
    nodisk: false,
    notapemonitor: false,
    scanlines: false,
@@ -897,8 +807,6 @@ let options: QueryStringOptions = {
    bt: undefined,
    bb: undefined,
    bh: undefined,
-   rgbmaskopacity: 0,
-   rgbmasksize: 3,
    keyboard_ITA: false
 };
 

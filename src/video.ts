@@ -3,15 +3,38 @@
 
 import { laser500 } from "./emulator";
 import { charset } from "./roms";
-import { CRTEmulator } from "@nippur72/crt-emulator";
+import { CRTEmulator, CRTEmulatorOptions } from "@nippur72/crt-emulator";
 
-export let emulate_CRT = false;
+export let emulate_CRT = true;
+
+export const defaultCrtOptions: Required<CRTEmulatorOptions> = {
+   hardScan: -6.0,
+   hardPix: -2.0,
+   warp: 0.04,
+   maskDark: 0.5,
+   maskLight: 1.0,
+   maskScale: 1.25,
+   chromaBleed: 1.0,
+   maskWidth: 3.0,
+   maskHeight: 6.0,
+   gapWidth: 0.25,
+   gapHeight: 0.5,
+   maskFade: 0.9,
+};
+
+export const crtOptions: Required<CRTEmulatorOptions> = { ...defaultCrtOptions };
+
+export function setCrtOption<K extends keyof CRTEmulatorOptions>(key: K, value: CRTEmulatorOptions[K]) {
+   crtOptions[key] = value as any;
+}
+
+export function resetCrtOptions() {
+   Object.assign(crtOptions, defaultCrtOptions);
+}
 
 export const video = {
    hide_scanlines: false,
    saturation: 1.0,
-   rgbmask_opacity: 0.5,
-   rgbmask_size: 3,
    border_top:    undefined as number|undefined,
    border_bottom: undefined as number|undefined,
    border_h:      undefined as number|undefined
@@ -548,7 +571,7 @@ export function drawFrame_y()
 
 function updateCanvas() {
    if (useWebGL && crtEmulator) {
-      crtEmulator.render(SCREEN_W, SCREEN_H, DOUBLE_SCANLINES, imageData);
+      crtEmulator.render(SCREEN_W, SCREEN_H, DOUBLE_SCANLINES, imageData, crtOptions);
    } else {
       canvasContext.putImageData(imageData, 0, 0);
    }

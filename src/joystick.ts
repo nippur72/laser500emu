@@ -7,13 +7,13 @@ class Joystick {
    arm   = 0;
 }
 
-let swap_joystick = true;
+import { laser500 } from "./emulator";
 
 export function numpad_to_joystick(key: string, press: boolean) 
 {
    let joystick_key = true;
 
-   let joy = swap_joystick ? joy_left : joy_right;
+   let joy = laser500.swap_joysticks ? joy_left : joy_right;
 
    if(press) 
    {
@@ -51,7 +51,7 @@ export function updateGamePad() {
    if(gamepads.length < 1) return;
 
    // joy 0
-   let joy = swap_joystick ? joy_left : joy_right;
+   let joy = laser500.swap_joysticks ? joy_left : joy_right;
    let gamepad = gamepads[0];
    if(gamepad === null) return;
 
@@ -64,7 +64,7 @@ export function updateGamePad() {
    if(gamepad.buttons[1].pressed) joy.fire  = 1; else joy.fire  = 0;
 
    // joy 1
-   joy = swap_joystick ? joy_right : joy_left;
+   joy = laser500.swap_joysticks ? joy_right : joy_left;
    gamepad = gamepads[1];
    if(gamepad === null) return;
 
