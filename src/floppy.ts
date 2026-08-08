@@ -1,5 +1,6 @@
 import { vtdos_11_image } from "./vtdos11_disk";
 import { areUint8ArraysDifferent, downloadBytes } from "./bytes";
+import { playDriveSound } from "./drive-sound";
 
 // FDC internal registers
 
@@ -225,6 +226,8 @@ export class Drive {
          this.track_x2 += direction;
          if(this.track_x2 >= this.TRACKS_PER_FLOPPY) this.track_x2 = this.TRACKS_PER_FLOPPY-1;
          else if(this.track_x2 < 0)                  this.track_x2 = 0;
+         // play head step sound if enabled
+         if((window as any).laser500?.drive_sound) playDriveSound();
          // console.log(`track: ${this.track_x2} ${this.fileName}`);
       }
    }

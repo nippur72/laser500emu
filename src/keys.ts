@@ -1,6 +1,7 @@
 // all 76 keys on the real LASER 500
 
-import { audio, laser500, rewind_tape, stop_tape } from "./emulator";
+import { audio, laser500 } from "./emulator";
+import { rewind_tape, stop_tape } from "./browser";
 
 const KEY_RESET = 0; // not mapped on the I/O but directly on the /RES line to the CPU
 const KEY_F1  = 1;

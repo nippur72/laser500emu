@@ -29,12 +29,14 @@
 - contrast/luminosity/saturation controls?
 - monochrome control?
 - almost exact cycles drawing
+- palette
 
 ## disk drive
 - restore IN(0x13)=0xFF, IN(0x12)=0x13 when no drive selected (@Bonstra test)
 - emulate true drive @300 RPM
 - track/head r/w status bar indicator (display drive activity)
 - disk drive sounds
+- investigate why CP/M DIR B: needs STAT B: before
 
 ## keyboard
 - caplock key / led ?
@@ -55,7 +57,6 @@
 - modularize, avoid global variables
 - stop() resumes after browser tab reactivates
 - ??fix page refresh when in laser 350 mode
-- URLSearchParams()
 - remove software from facebook group
 - screen writing emulation as browser support
 - publish Jaime's disks

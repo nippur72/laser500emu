@@ -1,223 +1,12 @@
-import { bit, downloadBytes, getFileExtension, hex, mem_read_word, mem_write_word, reset_bit, set_bit, uint8ToString } from "./bytes";
+import { bit, downloadBytes, hex, mem_read_word, mem_write_word, reset_bit, set_bit } from "./bytes";
 
-import { video, drawFrame_y, calculateGeometry } from "./video";
+import { drawFrame_y } from "./video";
 
-const autoload = undefined;
-
-/* @@@ utils.js */  
 // **** machine-specific utility functions ****
 
 function cpu_status() {
    const state = laser500.cpu.getState();
    return `A=${hex(state.a)} BC=${hex(state.b)}${hex(state.c)} DE=${hex(state.d)}${hex(state.e)} HL=${hex(state.h)}${hex(state.l)} IX=${hex(state.ix,4)} IY=${hex(state.iy,4)} SP=${hex(state.sp,4)} PC=${hex(state.pc,4)} S=${state.flags.S}, Z=${state.flags.Z}, Y=${state.flags.Y}, H=${state.flags.H}, X=${state.flags.X}, P=${state.flags.P}, N=${state.flags.N}, C=${state.flags.C}`;   
-}
-
-function pasteLine(text) {
-   // keyboard buffer: 8289-838b  
-   // key repeat address: 85F7
-   
-   for(let t=0;t<text.length;t++) {
-      const v = text.charCodeAt(t);
-      mem_write(0x8289 + t, v);
-   }
-   mem_write_word(0x85f7, 0x8289);
-   //simulateKey("End");
-   laser500.cpu.reset();
-}
-
-function pasteLong(str) {
-   function pasteQueue(lines) {
-      if(lines.length == 0) return;
-      let firstline = lines[0];
-      lines = lines.slice(1);
-      pasteBasicLine(firstline+"\r\n");
-      setTimeout(()=>pasteQueue(lines), 500);
-   }
-
-   let lines = str.split("\n");
-   //lines.forEach(line=>paste(line+"\r\n"));
-   pasteQueue(lines);
-}
-
-export function pasteBasic(text) {
-   const lines = text.split("\n");   
-   for(let t=0; t<lines.length; t++) {
-      const linea = lines[t];
-      console.log(linea);
-      pasteBasicLine(linea);      
-   }
-   console.log("pasted!");   
-}
-
-function pasteBasicLine(line) {
-   for(let t=0; t<line.length; t++) {
-      let char = line.charAt(t);
-      if(char === "§") char = "`";  // § is alias for ` to ease pasting from console
-      pasteBasicChar(char);
-   }
-   pasteBasicChar("\n");
-}
-
-function pasteBasicChar(char) {
-   const old_cursor_pos = mem_read_word(0x85e2);
-   const code = asciiToKey(char);
-   if(code === undefined) {
-      console.warn(`char ${char} not recognized`);
-      return;
-   }   
-   
-   if(code.shift) keyDown(evkey("ShiftLeft"));
-   keyDown(evkey(code.code));     
-
-   /*
-   for(let t=1; mem_read_word(0x85e2) === old_cursor_pos; t++) {
-      renderAllLines();
-      if(t>5000) {
-         console.warn("paste fail");
-         break;
-      }      
-   }*/
-
-   renderAllLines();
-   renderAllLines();
-
-   keyUp(evkey(code.code));
-   if(code.shift) keyUp(evkey("ShiftLeft"));
-
-   renderAllLines();
-   renderAllLines();
-}
-
-function wait_for_cursor() {
-   while(1) {
-      renderAllLines();
-      if((total_cycles > cpuSpeed/4) && bit(mem_read(0x85fa),5)==1) return;
-   }
-}
-
-function evkey(pcKey) {
-   const ev = {
-      code: pcKey,
-      preventDefault: ()=>{}
-   };
-   return ev;
-}
-
-function asciiToKey(c) {
-   
-   if(c === "1") return { code: "Digit1", shift: false };
-   if(c === "2") return { code: "Digit2", shift: false };
-   if(c === "3") return { code: "Digit3", shift: false };
-   if(c === "4") return { code: "Digit4", shift: false };
-   if(c === "5") return { code: "Digit5", shift: false };
-   if(c === "6") return { code: "Digit6", shift: false };
-   if(c === "7") return { code: "Digit7", shift: false };
-   if(c === "8") return { code: "Digit8", shift: false };
-   if(c === "9") return { code: "Digit9", shift: false };
-   if(c === "0") return { code: "Digit0", shift: false };
-
-   if(c === "!") return { code: "Digit1", shift: true };
-   if(c === "@") return { code: "Digit2", shift: true };
-   if(c === "#") return { code: "Digit3", shift: true };
-   if(c === "$") return { code: "Digit4", shift: true };
-   if(c === "%") return { code: "Digit5", shift: true };
-   if(c === "^") return { code: "Digit6", shift: true };
-   if(c === "&") return { code: "Digit7", shift: true };
-   if(c === "*") return { code: "Digit8", shift: true };
-   if(c === "(") return { code: "Digit9", shift: true };
-   if(c === ")") return { code: "Digit0", shift: true };
-
-   if(c === "-") return { code: "Minus", shift: false };
-   if(c === "=") return { code: "Equal", shift: false };
-   if(c === "_") return { code: "Minus", shift: true  };
-   if(c === "+") return { code: "Equal", shift: true  };
-
-   if(c === "`") return { code: "Backquote", shift: false};
-   if(c === "~") return { code: "Backquote", shift: true};
-
-   if(c === "[") return { code: "BracketLeft",  shift: false};
-   if(c === "]") return { code: "BracketRight", shift: false};
-   if(c === "{") return { code: "BracketLeft",  shift: true};
-   if(c === "}") return { code: "BracketRight", shift: true};
-
-   if(c === ";") return { code: "Semicolon", shift: false };
-   if(c === ":") return { code: "Semicolon", shift: true  };
-
-   if(c === '"') return { code: "Quote", shift: true};
-   if(c === "'") return { code: "Quote", shift: false};
-
-   if(c === "<") return { code: "Comma",  shift: true};
-   if(c === ">") return { code: "Period", shift: true};
-   if(c === ",") return { code: "Comma",  shift: false};
-   if(c === ".") return { code: "Period", shift: false};
-   
-   if(c === "/") return { code: "Slash", shift: false};   
-   if(c === "?") return { code: "Slash", shift: true };
-   
-   if(c === "£") return { code: "PageUp", shift: true};      
-
-   if(c === "|") return { code: "Backslash", shift: true};
-   if(c === "\\") return { code: "Backslash", shift: false};
-
-   if(c === "a") return { code: "KeyA", shift: false};
-   if(c === "b") return { code: "KeyB", shift: false};
-   if(c === "c") return { code: "KeyC", shift: false};
-   if(c === "d") return { code: "KeyD", shift: false};
-   if(c === "e") return { code: "KeyE", shift: false};
-   if(c === "f") return { code: "KeyF", shift: false};
-   if(c === "g") return { code: "KeyG", shift: false};
-   if(c === "h") return { code: "KeyH", shift: false};
-   if(c === "i") return { code: "KeyI", shift: false};
-   if(c === "j") return { code: "KeyJ", shift: false};
-   if(c === "k") return { code: "KeyK", shift: false};
-   if(c === "l") return { code: "KeyL", shift: false};
-   if(c === "m") return { code: "KeyM", shift: false};
-   if(c === "n") return { code: "KeyN", shift: false};
-   if(c === "o") return { code: "KeyO", shift: false};
-   if(c === "p") return { code: "KeyP", shift: false};
-   if(c === "q") return { code: "KeyQ", shift: false};
-   if(c === "r") return { code: "KeyR", shift: false};
-   if(c === "s") return { code: "KeyS", shift: false};
-   if(c === "t") return { code: "KeyT", shift: false};
-   if(c === "u") return { code: "KeyU", shift: false};
-   if(c === "v") return { code: "KeyV", shift: false};
-   if(c === "w") return { code: "KeyW", shift: false};
-   if(c === "x") return { code: "KeyX", shift: false};
-   if(c === "y") return { code: "KeyY", shift: false};
-   if(c === "z") return { code: "KeyZ", shift: false};
-   
-   if(c === "A") return { code: "KeyA", shift: true };
-   if(c === "B") return { code: "KeyB", shift: true };
-   if(c === "C") return { code: "KeyC", shift: true };
-   if(c === "D") return { code: "KeyD", shift: true };
-   if(c === "E") return { code: "KeyE", shift: true };
-   if(c === "F") return { code: "KeyF", shift: true };
-   if(c === "G") return { code: "KeyG", shift: true };
-   if(c === "H") return { code: "KeyH", shift: true };
-   if(c === "I") return { code: "KeyI", shift: true };
-   if(c === "J") return { code: "KeyJ", shift: true };
-   if(c === "K") return { code: "KeyK", shift: true };
-   if(c === "L") return { code: "KeyL", shift: true };
-   if(c === "M") return { code: "KeyM", shift: true };
-   if(c === "N") return { code: "KeyN", shift: true };
-   if(c === "O") return { code: "KeyO", shift: true };
-   if(c === "P") return { code: "KeyP", shift: true };
-   if(c === "Q") return { code: "KeyQ", shift: true };
-   if(c === "R") return { code: "KeyR", shift: true };
-   if(c === "S") return { code: "KeyS", shift: true };
-   if(c === "T") return { code: "KeyT", shift: true };
-   if(c === "U") return { code: "KeyU", shift: true };
-   if(c === "V") return { code: "KeyV", shift: true };
-   if(c === "W") return { code: "KeyW", shift: true };
-   if(c === "X") return { code: "KeyX", shift: true };
-   if(c === "Y") return { code: "KeyY", shift: true };
-   if(c === "Z") return { code: "KeyZ", shift: true };
-
-   if(c === " ") return { code: "Space", shift: false };
-
-   if(c === "\n") return { code: "Enter", shift: false };
-   
-   return undefined;
 }
 
 function zap() {      
@@ -234,7 +23,7 @@ function zap() {
    laser500.cpu.setState(state);   
 }
 
-function saveState() {
+export function saveState() {
    const saveObject = {
       bank4: Array.from(laser500.bank4),
       bank5: Array.from(laser500.bank5),
@@ -256,8 +45,6 @@ function saveState() {
    window.localStorage.setItem(`laser500emu_state`, JSON.stringify(saveObject));
 }
 
-
-
 function dumpPointers() {
    console.log(`
    +------------------------+ <- TOPMEM (0x803d) ${hex(mem_read_word(0x803d),4)}
@@ -278,9 +65,6 @@ function dumpPointers() {
 `);
 }
 
-let debugBefore = undefined;
-let debugAfter = undefined;
-
 function dumpStack() {
    const sp = laser500.cpu.getState().sp;
 
@@ -290,321 +74,17 @@ function dumpStack() {
    }
 }
 
-// *************************************************************************************
-// connects to bbs.sblendorio.eu
-// requires TERM.COM
-
-import { BBS } from "./bbs";
-
-async function bbs() {
-   let modem = new BBS();
-   modem.debug = false;
-
-   modem.onreceive = (data) => data.forEach(e=>laser500.serial.receive_from_external(e));
-   laser500.serial.on_send_to_external = (data) => modem.send([data]);
-
-   try {
-      await modem.connect("wss://bbs.sblendorio.eu:8082","bbs");
-   }
-   catch(err) {
-      console.log("BBS: websocket connection failed");
-   }   
-}
 
 
 
-/* @@@ browser.js */  
-// handles interaction between browser and emulation 
+import { parseQueryStringCommands } from "./browser";
 
-let aspect = 1.55;
-
-function onResize() {
-   const canvas = document.getElementById("canvas"); 
-   if(canvas === null) return;
-
-   if(window.innerWidth > (window.innerHeight*aspect))
-   {
-      canvas.style.width  = `${aspect*100}vmin`;
-      canvas.style.height = "100vmin";
-   }
-   else if(window.innerWidth > window.innerHeight)
-   {
-      canvas.style.width  = "100vmax";
-      canvas.style.height = `${(1/aspect)*100}vmax`;
-   }
-   else
-   {
-      canvas.style.width  = "100vmin";
-      canvas.style.height = `${(1/aspect)*100}vmin`;
-   }
-
-   const trueHeight = canvas.offsetHeight
-   video.hide_scanlines = (trueHeight < 512);
-   buildPalette();
-}
-
-function goFullScreen() 
-{
-   const canvas = document.getElementById("canvas"); 
-   if(canvas === null) return;
-   onResize();
-}
-
-// **** save state on close ****
-
-window.onbeforeunload = function(e) {
-   saveState();   
- };
-
-// **** visibility change ****
-
-window.addEventListener("visibilitychange", function() {
-   if(document.visibilityState === "hidden")
-   {
-      laser500.stopped = true;
-      audio.stop();
-   }
-   else if(document.visibilityState === "visible")
-   {
-      laser500.stopped = false;
-      oneFrame(undefined);
-      audio.start();
-   }
-});
-
-// **** drag & drop ****
-
-const dropZone = document.getElementById('screen');
-
-if(dropZone !== null) {
-   // Optional.   Show the copy icon when dragging over.  Seems to only work for chrome.
-   dropZone.addEventListener('dragover', function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      if(e.dataTransfer) {
-         e.dataTransfer.dropEffect = 'copy';
-      }
-   });
-
-   // Get file data on drop
-   dropZone.addEventListener('drop', e => {
-      audio.resume();
-
-      e.stopPropagation();
-      e.preventDefault();
-      const files = e.dataTransfer?.files; // Array of all files
-      if(files === undefined) return;
-
-      for(let i=0, file; file=files[i]; i++) {                   
-         const reader = new FileReader();      
-         reader.onload = e2 => {
-            const result = e2.target?.result;
-            if(result && typeof result !== 'string') {               
-               droppedFile(file.name, new Uint8Array(result));
-            }
-         };
-         reader.readAsArrayBuffer(file); 
-      }
-   });
-}
-
-async function droppedFile(droppedFileName: string, bytes: Uint8Array) {
-
-   const ext = getFileExtension(droppedFileName);
-
-   if(ext === ".wav") {
-      // WAV files
-      console.log("WAV file dropped");
-
-      laser500.tape.load_wav_file(droppedFileName, bytes.buffer);
-
-      // CRUN run only if in immediate mode
-      if(laser500.isImmediateMode()) pasteLine("CRUN\r\n");
-            
-      return;
-   }
-
-   if(ext === ".nic") {
-      console.log("floppy disk (.nic file) dropped");
-      // mount directly, same as the GUI does
-      laser500.drives[0] = new Drive(bytes, droppedFileName);
-      return;
-   }
-
-   if(ext === ".bin") {
-      // load raw bytes directly into RAM (BASIC start 0x8995) and run
-      loadBytes(Array.from(bytes), undefined, droppedFileName);
-      laser500.cpu.reset();
-      pasteLine("RUN\r\n");
-      return;
-   }
-
-   if(ext === ".bas") {
-      pasteBasic(uint8ToString(bytes));
-      return;
-   }
-}
-
-// **** welcome message ****
-
-function welcome() {
-   console.info(
-`Welcome to the Video Technology Laser 500 emulator
-Please read the instructions at https://github.com/nippur72/laser500emu`);   
-}
-
-function getQueryStringObject(options) {
-   const params = new URLSearchParams(window.location.search);
-   for (const [key, value] of params) {
-      if (value === "true") options[key] = true;
-      else if (value === "false") options[key] = false;
-      else options[key] = value;
-   }
-   return options;
-}
-
-export type CharsetOption = "english" | "german" | "french" | "bincode";
-
-export function setCharset(charset: CharsetOption | string) {
-   if (charset === "english") laser500.charset_offset = 0;
-   else if (charset === "bincode") laser500.charset_offset = 2048;
-   else if (charset === "german") laser500.charset_offset = 4096;
-   else if (charset === "french") laser500.charset_offset = 6144;
-   else console.warn(`option charset=${charset} not recognized`);
-}
-
-export function getCharset(): CharsetOption {
-   if (laser500.charset_offset === 4096) return "german";
-   if (laser500.charset_offset === 6144) return "french";
-   if (laser500.charset_offset === 2048) return "bincode";
-   return "english";
-}
-
-interface QueryStringOptions {
-   load?: string;          // program to load and run at startup (URL or software/ path)
-   nic?: string;           // disk image (.nic) to mount at startup (URL)
-   fd1?: string;           // disk image (.nic) to mount on drive 1 (URL or software/ path)
-   fd2?: string;           // disk image (.nic) to mount on drive 2 (URL or software/ path)
-   nodisk?: boolean;       // start with the floppy disk controller detached
-   notapemonitor?: boolean;// start with tape monitor audio disabled
-   scanlines?: boolean,    // (parsed but currently unused) scanline effect
-   saturation?: number,    // color saturation 0..1 (1 = full color)
-   charset?: "english"|"bincode"|"german"|"french", // character ROM variant
-   bt?: number,            // border top scanlines (0..65)
-   bb?: number,            // border bottom scanlines (0..56)
-   bh?: number,            // border horizontal width (0..40)
-   keyboard_ITA?: boolean, // Italian keyboard layout (unused)
-   aspect?: number         // canvas aspect ratio override
-}
-
-async function parseQueryStringCommands() {
-   options = getQueryStringObject(options);
-
-   const name = options.load;
-   if(name !== undefined) {      
-      setTimeout(async ()=>{
-         wait_for_cursor();
-         const bytes = await fetchFile(name);
-         if(bytes !== undefined) {
-            await droppedFile(name, bytes);
-         }
-      }, 500);
-   }
-
-   if(options.nic !== undefined) {
-      // ?nic=http://github.com/nippur72/laser500emu/blob/gh-pages/software/disks/vt-dos.nic
-      const name = options.nic;
-      const nic = await fetchFile(name);
-      if(nic !== undefined) {
-         await droppedFile(name, nic);
-      }
-   }
-
-   if(options.fd1 !== undefined) {
-      const name = options.fd1;
-      const nic = await fetchFile(name);
-      if(nic !== undefined) {
-         laser500.drives[0] = new Drive(nic, name);
-      }
-   }
-
-   if(options.fd2 !== undefined) {
-      const name = options.fd2;
-      const nic = await fetchFile(name);
-      if(nic !== undefined) {
-         laser500.drives[1] = new Drive(nic, name);
-      }
-   }
-
-   if(options.nodisk === true) {
-      laser500.emulate_fdc = false;      
-   }
-
-   if(options.notapemonitor === true) {
-      laser500.tape_monitor = false;      
-   }
-
-   /*
-   if(options.keyboard === "ITA") {
-      keyboard_ITA = true;
-   }
-   */
-
-   if(options.saturation !== undefined) {
-           if(options.saturation < 0) video.saturation = 0;
-      else if(options.saturation > 1) video.saturation = 1;
-      else                            video.saturation = options.saturation;   
-      buildPalette();   
-   }
-
-   if(options.charset !== undefined) {
-      setCharset(options.charset);
-   }
-
-   if(options.bt !== undefined || 
-      options.bb !== undefined || 
-      options.bh !== undefined || 
-      options.aspect !== undefined
-   ) {
-      if(options.bt     !== undefined) video.border_top    = Number(options.bt); 
-      if(options.bb     !== undefined) video.border_bottom = Number(options.bb);
-      if(options.bh     !== undefined) video.border_h      = Number(options.bh);
-      if(options.aspect !== undefined) aspect              = Number(options.aspect);
-      calculateGeometry();
-      onResize();
-   }
-}
-
-export function rewind_tape() {   
-   laser500.tape.tapePtr = 0;
-   laser500.tape.tapeHighPtr = 0;
-}
-
-export function stop_tape() {   
-   laser500.tape.tapePtr = laser500.tape.tapeLen;   
-}
-
-/*
-function downloadBytes(fileName, buffer) {
-   let blob = new Blob([buffer], {type: "application/octet-stream"});
-   saveAs(blob, fileName);
-   console.log(`downloaded "${fileName}"`);
-}
-*/
-
-function downloadRam(start, end) {
-   const ram: number[] = [];
-   for(let t=start; t<=end; t++) {
-      ram.push(mem_read(t));            
-   }
-   downloadBytes(`ram.${hex(start,4)}-${hex(end,4)}.bin`, new Uint8Array(ram));
-}
-
-/* @@@ emulator.js */  
+/* @@@ emulator.js */
 "use strict";
 
 
 import { Audio } from "./audio";
+import { initDriveSound, loadDriveSound } from "./drive-sound";
 import { Z80 } from "z80-js";
 
 import { updateGamePad } from "./joystick";
@@ -682,6 +162,7 @@ export const laser500 = {
    
    emulate_fdc: true,
    tape_monitor: true,
+   drive_sound: true,
 
    cpu: Z80({ mem_read, mem_write, io_read, io_write }),
 
@@ -735,18 +216,6 @@ export function getAverageFrameTime() {
 let cycle = 0;
 let total_cycles = 0;
 
-let options: QueryStringOptions = {
-   load: undefined,
-   nodisk: false,
-   notapemonitor: false,
-   scanlines: false,
-   saturation: 1.0,
-   charset: "english",
-   bt: undefined,
-   bb: undefined,
-   bh: undefined,
-   keyboard_ITA: false
-};
 
 /*
 function cpuCycle() {
@@ -788,7 +257,14 @@ function system_tick(nticks) {
    }
 }
 
-function renderAllLines() {
+export function wait_for_cursor() {
+   while(1) {
+      renderAllLines();
+      if((total_cycles > cpuSpeed/4) && bit(mem_read(0x85fa),5)==1) return;
+   }
+}
+
+export function renderAllLines() {
    system_tick(cyclesPerLine * 312);
 }
 
@@ -869,11 +345,13 @@ function writeAudioSamples(cpuCycles) {
 
 export let audio = new Audio(4096);
 audio.start();
+initDriveSound(audio.audioContext);
 
 async function main() {
    // prints welcome message on the console
    // welcome();
 
+   await loadDriveSound('/5.25_Epson_SD-700_1.2M_80tracks_1up.wav');
    await parseQueryStringCommands();
    
    // starts drawing frames
@@ -915,15 +393,3 @@ export function info() {
 
 main();
 
-import { createElement } from "react";
-import { createRoot } from "react-dom/client";
-
-import { initializeIcons } from "@fluentui/react";
-
-// Register icons and pull the fonts from the default SharePoint cdn.
-initializeIcons();
-
-window.addEventListener("resize", onResize);
-window.addEventListener("dblclick", goFullScreen);
-
-onResize();

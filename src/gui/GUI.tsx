@@ -3,7 +3,8 @@ import { createPortal } from "react-dom";
 
 import { Modal } from "@fluentui/react";
 import { useState, useEffect, useReducer } from "react";
-import { laser500, setCharset, getCharset, CharsetOption } from "../emulator";
+import { laser500 } from "../emulator";
+import { setCharset, getCharset, CharsetOption } from "../browser";
 import { Uploader, UploaderSingle } from "./UploadButton";
 import { FileInfo, readFiles } from "./readfile"
 import { Drive, EmptyDisk } from "../floppy";
@@ -37,6 +38,7 @@ interface GUIState {
    crtOptions: Required<CRTEmulatorOptions>;
    joystickConnected: boolean;
    swapJoysticks: boolean;
+   driveSound: boolean;
 }
 
 const initialState: GUIState = {
@@ -63,6 +65,7 @@ function freshState() {
       crtOptions: { ...crtOptions },
       joystickConnected: laser500.joystick_connected,
       swapJoysticks: laser500.swap_joysticks,
+      driveSound: laser500.drive_sound,
    };
 }
 
@@ -90,6 +93,7 @@ type Action =
    | { type: 'UPDATE_TAPE_STATUS' }
    | { type: 'TOGGLE_JOYSTICK_CONNECTED' }
    | { type: 'TOGGLE_SWAP_JOYSTICK' }
+   | { type: 'TOGGLE_DRIVE_SOUND' }
 ;
 
 function reducer(state: GUIState, action: Action): GUIState {
@@ -104,6 +108,11 @@ function reducer(state: GUIState, action: Action): GUIState {
 
       case 'TOGGLE_TAPE_MONITOR': {
          laser500.tape_monitor = !laser500.tape_monitor;
+         return { ...state, ...freshState() };
+      }
+
+      case 'TOGGLE_DRIVE_SOUND': {
+         laser500.drive_sound = !laser500.drive_sound;
          return { ...state, ...freshState() };
       }
 
@@ -510,11 +519,17 @@ export function EmulatorGUI() {
 
                      {activeKey === "disk" && (
                         <>
-                           <RetroCheckbox 
-                              label="Disk drive interface attached"
-                              checked={state.emulate_fdc} 
-                              onChange={()=>dispatch({ type: 'TOGGLE_EMULATE_FDC' })} 
-                           />
+                            <RetroCheckbox 
+                               label="Disk drive interface attached"
+                               checked={state.emulate_fdc} 
+                               onChange={()=>dispatch({ type: 'TOGGLE_EMULATE_FDC' })} 
+                            />
+
+                            <RetroCheckbox
+                               label="Audible drive head sounds"
+                               checked={state.driveSound}
+                               onChange={()=>dispatch({ type: 'TOGGLE_DRIVE_SOUND' })}
+                            />
 
                             <div className="drive-grid section-gap">
                                {/* DRIVE 1 */}
