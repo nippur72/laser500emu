@@ -1,61 +1,3 @@
-// TODO serial: reconcile BBS serial port with CP/M serial port
-// TODO tape: separate button for downloading 
-// TODO capture printer
-// TODO joystick: on gui
-// TODO audio: mute option
-// TODO audio: save with tape?
-// TODO misc: load/save memory block/basic program
-// TODO misc: type basic text, paste
-// TODO replace .bin with VZ ?
-// TODO misc: cartridge load
-// TODO adopt bank/page termonology as in the user manual
-// TODO gui keydown, make single handler
-
-// *** OLD TODOs ***
-
-// TODO gamepads and numpad emulation DO NOT coexist
-// TODO joysticks ports like in laser 310 (also fpga ?)
-// TODO restore IN(0x13)=0xFF, IN(0x12)=0x13 when no drive selected (@Bonstra test)
-// TODO add a machine reset (FDC ecc..)
-// TODO build of CP/M ?
-// TODO modularize, avoid global variables
-// TODO stop() resumes after browser tab reactivates
-// TODO fix page refresh when in laser 350 mode
-// TODO save/load state does not save banks?
-// TODO 1x1 pixel rendering
-// TODO URLSearchParams()
-// TODO gamepad api
-// TODO tape stereo trick https://retrocomputing.stackexchange.com/questions/773/loading-zx-spectrum-tape-audio-in-a-post-cassette-world
-// TODO inverted waveform option
-// TODO remove software from facebook group
-// TODO contrast/luminosity
-// TODO fix bug introduced with audioContext.resume
-// TODO screen writing emulation as browser support
-// TODO emulate true drive @300 RPM
-// TODO display drive activity in canvas
-// TODO publish Jaime's disks
-// TODO turbotape check T-states, finalize 
-// TODO finalize throttle / end of frame hook
-// TODO finalize Z80.js fuse tests
-// TODO disk drive sounds
-// TODO finalize pasteLine/pasteText
-// TODO save emulator snapshots?
-// TODO draw keyboard for mobile
-// TODO save to cloud ?
-// TODO almost exact cycles drawing
-// TODO javascript debugger, halt
-// TODO laser 350/700
-// TODO cartdriges / rom expansion slots
-// TODO laser 200 family? study vzem
-// TODO draw in webassembly
-// TODO caplock key / led ?
-// TODO visual/sound display of activity
-// TODO wrap in electron app
-// TODO verify cassette_bit I/O range on real HW
-// TODO options window (modal)
-// TODO be able to emulate CTRL+power up
-// TODO sprite routine?
-
 import { bit, downloadBytes, getFileExtension, hex, mem_read_word, mem_write_word, reset_bit, set_bit, uint8ToString } from "./bytes";
 
 import { video, drawFrame_y, calculateGeometry } from "./video";
@@ -555,7 +497,7 @@ interface QueryStringOptions {
    bt?: number,            // border top scanlines (0..65)
    bb?: number,            // border bottom scanlines (0..56)
    bh?: number,            // border horizontal width (0..40)
-   keyboard_ITA?: boolean, // Italian keyboard layout (TODO, unused)
+   keyboard_ITA?: boolean, // Italian keyboard layout (unused)
    aspect?: number         // canvas aspect ratio override
 }
 
@@ -606,10 +548,10 @@ async function parseQueryStringCommands() {
       laser500.tape_monitor = false;      
    }
 
-   /* TODO
+   /*
    if(options.keyboard === "ITA") {
       keyboard_ITA = true;
-   }   
+   }
    */
 
    if(options.saturation !== undefined) {
