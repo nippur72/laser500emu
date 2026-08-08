@@ -351,7 +351,7 @@ async function main() {
    // prints welcome message on the console
    // welcome();
 
-   await loadDriveSound('/5.25_Epson_SD-700_1.2M_80tracks_1up.wav');
+   await loadDriveSound('5.25_Epson_SD-700_1.2M_80tracks_1up.wav');
    await parseQueryStringCommands();
    
    // starts drawing frames
