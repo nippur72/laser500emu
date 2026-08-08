@@ -454,17 +454,13 @@ Please read the instructions at https://github.com/nippur72/laser500emu`);
 }
 
 function getQueryStringObject(options) {
-   let a = window.location.search.split("&");
-   let o = a.reduce((o, v) =>{
-      var kv = v.split("=");
-      const key = kv[0].replace("?", "");
-      let value: boolean|string = kv[1];
-           if(value === "true") value = true;
-      else if(value === "false") value = false;
-      o[key] = value;
-      return o;
-   }, options);
-   return o;
+   const params = new URLSearchParams(window.location.search);
+   for (const [key, value] of params) {
+      if (value === "true") options[key] = true;
+      else if (value === "false") options[key] = false;
+      else options[key] = value;
+   }
+   return options;
 }
 
 export type CharsetOption = "english" | "german" | "french" | "bincode";
