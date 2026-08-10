@@ -1,1 +1,0 @@
-yaza cpm.asm --list --sym
