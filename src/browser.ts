@@ -228,22 +228,26 @@ export async function parseQueryStringCommands() {
       }, 500);
    }
 
-   if(options.nic !== undefined) {
-      // ?nic=http://github.com/nippur72/laser500emu/blob/gh-pages/software/disks/vt-dos.nic
-      const name = options.nic;
-      const nic = await fetchFile(name);
-      if(nic !== undefined) {
-         await droppedFile(name, nic);
-      }
-   }
+    if (options.nic === undefined && options.fd1 === undefined) {
+       options.nic = "disks/vt-dos-11-dd.nic";
+    }
 
-   if(options.fd1 !== undefined) {
-      const name = options.fd1;
-      const nic = await fetchFile(name);
-      if(nic !== undefined) {
-         laser500.drives[0] = new Drive(nic, name);
-      }
-   }
+    if(options.nic !== undefined) {
+       // ?nic=http://github.com/nippur72/laser500emu/blob/gh-pages/software/disks/vt-dos.nic
+       const name = options.nic;
+       const nic = await fetchFile(name);
+       if(nic !== undefined) {
+          await droppedFile(name, nic);
+       }
+    }
+
+    if(options.fd1 !== undefined) {
+       const name = options.fd1;
+       const nic = await fetchFile(name);
+       if(nic !== undefined) {
+          laser500.drives[0] = new Drive(nic, name);
+       }
+    }
 
    if(options.fd2 !== undefined) {
       const name = options.fd2;

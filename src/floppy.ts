@@ -249,8 +249,8 @@ export class Drive {
    }
 }
 
-// the actual floppy disks inserted in the drives
+// the actual floppy disks inserted in the drives at startup
 export const drives = [ 
-   new Drive(vtdos_11_image, "VTDOS11.NIC"), 
+   new Drive(EmptyDisk(2), "EMPTY.NIC"), 
    new Drive(EmptyDisk(2), "EMPTY.NIC") 
 ];
