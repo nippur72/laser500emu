@@ -40,9 +40,9 @@ Bit(s)	Description
 
 0x11: Latch register 2
 Bit(s)	Description
-7-1	Reserved
-0	Data write mode: 0 = 8 bit
-	                 1 = 16 bit
+7-0	Self-sync byte control mode:
+	255 (0xFF) = Enable self-sync bytes mode (for writing sync 2 bit gaps)
+	213 (0xD5) = Disable self-sync bytes mode (for sector data payload)
 
 0x12: Status register
 Bit(s)	Description
@@ -52,8 +52,8 @@ Bit(s)	Description
 	When reading: 0 = data not ready
 	              1 = data ready
 6-1	Reserved
-0	Write protect sense: 0 = write-protected
-	                     1 = not write-protected
+0	Write protect sense: 0 = not write-protected
+	                     1 = write-protected
 	Status of the WPROT input (for selected drive).
 
 0x13: Data write register
@@ -72,6 +72,12 @@ Bytes written on the media must comply with the following constraints:
 - MSB must be 1 (bytes are written on the media MSB first, and this is used
   for synchronization)
 - A byte must not contain more than 2 consecutive zero bits
+
+Self-Sync Bytes:
+Sync bytes (0xFF) are written in sector gaps before headers and data blocks. When 
+writing with self-sync mode enabled (0x11 = 255), the hardware adds an additional
+gap pattern (2 more bits) that allows automatic sync to byte when reading the sync
+bytes (in order to sync to the start of the data byte payload properly)
 
 The GCR "6 and 2" encoding, which is used on the Apple ][, is used to encode
 the data part of a sector.
