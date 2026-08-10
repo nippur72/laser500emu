@@ -166,7 +166,7 @@ function reducer(state: GUIState, action: Action): GUIState {
 
       case 'EMPTY_DISK': {         
          const drive = action.drive-1;
-         laser500.drives[drive] = new Drive(EmptyDisk(1), "EMPTY.NIC");         
+         laser500.drives[drive] = new Drive(EmptyDisk(2), "EMPTY.NIC");         
          return { ...state, ...freshState() };
       }
 
