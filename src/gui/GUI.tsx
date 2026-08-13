@@ -279,6 +279,8 @@ const CRT_SLIDERS: CRTSliderConfig[] = [
    { key: "hardPix", label: "Pixel Sharpness (Hard Pix)", min: -10, max: 0, step: 0.1 },
    { key: "warp", label: "Screen Curvature (Warp)", min: 0, max: 0.2, step: 0.005, format: v => v.toFixed(3) },
    { key: "chromaBleed", label: "Chroma Bleed", min: 0, max: 3, step: 0.1 },
+   { key: "chromaPhase", label: "Chroma Phase", min: 0, max: 1, step: 0.025, format: v => v.toFixed(3) },
+   { key: "chromaCrosstalk", label: "Chroma Crosstalk", min: 0, max: 1, step: 0.05 },
    { key: "maskDark", label: "Mask Dark", min: 0, max: 1, step: 0.05 },
    { key: "maskLight", label: "Mask Light", min: 0, max: 2, step: 0.05 },
    { key: "maskScale", label: "Mask Scale", min: 0.25, max: 3, step: 0.05 },

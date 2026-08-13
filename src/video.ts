@@ -15,6 +15,8 @@ export const defaultCrtOptions: Required<CRTEmulatorOptions> = {
    maskLight: 1.0,
    maskScale: 1.25,
    chromaBleed: 1.0,
+   chromaPhase: 0.5,
+   chromaCrosstalk: 0.5,
    maskWidth: 3.0,
    maskHeight: 6.0,
    gapWidth: 0.25,
