@@ -198,6 +198,8 @@ export const laser500 = {
 (window as any).csave    = laser500.tape.csave;
 (window as any).cstop    = laser500.tape.cstop;
 (window as any).laser500 = laser500;
+(window as any).mem_read  = mem_read;
+(window as any).mem_write = mem_write;
 
 /******************/
 
@@ -346,7 +348,6 @@ function writeAudioSamples(cpuCycles) {
 export let audio = new Audio(4096);
 audio.start();
 initDriveSound(audio.audioContext);
-
 async function main() {
    // prints welcome message on the console
    // welcome();
@@ -356,19 +357,6 @@ async function main() {
    
    // starts drawing frames
    oneFrame(undefined);
-   
-   /*
-   // autoload program and run it
-   if(autoload !== undefined) {
-      zap();
-      laser500.cpu.reset();
-      
-      setTimeout(()=>{
-         loadBytes(autoload);
-         pasteLine("RUN\r\n");
-      }, 200);
-   }
-   */
 }
 
 export function stop() {

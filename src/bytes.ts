@@ -147,3 +147,79 @@ export function areUint8ArraysDifferent(arr1: Uint8Array, arr2: Uint8Array): boo
    // Use every to compare elements
    return !arr1.every((value, index) => value === arr2[index]);
 }
+
+/**
+ * Downloads a CP/M program loaded into memory at address 0x0100 (0100H).
+ * 
+ * Usage in console:
+ *   downloadCpmProgram()                       // Auto-detects via CP/M FCB at 0x005C, saves as "PROGRAM.COM"
+ *   downloadCpmProgram("MYPROG.COM")          // Auto-detects via CP/M FCB at 0x005C, saves as "MYPROG.COM"
+ *   downloadCpmProgram(0x0380)                // Downloads up to DDT's NEXT address 0x0380 as "PROGRAM.COM"
+ *   downloadCpmProgram("MYPROG.COM", 0x0380)  // Downloads up to DDT's NEXT address 0x0380 as "MYPROG.COM"
+ */
+export function downloadCpmProgram(
+   fileNameOrEndAddress?: string | number,
+   explicitEndAddress?: number
+) {
+   let fileName = "PROGRAM.COM";
+   let endAddress: number | undefined = undefined;
+   const startAddress = 0x0100;
+
+   if (typeof fileNameOrEndAddress === "string") {
+      fileName = fileNameOrEndAddress;
+      if (typeof explicitEndAddress === "number") {
+         endAddress = explicitEndAddress;
+      }
+   } else if (typeof fileNameOrEndAddress === "number") {
+      endAddress = fileNameOrEndAddress;
+   }
+
+   // Normalize endAddress if passed as a length (e.g. 640) rather than an address (0x0380)
+   if (endAddress !== undefined && endAddress <= startAddress) {
+      endAddress = startAddress + endAddress;
+   }
+
+   // If endAddress was not provided, auto-detect using CP/M FCB at 0x005C
+   if (endAddress === undefined) {
+      const ex = mem_read(0x0068); // Extent count (EX)
+      const rc = mem_read(0x006B); // Record count in current extent (RC)
+      const totalRecords = ex * 128 + rc;
+
+      if (totalRecords > 0 && totalRecords < 512) {
+         const fileLength = totalRecords * 128;
+         endAddress = startAddress + fileLength;
+      } else {
+         // Fallback: search for CP/M EOF marker (0x1A / Ctrl-Z) in memory
+         for (let addr = startAddress; addr < 0x8000; addr++) {
+            if (mem_read(addr) === 0x1A) {
+               endAddress = addr + 1;
+               break;
+            }
+         }
+      }
+   }
+
+   if (!endAddress || endAddress <= startAddress) {
+      console.warn(
+         `Could not automatically determine program size. Please specify DDT's NEXT address, e.g.: downloadCpmProgram("${fileName}", 0x0380)`
+      );
+      return;
+   }
+
+   const length = endAddress - startAddress;
+   const buffer = new Uint8Array(length);
+   for (let i = 0; i < length; i++) {
+      buffer[i] = mem_read(startAddress + i);
+   }
+
+   downloadBytes(fileName, buffer);
+   console.log(
+      `Downloaded CP/M program "${fileName}" from ${hex(startAddress, 4)}h to ${hex(endAddress, 4)}h (${length} bytes / ${hex(length, 4)}h)`
+   );
+}
+
+if (typeof window !== "undefined") {
+   (window as any).downloadCpmProgram = downloadCpmProgram;
+   (window as any).downloadCPM = downloadCpmProgram;
+}
+
