@@ -116,6 +116,18 @@ DE AA // Data end
 Checksum must check:
 volume_num ^ track ^ sector ^ checksum == 0
 
+Observed volume numbers (verified on the disk images in software/):
+- 0xCD: CP/M disks (fd004, fd007-fd022). All CP/M disks share this volume.
+- 0xAA: VT-DOS disks (fd005, fd010, vt-dos-11-dd.nic)
+- 0x00: LOGO disk (fd019)
+
+VT-DOS and CP/M use the same on-disk sector/track format (same D5 AA 96 /
+D5 AA AD markers, same 6&2 GCR, same checksums); the only difference found
+is this volume field in the sector address header. A CP/M "Bdos Err On A:
+Bad Sector" can occur when reading a disk whose sectors were written with a
+different volume number (e.g. a disk formatted by VT-DOS INIT, volume 0xAA,
+then read by CP/M which expects 0xCD).
+
 Sector data part:
 D5 AA // Data start
 AD // Data type: sector data (0x0b in GCR encoding)
