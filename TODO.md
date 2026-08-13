@@ -10,6 +10,7 @@
 ## serial and parallel
 - serial: reconcile BBS serial port with CP/M serial port
 - capture printer in gui
+- parallel: align to manual (00h-0Fh port numbers)
 
 ## tape
 - inverted waveform option
@@ -37,6 +38,8 @@
 - track/head r/w status bar indicator (display drive activity)
 - disk drive sounds
 - investigate why CP/M DIR B: needs STAT B: before
+- fix software/disks/vt-dos-11.nic (it's an assembly source file with defb statements, not a raw .nic disk image)
+- add disk drive type selection (single side vs double side); possible models FD-100 / FD-100A
 
 ## keyboard
 - caplock key / led ?
@@ -47,6 +50,7 @@
 - organize/document chinese disk collection
 
 ## misc
+- creare un Wiki per il laser 500
 - load/save memory block/basic program
 - type basic text, paste
 - replace .bin with VZ ?
