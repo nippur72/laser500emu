@@ -88,6 +88,10 @@ LOW RAM MAP
 KERNAL ROM ROUTINES
 ===================
 ```
+0023 - ROLLOVER → 05CAh This is the ROM's non-blocking key check (jp 05cah at vector 0023h 
+       in rom.disassembly.txt). It's the INKEY$-style poll. Returns A = 0 (Z set) if no key 
+       is pressed (or no new key — it implements key rollover), otherwise A = ASCII code 
+       of the pressed key.
 0538 - GETKEY2: waits for keypress, updates LAST_KEY_PRESSED and returns ASCII code in A
 09E2 - BELL: emits small beep sound (CHR$(7))
 09EA - BEEP (not working) emet un son 
