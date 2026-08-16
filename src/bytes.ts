@@ -218,8 +218,43 @@ export function downloadCpmProgram(
    );
 }
 
+/**
+ * Downloads a portion of RAM to a file.
+ * 
+ * Usage in console:
+ *   downloadRam(0x8000, 0x8FFF)              // Downloads 0x8000 to 0x8FFF as "ram.bin"
+ *   downloadRam(0x8000, 0x8FFF, "dump.bin")  // Downloads 0x8000 to 0x8FFF as "dump.bin"
+ */
+export function downloadRam(
+   startAddress: number,
+   endAddress: number,
+   fileName: string = "ram.bin"
+) {
+   if (startAddress > endAddress) {
+      console.error(
+         `downloadRam: startAddress (${hex(startAddress, 4)}h) must be <= endAddress (${hex(endAddress, 4)}h)`
+      );
+      return;
+   }
+
+   const length = endAddress - startAddress + 1;
+   const buffer = new Uint8Array(length);
+   for (let i = 0; i < length; i++) {
+      buffer[i] = mem_read(startAddress + i);
+   }
+
+   downloadBytes(fileName, buffer);
+   console.log(
+      `Downloaded RAM "${fileName}" from ${hex(startAddress, 4)}h to ${hex(endAddress, 4)}h (${length} bytes / ${hex(length, 4)}h)`
+   );
+}
+
 if (typeof window !== "undefined") {
    (window as any).downloadCpmProgram = downloadCpmProgram;
    (window as any).downloadCPM = downloadCpmProgram;
+   (window as any).downloadRam = downloadRam;
+   (window as any).dumpMem = dumpMem;
 }
+
+
 
