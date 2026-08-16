@@ -40,14 +40,97 @@ byte rom_getc() FASTNAKED {
    __endasm;
 }
 
+byte rom_kbhit() FASTNAKED {
+   __asm
+   push bc
+   push de
+
+   di
+   ld a, 2
+   out (0x41), a
+
+   call 0x05CA
+
+   ld l, a
+   ld h, 0
+
+   ld a, 1
+   out (0x41), a
+   ei
+
+   pop de
+   pop bc
+   ret
+   __endasm;
+}
+
 void rom_bell() FASTNAKED {
    __asm
       jp 0x09E2   ; and ret there
    __endasm;
 }
 
-void cls() {
-   rom_putc(CLS);
+void rom_cls() FASTNAKED {
+   __asm
+   di
+   ld a, 7
+   out (0x41), a
+
+   call 0x04D0
+
+   ld a, 1
+   out (0x41), a
+   ei
+   ret
+   __endasm;
+}
+
+void rom_set_text_40() FASTNAKED {
+   __asm
+   di
+   ld a, 7
+   out (0x41), a
+
+   call 0x045E
+
+   ld a, 1
+   out (0x41), a
+   ei
+   ret
+   __endasm;
+}
+
+void rom_set_text_80() FASTNAKED {
+   __asm
+   di
+   ld a, 7
+   out (0x41), a
+
+   call 0x0445
+
+   ld a, 1
+   out (0x41), a
+   ei
+   ret
+   __endasm;
+}
+
+void set_cursor_flash(byte enable) {
+   byte v = peek(CURSOR_STATUS);
+   if(enable) v |= 0b100000;
+   else v &= ~0b100000;
+   poke(CURSOR_STATUS, v);
+}
+
+void rom_set_keyboard_beep(byte enable) {
+   byte v = peek(CURSOR_STATUS);
+   if(enable) v &= ~0b1000; // bit 3 = 0 -> beep on
+   else v |= 0b1000;        // bit 3 = 1 -> beep off (muted)
+   poke(CURSOR_STATUS, v);
+}
+
+void set_keyboard_beep(byte enable) {
+   rom_set_keyboard_beep(enable);
 }
 
 word *get_cursor_address(byte x, byte y) {

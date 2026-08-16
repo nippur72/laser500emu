@@ -125,3 +125,29 @@ byte mapped_io_key_test(word row, byte col) {
    SLOT1_END();
    return ((c|col) ^ 0xFF) != 0;
 }
+
+byte getchar_non_blocking() {
+   static byte last_key = 0;
+   static word repeat_counter = 0;
+
+   byte k = rom_kbhit();
+   if(k == 0) {
+      last_key = 0;
+      repeat_counter = 0;
+      return 0;
+   }
+
+   if(k != last_key) {
+      last_key = k;
+      repeat_counter = KEY_AUTOREPEAT_DELAY;
+      return k;
+   }
+
+   if(repeat_counter > 0) {
+      repeat_counter--;
+      return 0;
+   }
+
+   repeat_counter = KEY_AUTOREPEAT_RATE;
+   return k;
+}

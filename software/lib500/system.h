@@ -5,6 +5,7 @@
 #define CURSOR_ADDRESS ((word *)0x85e2)
 #define CURSOR_COL     ((byte *)0x85e9)
 #define CURSOR_ROW     ((byte *)0x85e8)
+#define CURSOR_STATUS  ((byte *)0x85fa)
 
 // memory banks latches
 #define PORT_40_LATCH  ((byte *)0x8665)

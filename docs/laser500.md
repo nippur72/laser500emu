@@ -54,10 +54,9 @@ LOW RAM MAP
 85F7      (pointer) KEY_REPLAY_STRING: if not zero replay the 0 terminated string pointed by this (used for FKEYS?)
 85F9      latch of I/O image (was :?? bit 3: if 1 then do not read keyboard during interrupt)
 85FA      bit 1: turn on/off inverse text 
-          bit 3: turn on/off key beep
-          bit 5: 0=cursor off, 1=cursor is on
-          bit 3: ??
-          bit 2: ??
+          bit 2: key event flagged (set by CONIN, cleared by interrupt beep handler)
+          bit 3: 0=key beep on, 1=key beep off (muted; requires bit 5=1 to beep)
+          bit 5: 0=cursor off, 1=cursor is on/flashing
 85FB      CAPSLOCK: 
           bit 6: if 1 then do not read keyboard during interrupt
           bit 4: if 0 then do not do key autorepeat during interrupt
@@ -65,9 +64,15 @@ LOW RAM MAP
           bit 1-0: 00 = QWERTY keyboard layout
                    01 = AZERTY keyboard layout
                    10 = QWERTZ keyboard layout
+85FD      TEXT80: 40/80 column flag, only bit 0 used: 0 = 40 columns, 1 = 80 columns.
+          Software copy of bit 0 of the I/O port 44h latch (8669h). Initialized at boot
+          from bit 6 of the I/O input 6FFDh (SOME_KEY, 0B34h). Read by the text screen
+          code to choose 1-byte (80 col) vs 2-byte (40 col: char + color) cells.
 8604      content at cursor position
-8606      ?? initialized with 10h
-8607      ?? initialized with 10h
+8606      cursor flash counter: decremented by INTERRUPT_FLASH_CURSOR (0A2Eh) each
+          interrupt; when it reaches 0 the cursor is toggled and the counter is reloaded
+          from 8607h
+8607      cursor flash reload value: period per toggle = value * 20 ms (default 10h = 320 ms)
 8612      PORT_10_LATCH: port 10h latch (?)
 861D      (pointer) warm reset routine (reset key)
 861F      warm boot flag, if equal to (&H861D)+(&H816E)+&HE1 then is graceful reset, otherwise is boot
@@ -92,6 +97,23 @@ KERNAL ROM ROUTINES
        in rom.disassembly.txt). It's the INKEY$-style poll. Returns A = 0 (Z set) if no key 
        is pressed (or no new key — it implements key rollover), otherwise A = ASCII code 
        of the pressed key.
+       Note: Requires Bank 1 to be switched to Bank 2 (Mapped I/O, OUT (41h), 2) before calling.
+       Also note that ROLLOVER cannot be used alone to read keys because it does not detect key
+       release (it doesn't wait for the key to be released, resulting in repeat issues).
+       It should only be used to detect whether a key has been pressed (rom_kbhit), after which
+       the character should be read with GETC (58F0h / rom_getc).
+0013 - CONIN (jp 0531h, callable via CALL 0013h): blocking console input, waits for a
+       keypress and returns its ASCII code in A. Loops on ROLLOVER until a key arrives.
+001B - 06ACh (callable via CALL 001Bh): raw keyboard matrix scan, returns A=0 (no key)
+       or A=FFh (new key).
+NOTE: 0445/045E (and the CLS they call, 04D0h) write the screen at 7800-7FFF, which is
+      bank 1 (port 41h) mapped to page 7 (video RAM). They do not switch banks themselves;
+      when CALLing from user code, first do OUT &H41,7 (machine code: ld a,7 / out (41h),a).
+0445 - 40 -> 80 columns: sets TEXT80 (85FD)=1, sets bit 0 of the port 44h latch (8669h),
+       then CLS (04D0h). Safe to CALL; no-op if already in 80-column mode.
+045E - 80 -> 40 columns: clears bit 0 of the port 44h latch (8669h), sets TEXT80 (85FD)=0,
+       then CLS (04D0h). Safe to CALL; no-op if already in 40-column mode.
+04D0 - CLS (rom_cls): clears text screen and resets cursor position to top-left (0,0).
 0538 - GETKEY2: waits for keypress, updates LAST_KEY_PRESSED and returns ASCII code in A
 09E2 - BELL: emits small beep sound (CHR$(7))
 09EA - BEEP (not working) emet un son 
@@ -100,7 +122,8 @@ KERNAL ROM ROUTINES
        B = 02
 0B4F - not working - GETKEY: reads the keyboard and updates LAST_KEY_PRESSED and KEYASCII
 09D2 - lprint character
-58F0 - GETC read char from keyboard and returns in A
+58F0 - GETC (rom_getc): read char from keyboard and returns in A. Calls CONIN internally,
+       handling key debouncing, auto-repeat and waiting for key release.
 591C - print new line (apparently) 
 62D3 - PRINTSTR: print 0 terminated string in HL
 66EF - RESET cold software reset
@@ -274,8 +297,49 @@ GR3 160x192, 16 colors
 GR4  320x192, 2 of 16 colors(even byte=8 pixels(1=foreground color , 0=background color), odd byte=back and foreground color info for the 8 pixels)
 GR5 640x192, 2 colors, every bit is an pixel(80 bytes=80x8=640 pixels), back and foreground color info written to I/O port 45H   
 ```
+TEXT MODE COLUMNS (40/80)
+=========================
+85FDh (TEXT80) is a single-bit flag: bit 0 only, 0 = 40 columns, 1 = 80 columns.
+It mirrors bit 0 of I/O port 44h and is stored in the port 44h latch (8669h).
+Two reusable ROM routines switch modes and clear the screen (CLS, 04D0h):
+
+  CALL 0445h  -> 80 columns (no-op if already 80)
+  CALL 045Eh  -> 40 columns (no-op if already 40)
+
+Both (and the CLS they call, 04D0h) write the screen at 7800-7FFF, which requires bank 1
+(port 41h) to be page 7 (video RAM); they do not switch banks themselves. From BASIC do
+OUT &H41,7 first, then CALL. (Do not CALL 0ADEh RESTORE_BANK1 from BASIC: it leaves the
+old bank value on the stack and must exit via 0AD3h.)
+
+From BASIC (note: CALL expression works only if the expression is a variable):
+  A=&H445:CALL A   ' 80 columns
+  A=&H45E:CALL A   ' 40 columns
+
+The console driver reaches these same routines from control codes 0A2h (80 cols)
+and 0A3h (40 cols) via the 0476h handler.
+
 TRICKS
 ======
+The cursor on/off switch is the system flag 85FAh bit 5 (0 = cursor off, 1 = cursor on).
+BASIC sets it in the line-editor entry (ROM 0D22h, used by the immediate prompt and INPUT)
+and clears it when the editor exits (ROM 0E94h, when a program runs). The blink itself is
+done by INTERRUPT_FLASH_CURSOR (0A2Eh) in the 20 ms frame interrupt, which XORs 80h
+(inverse video) into the character at the cursor address (85E2h). It is also gated by
+85F9h bit 3 and 85FBh (CAPSLOCK) bit 6, both of which must be 0.
+
+Safe way to control it:
+POKE &H85FB, PEEK(&H85FB) AND &HBF   ' clear CAPSLOCK bit 6: allow keyboard interrupt
+POKE &H85FA, PEEK(&H85FA) OR &H20    ' set bit 5: cursor ON (flashing)
+POKE &H85FA, PEEK(&H85FA) AND &HDF   ' clear bit 5: cursor OFF
+
+Flash speed (period per toggle = value * 20 ms, default 16 = &H10 = 320 ms):
+POKE &H8607, n   ' reload value
+POKE &H8606, n   ' optional: apply immediately
+
+NOTE: the POKE &H8012 trick below installs a JP 0A40h in the user interrupt vector. That
+entry skips the interrupt-safety gates and can corrupt the bank/stack state and hang the
+machine. Prefer the 85FAh bit 5 flag method above.
+
 if you want a flashing cursor during INKEY$, you can issue the following commands:
 ```
 POKE &H8013,64:POKE &H8014,10:REM PREPARE FLASHING CURSOR
