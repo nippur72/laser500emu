@@ -1,9 +1,11 @@
 export class Serial
 {
    recbuf: number[] = [];
-   on_send_to_external: (byte: number)=>void = ()=>{};
 
-   cpu_read_data(): number {
+   // callback installed by the remote host to receive the bytes   
+   on_send_callback: (byte: number)=>void = ()=>{};
+
+   read_data_register(): number {
       if(this.recbuf.length > 0) {
          let ch = this.recbuf[0];
          this.recbuf = this.recbuf.slice(1);
@@ -13,27 +15,23 @@ export class Serial
       }
    }
 
-   cpu_read_status(): number {
+   read_status_register(): number {
+      let status = 0b10;  // bit 1: transmit ready
       if(this.recbuf.length > 0) {
-         return 8+1;
+         status |= 0b01;  // bit 0: receive data ready
       }
-      else {
-         return 8;
-      }
+      return status;
    }
 
-   cpu_write_data(data: number): void {
-      if(this.on_send_to_external !== undefined) {
-         this.on_send_to_external(data);
+   write_data_register(data: number): void {
+      if(this.on_send_callback !== undefined) {
+         this.on_send_callback(data);
       }
    }
 
-   cpu_write_command(command) {
-      // ignored
-   }
-
+   // called by the host (e.g. the BBS bridge) to deliver the incoming
+   // bytes from the remote side to the emulated serial port
    receive_from_external(data: number): void {
       this.recbuf.push(data);
    }
 }
-

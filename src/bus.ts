@@ -97,10 +97,10 @@ export function io_read(ioport) {
       // floppy disk controller
       return FDC_io_read(port);
    }
-   else if(port == 0x78) return laser500.serial.cpu_read_data();   // fictional serial device: read data
-   else if(port == 0x78) return laser500.serial.cpu_read_status(); // fictional serial device: status, always ready
+   else if(port == 0x50) return laser500.serial.read_status_register(); // serial device: status register
+   else if(port == 0x51) return laser500.serial.read_data_register();   // serial device: data register   
    else {
-      // console.warn(`read from unknown port ${hex(port)}h`);
+      console.warn(`read from unknown port ${hex(port)}h`);
    }
    return port | 1; // this is the value returned from unused ports on a real Laser 500
 }
@@ -134,11 +134,15 @@ export function io_write(port, value) {
          //console.log(`vdc_text80_foreground = ${vdc_text80_foreground}`);
          //console.log(`vdc_text80_background = ${vdc_text80_background}`);
          break;
+
       case 0x0d:
          laser500.printer.printerWrite(value);
+         return;
+
       case 0x0e:
-         // printer port duplicated here
+         // CP/M write printer data here as well, but 0x0d is enough
          return;                           
+
       case 0x10:
       case 0x11:
       case 0x12:
@@ -146,16 +150,12 @@ export function io_write(port, value) {
       case 0x14:
          if(laser500.emulate_fdc) FDC_io_write(port & 0xFF, value);
          return;
-
-      // fictional serial device
-      case 0x78:
-         // serial data
-         laser500.serial.cpu_write_data(value);
+      
+      case 0x50: // serial status register is read-only
          return;
 
-      case 0x7a:
-         // serial command, ignored
-         laser500.serial.cpu_write_command(value);
+      case 0x51: // serial data register 
+         laser500.serial.write_data_register(value);
          return;
 
       default:

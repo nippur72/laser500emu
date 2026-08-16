@@ -16,6 +16,9 @@
 */
 
 // wstcp -t bbs.sblendorio.eu -p 23 -w 8080 -n bbs
+// wstcp -t particlesbbs.dyndns.org -p 6400 -w 8081
+
+import { laser500 } from "./emulator";
 
 export class BBS {
    connected = false;
@@ -23,10 +26,12 @@ export class BBS {
    onreceive: (bytes: Uint8Array)=>void = ()=>{};    // user defined callback when data is received
    debug = false;
 
-   async connect(url, protocol) {
+   async connect(url?: string, protocol?: string) {
       return new Promise((resolve,reject)=>{
-         if(url === undefined) url = "wss://bbs.sblendorio.eu:8080";
-         if(protocol === undefined) protocol = "bbs";
+         if(url === undefined) {
+            url = "wss://bbs.sblendorio.eu:8080";
+            protocol = "bbs";   // the remote proxy expects this subprotocol
+         }
 
          if(this.connected) {
             if(this.debug) console.log("BBS: already connected");
@@ -36,7 +41,7 @@ export class BBS {
          // create the WebSocket connection
          this.ws_connection = new WebSocket(url, protocol);      
          this.ws_connection.onerror = (err) => this.onerror(err, reject);
-         this.ws_connection.onclose = () => this.onclose();
+         this.ws_connection.onclose = (e) => this.onclose(e);
          this.ws_connection.onmessage = (e) => this.onmessage(e);
          this.ws_connection.onopen = () => {
             this.connected = true;
@@ -46,19 +51,19 @@ export class BBS {
       });
    }
 
-   onerror(err, reject) {
-      if(this.debug) console.log('websocket: connection error');
+   onerror(err: Event, reject: (reason?: unknown) => void) {
+      console.log('websocket: connection error', err);
       this.connected = false;
       reject(err);
    }
 
-   onclose() {
-      if(this.debug) console.log('websocket: disconnected');
+   onclose(e: CloseEvent) {
+      console.log(`websocket: closed (code=${e.code}, reason="${e.reason}", clean=${e.wasClean})`);
       this.connected = false;
    }
 
    // function called when bytes are received from the WebSocket
-   async onmessage(e) {
+   async onmessage(e: MessageEvent) {
       if(!this.connected) return;
 
       if (typeof e.data === 'string') {
@@ -77,7 +82,7 @@ export class BBS {
       }
    }
 
-   send(data) {
+   send(data: ArrayLike<number>) {
       if(!this.connected || this.ws_connection === undefined) {
          if(this.debug) console.log("websocket: can't send because not connected");
          return;
@@ -94,7 +99,7 @@ export class BBS {
       }
    }
 
-   sendText(text) {
+   sendText(text: string) {
       this.send(this.string2Array(text));
    }
 
@@ -103,7 +108,7 @@ export class BBS {
       this.ws_connection.close();
    }
 
-   string2Array(str) {
+   string2Array(str: string) {
       let arr: number[] = [];
       for(let t=0; t<str.length; t++) {
          arr.push(str.charCodeAt(t) & 0xFF);
@@ -111,11 +116,92 @@ export class BBS {
       return new Uint8Array(arr);
    }
 
-   array2String(data) {
+   array2String(data: Uint8Array) {
       let str = "";
       for(var index=0; index<data.length; index++) {
          str += String.fromCharCode(data[index]);
       }
       return str;
    }
+}
+
+// *********************************************************************
+// Global helpers: connect/disconnect the emulated serial port to/from
+// a remote BBS through a WebSocket tunnel.
+//
+// Usage in the browser console:
+//
+//    bbs()                        // default remote URL + "bbs" protocol
+//    bbs("ws://localhost:8081")    // custom URL, no subprotocol
+//    bbs("ws://...", "bbs")        // custom URL + subprotocol
+//    bbs_disconnect()              // close the current BBS connection
+// *********************************************************************
+
+let currentModem: BBS | undefined = undefined;
+let savedSendCallback: ((byte: number) => void) | undefined = undefined;
+
+export async function connectToBBS(url?: string, protocol?: string) {
+   // close any previous connection and restore its serial callback
+   if(currentModem !== undefined) {
+      bbs_disconnect();
+   }
+
+   const modem = new BBS();
+   currentModem = modem;
+
+   // remember the serial callback we are about to replace (e.g. the
+   // loopback host), so bbs_disconnect() can restore it
+   savedSendCallback = laser500.serial.on_send_callback;
+
+   // bytes received from the remote side are pushed into the emulated
+   // serial port receive buffer
+   modem.onreceive = (bytes: Uint8Array) => {
+      for(let i=0; i<bytes.length; i++) {
+         laser500.serial.receive_from_external(bytes[i]);
+      }
+   };
+
+   // bytes written by the emulated CPU to the serial data register
+   // are sent to the remote side
+   laser500.serial.on_send_callback = (byte: number) => {
+      modem.send([byte]);
+   };
+
+   try {
+      await modem.connect(url, protocol);
+      console.log("BBS: connected");
+   }
+   catch(err) {
+      console.log("BBS: websocket connection failed",err);
+      currentModem = undefined;
+      if(savedSendCallback !== undefined) {
+         laser500.serial.on_send_callback = savedSendCallback;
+         savedSendCallback = undefined;
+      }
+   }
+
+   return modem;
+}
+
+export function bbs_disconnect() {
+   if(currentModem === undefined) {
+      console.log("BBS: not connected");
+      return;
+   }
+
+   currentModem.disconnect();
+   currentModem = undefined;
+
+   // restore the serial callback that was in place before connectToBBS()
+   if(savedSendCallback !== undefined) {
+      laser500.serial.on_send_callback = savedSendCallback;
+      savedSendCallback = undefined;
+   }
+
+   console.log("BBS: disconnected");
+}
+
+if(typeof window !== "undefined") {
+   (window as any).bbs = connectToBBS;
+   (window as any).bbs_disconnect = bbs_disconnect;
 }

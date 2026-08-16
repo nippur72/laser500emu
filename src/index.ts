@@ -3,6 +3,9 @@ import { createReactRoot } from "./gui/createRoot";
 // starts the emulator on the canvas 
 import "./emulator";
 
+// publishes the global bbs() helper that bridges serial <-> WebSocket
+import "./bbs";
+
 /*
 import { createTheme, Customizations } from '@fluentui/react';
 

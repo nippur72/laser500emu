@@ -381,3 +381,33 @@ export function info() {
 
 main();
 
+// *********************************************************************
+// Loopback serial device host
+//
+// Receives the bytes written by the emulated CPU to the serial data
+// register, echoing each one back as-is (local echo). When a complete
+// line is received, it also sends back "received: <msg>".
+// *********************************************************************
+
+let serial_line_buffer = "";
+
+function serial_loopback_send(text: string) {
+   for(let i=0; i<text.length; i++) {
+      laser500.serial.receive_from_external(text.charCodeAt(i) & 0xFF);
+   }
+}
+
+laser500.serial.on_send_callback = (byte: number) => {
+   // local echo: send the received character back as-is
+   laser500.serial.receive_from_external(byte);
+
+   if(byte === 13 || byte === 10) {   // CR or LF completes the line
+      if(serial_line_buffer.length > 0) {
+         serial_loopback_send("received: " + serial_line_buffer + "\r\n");
+      }
+      serial_line_buffer = "";
+   } else {
+      serial_line_buffer += String.fromCharCode(byte);
+   }
+};
+
