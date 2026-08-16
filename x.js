@@ -1182,3 +1182,24 @@ debugBefore = ()=> {
       downloadRam(0xA200, 0xA2FF);
    }      
 };
+
+
+/*
+some good values for the crt emulator
+{
+  "hardScan": -7.1,
+  "hardPix": -1.5,
+  "warp": 0.04,
+  "maskDark": 0.95,
+  "maskLight": 1.3,
+  "maskScale": 1.95,
+  "chromaBleed": 3.2,
+  "chromaPhase": 0,
+  "chromaCrosstalk": 0.34,
+  "maskWidth": 3,
+  "maskHeight": 6,
+  "gapWidth": 0.25,
+  "gapHeight": 0.5,
+  "maskFade": 0.77
+}
+*/

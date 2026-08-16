@@ -3,7 +3,7 @@
 
 import { laser500 } from "./emulator";
 import { charset } from "./roms";
-import { CRTEmulator, CRTEmulatorOptions } from "@nippur72/crt-emulator";
+import { CRTEmulator, CRTEmulatorOptions, crt_emulator as lib_crt_emulator, CRTControlPanelOptions, CRTControlPanelHandle } from "@nippur72/crt-emulator";
 
 export let emulate_CRT = false;
 
@@ -32,6 +32,60 @@ export function setCrtOption<K extends keyof CRTEmulatorOptions>(key: K, value: 
 
 export function resetCrtOptions() {
    Object.assign(crtOptions, defaultCrtOptions);
+}
+
+export function crt_emulator(
+   optionsOrOnChange?: Partial<CRTEmulatorOptions> | ((opts: CRTEmulatorOptions) => void) | CRTControlPanelOptions,
+   onChangeCallback?: (opts: CRTEmulatorOptions) => void
+): CRTControlPanelHandle {
+   if (!emulate_CRT) {
+      setEmulateCRT(true);
+   }
+
+   if (optionsOrOnChange === undefined) {
+      return lib_crt_emulator({
+         options: crtOptions,
+         onChange: (opts) => {
+            Object.assign(crtOptions, opts);
+         }
+      });
+   } else if (typeof optionsOrOnChange === "function") {
+      return lib_crt_emulator({
+         options: crtOptions,
+         onChange: (opts) => {
+            Object.assign(crtOptions, opts);
+            optionsOrOnChange(opts);
+         }
+      });
+   } else if (optionsOrOnChange && ("options" in optionsOrOnChange || "onChange" in optionsOrOnChange || "onClose" in optionsOrOnChange)) {
+      const config = optionsOrOnChange as CRTControlPanelOptions;
+      return lib_crt_emulator({
+         ...config,
+         options: { ...crtOptions, ...config.options },
+         onChange: (opts) => {
+            Object.assign(crtOptions, opts);
+            config.onChange?.(opts);
+         }
+      });
+   } else {
+      return lib_crt_emulator({
+         options: { ...crtOptions, ...(optionsOrOnChange as Partial<CRTEmulatorOptions>) },
+         onChange: (opts) => {
+            Object.assign(crtOptions, opts);
+            onChangeCallback?.(opts);
+         }
+      });
+   }
+}
+
+if (typeof window !== "undefined") {
+   (window as any).crt_emulator = crt_emulator;
+   window.addEventListener("crt-emulator:change", (e: Event) => {
+      const customEvent = e as CustomEvent<CRTEmulatorOptions>;
+      if (customEvent.detail) {
+         Object.assign(crtOptions, customEvent.detail);
+      }
+   });
 }
 
 export const video = {
