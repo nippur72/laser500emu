@@ -7,11 +7,6 @@
 - joysticks ports like in laser 310 (also fpga ?)
 - gamepad api
 
-## serial and parallel
-- serial: reconcile BBS serial port with CP/M serial port
-- capture printer in gui
-- parallel: align to manual (00h-0Fh port numbers)
-
 ## tape
 - inverted waveform option
 - turbotape check T-states, finalize
@@ -43,7 +38,6 @@
 
 ## keyboard
 - caplock key / led ?
-- be able to emulate CTRL+power up
 
 ## cpm 
 - clean CP/M attempt
@@ -52,7 +46,6 @@
 ## misc
 - creare un Wiki per il laser 500
 - load/save memory block/basic program
-- type basic text, paste
 - replace .bin with VZ ?
 - cartridge load
 - adopt bank/page termonology as in the user manual
@@ -67,7 +60,6 @@
 - z88dk, change header of .bin files use "B:" type
 - finalize throttle / end of frame hook
 - finalize Z80.js fuse tests
-- finalize pasteLine/pasteText
 - draw keyboard for mobile
 - javascript debugger, halt
 - cartdriges / rom expansion slots
