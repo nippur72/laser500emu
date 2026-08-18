@@ -56,7 +56,7 @@ LOW RAM MAP
 85FA      bit 1: turn on/off inverse text 
           bit 2: key event flagged (set by CONIN, cleared by interrupt beep handler)
           bit 3: 0=key beep on, 1=key beep off (muted; requires bit 5=1 to beep)
-          bit 5: 0=cursor off, 1=cursor is on/flashing
+          bit 5: 0=cursor off, 1=cursor is on/flashing (immediate mode)
 85FB      CAPSLOCK: 
           bit 6: if 1 then do not read keyboard during interrupt
           bit 4: if 0 then do not do key autorepeat during interrupt

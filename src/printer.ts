@@ -2,9 +2,11 @@
 // JavaScript console and that's always ready
 
 export class ConsolePrinter {
+   fullText: string = "";
    printerBuffer: string = "";
    printerReady = 0x00;   
    printerTimeLastReceived = new Date();
+   on_text_callback?: (char: string) => void;
    
    // this version prints the whole buffer into one console line, allowing copy & paste
    // print is done if nothing is received from the computer within 2 seconds
@@ -19,8 +21,22 @@ export class ConsolePrinter {
    }
    
    printerWrite(byte: number) {
-      this.printerBuffer += String.fromCharCode(byte & 0xFF);
+      const char = String.fromCharCode(byte & 0xFF);
+      this.fullText += char;
+      this.printerBuffer += char;
       this.printerTimeLastReceived = new Date();
+      if (this.on_text_callback) {
+         this.on_text_callback(char);
+      }
       this.checkPrinterBuffer();
-   }   
+   }
+
+   getText(): string {
+      return this.fullText;
+   }
+
+   clear() {
+      this.fullText = "";
+      this.printerBuffer = "";
+   }
 }

@@ -1,196 +1,135 @@
-import { mem_write } from "./bus";
-import { mem_write_word, mem_read_word } from "./bytes";
+import { mem_read, mem_write } from "./bus";
+import { mem_read_word, bit, set_bit, reset_bit } from "./bytes";
 import { keyDown, keyUp } from "./keys";
 import { laser500, renderAllLines } from "./emulator";
 
-function evkey(pcKey) {
+export function evkey(pcKey: string) {
    const ev = {
       code: pcKey,
-      preventDefault: ()=>{}
+      preventDefault: () => {}
    };
    return ev;
 }
 
-function asciiToKey(c) {
-   
-   if(c === "1") return { code: "Digit1", shift: false };
-   if(c === "2") return { code: "Digit2", shift: false };
-   if(c === "3") return { code: "Digit3", shift: false };
-   if(c === "4") return { code: "Digit4", shift: false };
-   if(c === "5") return { code: "Digit5", shift: false };
-   if(c === "6") return { code: "Digit6", shift: false };
-   if(c === "7") return { code: "Digit7", shift: false };
-   if(c === "8") return { code: "Digit8", shift: false };
-   if(c === "9") return { code: "Digit9", shift: false };
-   if(c === "0") return { code: "Digit0", shift: false };
-
-   if(c === "!") return { code: "Digit1", shift: true };
-   if(c === "@") return { code: "Digit2", shift: true };
-   if(c === "#") return { code: "Digit3", shift: true };
-   if(c === "$") return { code: "Digit4", shift: true };
-   if(c === "%") return { code: "Digit5", shift: true };
-   if(c === "^") return { code: "Digit6", shift: true };
-   if(c === "&") return { code: "Digit7", shift: true };
-   if(c === "*") return { code: "Digit8", shift: true };
-   if(c === "(") return { code: "Digit9", shift: true };
-   if(c === ")") return { code: "Digit0", shift: true };
-
-   if(c === "-") return { code: "Minus", shift: false };
-   if(c === "=") return { code: "Equal", shift: false };
-   if(c === "_") return { code: "Minus", shift: true  };
-   if(c === "+") return { code: "Equal", shift: true  };
-
-   if(c === "`") return { code: "Backquote", shift: false};
-   if(c === "~") return { code: "Backquote", shift: true};
-
-   if(c === "[") return { code: "BracketLeft",  shift: false};
-   if(c === "]") return { code: "BracketRight", shift: false};
-   if(c === "{") return { code: "BracketLeft",  shift: true};
-   if(c === "}") return { code: "BracketRight", shift: true};
-
-   if(c === ";") return { code: "Semicolon", shift: false };
-   if(c === ":") return { code: "Semicolon", shift: true  };
-
-   if(c === '"') return { code: "Quote", shift: true};
-   if(c === "'") return { code: "Quote", shift: false};
-
-   if(c === "<") return { code: "Comma",  shift: true};
-   if(c === ">") return { code: "Period", shift: true};
-   if(c === ",") return { code: "Comma",  shift: false};
-   if(c === ".") return { code: "Period", shift: false};
-   
-   if(c === "/") return { code: "Slash", shift: false};   
-   if(c === "?") return { code: "Slash", shift: true };
-   
-   if(c === "£") return { code: "PageUp", shift: true};      
-
-   if(c === "|") return { code: "Backslash", shift: true};
-   if(c === "\\") return { code: "Backslash", shift: false};
-
-   if(c === "a") return { code: "KeyA", shift: false};
-   if(c === "b") return { code: "KeyB", shift: false};
-   if(c === "c") return { code: "KeyC", shift: false};
-   if(c === "d") return { code: "KeyD", shift: false};
-   if(c === "e") return { code: "KeyE", shift: false};
-   if(c === "f") return { code: "KeyF", shift: false};
-   if(c === "g") return { code: "KeyG", shift: false};
-   if(c === "h") return { code: "KeyH", shift: false};
-   if(c === "i") return { code: "KeyI", shift: false};
-   if(c === "j") return { code: "KeyJ", shift: false};
-   if(c === "k") return { code: "KeyK", shift: false};
-   if(c === "l") return { code: "KeyL", shift: false};
-   if(c === "m") return { code: "KeyM", shift: false};
-   if(c === "n") return { code: "KeyN", shift: false};
-   if(c === "o") return { code: "KeyO", shift: false};
-   if(c === "p") return { code: "KeyP", shift: false};
-   if(c === "q") return { code: "KeyQ", shift: false};
-   if(c === "r") return { code: "KeyR", shift: false};
-   if(c === "s") return { code: "KeyS", shift: false};
-   if(c === "t") return { code: "KeyT", shift: false};
-   if(c === "u") return { code: "KeyU", shift: false};
-   if(c === "v") return { code: "KeyV", shift: false};
-   if(c === "w") return { code: "KeyW", shift: false};
-   if(c === "x") return { code: "KeyX", shift: false};
-   if(c === "y") return { code: "KeyY", shift: false};
-   if(c === "z") return { code: "KeyZ", shift: false};
-   
-   if(c === "A") return { code: "KeyA", shift: true };
-   if(c === "B") return { code: "KeyB", shift: true };
-   if(c === "C") return { code: "KeyC", shift: true };
-   if(c === "D") return { code: "KeyD", shift: true };
-   if(c === "E") return { code: "KeyE", shift: true };
-   if(c === "F") return { code: "KeyF", shift: true };
-   if(c === "G") return { code: "KeyG", shift: true };
-   if(c === "H") return { code: "KeyH", shift: true };
-   if(c === "I") return { code: "KeyI", shift: true };
-   if(c === "J") return { code: "KeyJ", shift: true };
-   if(c === "K") return { code: "KeyK", shift: true };
-   if(c === "L") return { code: "KeyL", shift: true };
-   if(c === "M") return { code: "KeyM", shift: true };
-   if(c === "N") return { code: "KeyN", shift: true };
-   if(c === "O") return { code: "KeyO", shift: true };
-   if(c === "P") return { code: "KeyP", shift: true };
-   if(c === "Q") return { code: "KeyQ", shift: true };
-   if(c === "R") return { code: "KeyR", shift: true };
-   if(c === "S") return { code: "KeyS", shift: true };
-   if(c === "T") return { code: "KeyT", shift: true };
-   if(c === "U") return { code: "KeyU", shift: true };
-   if(c === "V") return { code: "KeyV", shift: true };
-   if(c === "W") return { code: "KeyW", shift: true };
-   if(c === "X") return { code: "KeyX", shift: true };
-   if(c === "Y") return { code: "KeyY", shift: true };
-   if(c === "Z") return { code: "KeyZ", shift: true };
-
-   if(c === " ") return { code: "Space", shift: false };
-
-   if(c === "\n") return { code: "Enter", shift: false };
-   
-   return undefined;
+/**
+ * Gets the key sound / beep state from memory location 0x85FA bit 3.
+ * (0 = key beep on, 1 = key beep off / muted)
+ */
+export function get_key_s_state(): number {
+   return bit(mem_read(0x85fa), 3);
 }
 
-function pasteBasicLine(line) {
-   for(let t=0; t<line.length; t++) {
-      let char = line.charAt(t);
-      if(char === "§") char = "`";  // § is alias for ` to ease pasting from console
-      pasteBasicChar(char);
-   }
-   pasteBasicChar("\n");
+/**
+ * Sets the key sound / beep state at memory location 0x85FA bit 3.
+ * @param state 1 (or true) to set bit 3, 0 (or false) to clear bit 3
+ */
+export function set_key_s_state(state: number | boolean) {
+   const current = mem_read(0x85fa);
+   const updated = (state === 1 || state === true)
+      ? set_bit(current, 3)
+      : reset_bit(current, 3);
+   mem_write(0x85fa, updated);
 }
 
-function pasteBasicChar(char) {
-   const old_cursor_pos = mem_read_word(0x85e2);
-   const code = asciiToKey(char);
-   if(code === undefined) {
-      console.warn(`char ${char} not recognized`);
-      return;
-   }   
-   
-   if(code.shift) keyDown(evkey("ShiftLeft"));
-   keyDown(evkey(code.code));     
+let currentPasteSession = 0;
 
-   renderAllLines();
-   renderAllLines();
-
-   keyUp(evkey(code.code));
-   if(code.shift) keyUp(evkey("ShiftLeft"));
-
-   renderAllLines();
-   renderAllLines();
-}
-
-export function pasteLine(text) {
-   // keyboard buffer: 8289-838b  
-   // key repeat address: 85F7
-   
-   for(let t=0;t<text.length;t++) {
-      const v = text.charCodeAt(t);
-      mem_write(0x8289 + t, v);
-   }
-   mem_write_word(0x85f7, 0x8289);
-   //simulateKey("End");
-   laser500.cpu.reset();
-}
-
-function pasteLong(str) {
-   function pasteQueue(lines) {
-      if(lines.length == 0) return;
-      let firstline = lines[0];
-      lines = lines.slice(1);
-      pasteBasicLine(firstline+"\r\n");
-      setTimeout(()=>pasteQueue(lines), 500);
+/**
+ * Asynchronously pastes BASIC code using the function keys memory bank (Bank 6 / Page 6)
+ * and simulating the F1 keypress for each line.
+ * The original contents of Bank 6 are preserved and restored upon completion or cancellation.
+ */
+export function pasteBasic(text: string): Promise<void> {
+   const sessionId = ++currentPasteSession;
+   if (!text) {
+      console.log("paste stopped");
+      return Promise.resolve();
    }
 
-   let lines = str.split("\n");
-   //lines.forEach(line=>paste(line+"\r\n"));
-   pasteQueue(lines);
+   // Backup the entire function keys memory bank (Bank 6 / 16KB)
+   const savedBank6 = new Uint8Array(laser500.bank6);
+
+   const lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+   let lineIndex = 0;
+
+   return new Promise((resolve) => {
+      function cleanupAndFinish(logMsg?: string) {
+         laser500.bank6.set(savedBank6);
+         if (logMsg) console.log(logMsg);
+         resolve();
+      }
+
+      function processNextLine() {
+         // If a new paste session was started, restore bank 6 and abort
+         if (sessionId !== currentPasteSession) {
+            laser500.bank6.set(savedBank6);
+            return;
+         }
+
+         if (lineIndex >= lines.length) {
+            cleanupAndFinish("pasted!");
+            return;
+         }
+
+         // Check if system is ready for the next line:
+         // 1. Previous replay string has completed (KEY_REPLAY_STRING pointer at 0x85F7 is 0)
+         // 2. System is in immediate mode with active/flashing cursor (0x85FA bit 5 is 1)
+         const isReplaying = mem_read_word(0x85f7) !== 0;
+         const isImmediate = bit(mem_read(0x85fa), 5) === 1;
+         const isReady = !isReplaying && isImmediate;
+
+         if (isReady) {
+            const line = lines[lineIndex];
+            console.log(`[${lineIndex + 1}/${lines.length}] ${line}`);
+
+            // Max 253 characters for F1 slot (to leave room for '\r' and null terminator in 255-byte limit)
+            const maxLen = 253;
+            const truncated = line.length > maxLen ? line.substring(0, maxLen) : line;
+            const str = truncated + "\r";
+
+            // Write line into Bank 6 at F1 offset (0x0000)
+            for (let i = 0; i < str.length; i++) {
+               laser500.bank6[i] = str.charCodeAt(i);
+            }
+            laser500.bank6[str.length] = 0; // null terminator
+
+            // Save and mute key sound so simulated F1 keypress is silent
+            const saved_key_s = get_key_s_state();
+            set_key_s_state(1);
+
+            // Simulate pressing and releasing F1 key
+            const key_f1 = evkey("F1");
+            keyDown(key_f1);
+            renderAllLines();
+            renderAllLines();
+            keyUp(key_f1);
+            renderAllLines();
+            renderAllLines();
+
+            // Restore key sound state
+            set_key_s_state(saved_key_s);
+
+            lineIndex++;
+         }
+
+         // Poll every 50 ms until previous line finishes and next line is ready
+         setTimeout(processNextLine, 50);
+      }
+
+      // Start processing
+      setTimeout(processNextLine, 50);
+   });
 }
 
-export function pasteBasic(text) {
-   const lines = text.split("\n");   
-   for(let t=0; t<lines.length; t++) {
-      const linea = lines[t];
-      console.log(linea);
-      pasteBasicLine(linea);      
-   }
-   console.log("pasted!");   
+export function pasteLine(line: string): Promise<void> {
+   return pasteBasic(line);
 }
+
+// publish on the global window object
+(window as any).pasteBasic = pasteBasic;
+(window as any).pasteLine = pasteLine;
+(window as any).evkey = evkey;
+(window as any).get_key_s_state = get_key_s_state;
+(window as any).set_key_s_state = set_key_s_state;
+
+
+

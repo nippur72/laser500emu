@@ -2,7 +2,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 
 import { Modal } from "@fluentui/react";
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer, useRef } from "react";
 import { laser500 } from "../emulator";
 import { setCharset, getCharset, CharsetOption } from "../browser";
 import { Uploader, UploaderSingle } from "./UploadButton";
@@ -14,6 +14,12 @@ import { TabInfo, TABS } from "./TabInfo";
 import { useMainMenuButton } from "./useMainMenuButton";
 import { Menu } from "lucide-react";
 import cssText from "./GUI.css?inline";
+import { pasteBasic, pasteLine } from "../paste";
+import { uint8ToString } from "../bytes";
+import { fetchFile } from "../externalLoad";
+import { loadBytes } from "../files";
+import { connectToBBS } from "../bbs";
+import { saveAs } from "../save-file";
 
 
 
@@ -293,7 +299,67 @@ const CRT_SLIDERS: CRTSliderConfig[] = [
 
 export function EmulatorGUI() {
    const [state, dispatch] = useReducer(reducer, initialState);
+   const [bbsUrl, setBbsUrl] = useState("ws://bbs.retrocampus.com:8080?protocol=bbs");
+   const [printerText, setPrinterText] = useState(laser500.printer.getText());
+   const printerTextareaRef = useRef<HTMLTextAreaElement>(null);
    const menuButtonVisible = useMainMenuButton(state.menuOpen);
+
+   useEffect(() => {
+      setPrinterText(laser500.printer.getText());
+      laser500.printer.on_text_callback = () => {
+         setPrinterText(laser500.printer.getText());
+      };
+      return () => {
+         laser500.printer.on_text_callback = undefined;
+      };
+   }, []);
+
+   async function handleSavePrinterOutput() {
+      const blob = new Blob([laser500.printer.getText()], { type: "text/plain;charset=utf-8" });
+      await saveAs(blob, "printer_output.txt");
+   }
+
+   function handleClearPrinterOutput() {
+      laser500.printer.clear();
+      setPrinterText("");
+   }
+
+   async function handleConnectBBS() {
+      dispatch({ type: 'TOGGLE_MENU' });
+
+      let rawUrl = bbsUrl.trim();
+      if (!rawUrl.startsWith("ws://") && !rawUrl.startsWith("wss://")) {
+         rawUrl = "ws://" + rawUrl;
+      }
+
+      let wsUrl = rawUrl;
+      let protocol: string | undefined = undefined;
+
+      try {
+         const parsed = new URL(rawUrl);
+         const protoParam = parsed.searchParams.get("protocol");
+         if (protoParam) {
+            protocol = protoParam;
+         }
+         parsed.searchParams.delete("protocol");
+         if (parsed.pathname === "/" && !parsed.search && !parsed.hash) {
+            wsUrl = `${parsed.protocol}//${parsed.host}`;
+         } else {
+            wsUrl = parsed.toString();
+         }
+      } catch (e) {
+         console.warn("Invalid BBS URL:", e);
+      }
+
+      const bytes = await fetchFile("term/term.bin");
+      if (bytes !== undefined) {
+         loadBytes(Array.from(bytes), undefined, "term.bin");
+         laser500.cpu.reset();
+         pasteLine("RUN\r\n");
+      }
+
+      await connectToBBS(wsUrl, protocol);
+   }
 
    function tasto_premuto(ev) {
       if(ev.code === "KeyM" && ev.altKey && ev.ctrlKey) {
@@ -320,11 +386,16 @@ export function EmulatorGUI() {
       return () => clearInterval(interval);
    }, [state.menuOpen, state.isTapePlaying]);
 
+   const activeKey = state.selectedPivot || "system";
+   const overlayNode = document.getElementById("overlay-node");
    const drive1_is_modified = laser500.drives[0].is_modified();
    const drive2_is_modified = laser500.drives[1].is_modified();
 
-   const overlayNode = document.getElementById("overlay-node");
-   const activeKey = state.selectedPivot || "system";
+   useEffect(() => {
+      if (activeKey === "printer" && printerTextareaRef.current) {
+         printerTextareaRef.current.scrollTop = printerTextareaRef.current.scrollHeight;
+      }
+   }, [printerText, activeKey]);
 
    return (
       <>
@@ -605,23 +676,117 @@ export function EmulatorGUI() {
                      )}
 
                      {activeKey === "printer" && (
-                        <div className="not-implemented">
-                           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                           Printer configurations are not implemented yet.
+                        <div className="printer-panel">
+                           <div className="retro-label">Printer Output</div>
+                           <textarea
+                              ref={printerTextareaRef}
+                              className="printer-textarea"
+                              value={printerText}
+                              readOnly
+                              placeholder="No printer output yet..."
+                              wrap="off"
+                           />
+                           <div className="printer-actions">
+                              <button 
+                                 type="button" 
+                                 className="retro-btn"
+                                 onClick={handleSavePrinterOutput}
+                              >
+                                 Save printer output
+                              </button>
+                              <button 
+                                 type="button" 
+                                 className="retro-btn"
+                                 onClick={handleClearPrinterOutput}
+                              >
+                                 Clear
+                              </button>
+                           </div>
+                           <div className="retro-hint">
+                              The Laser 500 includes a Centronics-compatible parallel printer interface mapped to I/O port <strong>00h</strong> (Status / Ready) and port <strong>0Dh</strong> (8-bit Data).<br />
+                              Output generated by BASIC commands like <code>LPRINT</code> and <code>LLIST</code> is captured in this buffer in real-time.
+                           </div>
                         </div>
                      )}
 
                      {activeKey === "serial" && (
-                        <div className="not-implemented">
-                           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                           Serial configurations are not implemented yet.
+                        <div className="settings-group">
+                           <div className="retro-label">Connect to BBS</div>
+                           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                              <input 
+                                 type="text"
+                                 className="retro-input"
+                                 value={bbsUrl}
+                                 onChange={e => setBbsUrl(e.target.value)}
+                                 onKeyDown={e => {
+                                    if (e.key === "Enter") {
+                                       handleConnectBBS();
+                                    }
+                                 }}
+                                 placeholder="ws://bbs.retrocampus.com:8080?protocol=bbs"
+                              />
+                              <button 
+                                 type="button" 
+                                 className="retro-btn"
+                                 onClick={handleConnectBBS}
+                              >
+                                 Connect
+                              </button>
+                           </div>
+                           <div className="section-gap retro-hint">
+                              The serial port is mapped into I/O ports <strong>50h</strong> (Status) and <strong>51h</strong> (Data), and was almost exclusively used in CP/M.<br /><br />
+                              The WebSocket bridge button above loads a terminal program on the Laser 500 and connects to a remote server over WebSockets. To connect to a TCP/IP server, you can use a proxy like the <code>npm</code> utility <code>websocket-to-tcp</code>.
+                           </div>
                         </div>
                      )}
 
                      {activeKey === "misc" && (
-                        <div className="not-implemented">
-                           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                           Miscellaneous configurations are not implemented yet.
+                        <div className="settings-group">
+                           <div className="retro-label">Paste text / BASIC</div>
+                           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                              <UploaderSingle 
+                                 accept=".bas,.txt" 
+                                 onUpload={fileInfo => {
+                                    const text = uint8ToString(new Uint8Array(fileInfo.buffer));
+                                    dispatch({ type: 'TOGGLE_MENU' });
+                                    pasteBasic(text);
+                                 }}
+                              >
+                                 <button type="button" className="retro-btn">Paste text file</button>
+                              </UploaderSingle>
+                              <button 
+                                 type="button"
+                                 className="retro-btn" 
+                                 onClick={async () => {
+                                    try {
+                                       const text = await navigator.clipboard.readText();
+                                       if (text) {
+                                          dispatch({ type: 'TOGGLE_MENU' });
+                                          pasteBasic(text);
+                                       }
+                                    } catch (err) {
+                                       console.error("Failed to read clipboard:", err);
+                                    }
+                                 }}
+                              >
+                                 Paste clipboard
+                              </button>
+                              <button 
+                                 type="button"
+                                 className="retro-btn" 
+                                 onClick={() => {
+                                    dispatch({ type: 'TOGGLE_MENU' });
+                                    pasteBasic("");
+                                 }}
+                              >
+                                 Stop paste
+                              </button>
+                           </div>
+                           <div className="section-gap retro-hint">
+                              "Paste text file" opens .bas and .txt files and pastes them into the system.<br />
+                              "Paste clipboard" pastes the current clipboard contents.<br />
+                              "Stop paste" stops any ongoing paste operation.
+                           </div>
                         </div>
                      )}
 

@@ -80,7 +80,8 @@
 .modern-settings-container .tape-status-display,
 .modern-settings-container .tape-status-display *,
 .modern-settings-container code,
-.modern-settings-container .monospace-text {
+.modern-settings-container .monospace-text,
+.modern-settings-container .printer-textarea {
    font-family: Consolas, Monaco, monospace !important;
 }
 
@@ -456,6 +457,26 @@
     width: 100%;
 }
 
+/* Text input */
+.retro-input {
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 6px;
+    background: #fdfcf7;
+    border: 1px solid #cfc6b0;
+    color: #2d2721;
+    font-size: 13px;
+    font-family: Consolas, Monaco, monospace !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    outline: none;
+    box-sizing: border-box;
+    flex-grow: 1;
+}
+
+.retro-input:focus {
+    border-color: #b83a14;
+}
+
 /* Checkbox */
 .retro-checkbox {
     display: flex;
@@ -768,4 +789,43 @@
 .retro-slider::-moz-range-thumb:hover {
    background: #e65c2e;
    transform: scale(1.1);
+}
+
+/* Printer Output Styling */
+.printer-panel {
+   display: flex;
+   flex-direction: column;
+   height: 100%;
+   gap: 10px;
+}
+
+.printer-textarea {
+   flex: 1;
+   min-height: 140px;
+   width: 100%;
+   box-sizing: border-box;
+   padding: 10px 12px;
+   border-radius: 6px;
+   background: #fdfcf7;
+   border: 1px solid #cfc6b0;
+   color: #2d2721;
+   font-family: Consolas, Monaco, monospace !important;
+   font-size: 13px;
+   line-height: 1.4;
+   overflow-y: auto;
+   overflow-x: auto;
+   resize: none;
+   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+   outline: none;
+   cursor: default;
+}
+
+.printer-textarea:focus {
+   border-color: #b83a14;
+}
+
+.printer-actions {
+   display: flex;
+   gap: 10px;
+   flex-wrap: wrap;
 }
