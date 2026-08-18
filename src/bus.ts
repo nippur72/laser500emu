@@ -136,11 +136,11 @@ export function io_write(port, value) {
          break;
 
       case 0x0d:
-         laser500.printer.printerWrite(value);
+         laser500.printer.strobe();
          return;
 
       case 0x0e:
-         // CP/M write printer data here as well, but 0x0d is enough
+         laser500.printer.setData(value);
          return;                           
 
       case 0x10:

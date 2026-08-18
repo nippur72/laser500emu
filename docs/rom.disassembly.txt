@@ -1646,16 +1646,18 @@ REPLAY_KEY_IN_HL_BUFFER:
 09ce 00        nop     
 09cf 00        nop     
 09d0 00        nop     
-09d1 00        nop     
-09d2 4f        ld      c,a
-09d3 cd4f0b    call    0b4fh
-09d6 d8        ret     c
-09d7 db00      in      a,(00h)
-09d9 1f        rra     
-09da 38f7      jr      c,09d3h
-09dc 79        ld      a,c
-09dd d30e      out     (0eh),a
-09df d30d      out     (0dh),a
+;09d2
+; LPTOUT: send character in A to parallel printer
+;
+09d2 4f        ld      c,a              ; save character in C
+09d3 cd4f0b    call    0b4fh            ; scan keyboard / check BREAK key
+09d6 d8        ret     c                ; return if aborted
+09d7 db00      in      a,(00h)          ; read printer status port (bit 0 = BUSY)
+09d9 1f        rra                      ; shift bit 0 (BUSY) into carry
+09da 38f7      jr      c,09d3h          ; wait and loop if printer BUSY
+09dc 79        ld      a,c              ; restore character
+09dd d30e      out     (0eh),a          ; write data to parallel data latch
+09df d30d      out     (0dh),a          ; trigger STROBE pulse
 09e1 c9        ret     
 09e2 216400    ld      hl,0064h
 09e5 110600    ld      de,0006h

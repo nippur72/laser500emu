@@ -5,8 +5,17 @@ export class ConsolePrinter {
    fullText: string = "";
    printerBuffer: string = "";
    printerReady = 0x00;   
+   printerDataLatch = 0x00;
    printerTimeLastReceived = new Date();
    on_text_callback?: (char: string) => void;
+
+   setData(byte: number) {
+      this.printerDataLatch = byte & 0xFF;
+   }
+
+   strobe() {
+      this.printerWrite(this.printerDataLatch);
+   }
    
    // this version prints the whole buffer into one console line, allowing copy & paste
    // print is done if nothing is received from the computer within 2 seconds
@@ -38,5 +47,6 @@ export class ConsolePrinter {
    clear() {
       this.fullText = "";
       this.printerBuffer = "";
+      this.printerDataLatch = 0x00;
    }
 }

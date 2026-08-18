@@ -136,9 +136,29 @@ NOTE: 0445/045E (and the CLS they call, 04D0h) write the screen at 7800-7FFF, wh
 I/O PORTS
 =========
 ```
+00h      PARALLEL PRINTER STATUS (IN: bit 0 = BUSY: 1=busy, 0=ready)
+0Dh      PARALLEL PRINTER STROBE TRIGGER (OUT: write pulses /STROBE line)
+0Eh      PARALLEL PRINTER DATA LATCH (OUT: write 8-bit character data)
+10h-14h  FLOPPY DISK CONTROLLER
+20h-2Fh  JOYSTICKS
 40h-43h  BANK SWITCHING
 44h      DISPLAY MODE
 45h      COLOR FOR DISPLAY MODE   
+50h      SERIAL STATUS REGISTER (IN: read-only)
+51h      SERIAL DATA REGISTER (IN/OUT)
+```
+
+PARALLEL PRINTER (CENTRONICS)
+=============================
+```
+Port 00h (IN):  Printer Status. Bit 0 is Centronics BUSY signal (1 = Busy, 0 = Ready).
+Port 0Eh (OUT): Printer Data Latch. Latches 8-bit character data onto data lines D0-D7.
+Port 0Dh (OUT): Strobe Trigger. An I/O write pulses the active-low /STROBE line to trigger printing.
+
+Printer character output sequence:
+1. Poll port 00h and check bit 0 until 0 (printer ready).
+2. Write character code to port 0Eh (data latch).
+3. Write to port 0Dh to pulse /STROBE and latch data into printer.
 ```
 BANK SWITCHING
 ==============
