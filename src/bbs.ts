@@ -39,7 +39,7 @@ export class BBS {
          }
 
          // create the WebSocket connection
-         this.ws_connection = new WebSocket(url, protocol);      
+         this.ws_connection = protocol !== undefined ? new WebSocket(url, protocol) : new WebSocket(url);      
          this.ws_connection.onerror = (err) => this.onerror(err, reject);
          this.ws_connection.onclose = (e) => this.onclose(e);
          this.ws_connection.onmessage = (e) => this.onmessage(e);
