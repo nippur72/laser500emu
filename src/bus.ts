@@ -89,8 +89,8 @@ export function io_read(ioport) {
       if(((port & 8) == 0) && joy_left.arm  ) data &= ~16;
       return data;
    }
-   else if(port == 0x00) {
-      // printer
+   else if(port <= 0x0F && (port & 1) === 0) {
+      // printer busy line (00h-0Fh even)
       return laser500.printer.printerReady;
    }
    else if(port >= 0x10 && port <= 0x14 && laser500.emulate_fdc) {
@@ -135,13 +135,30 @@ export function io_write(port, value) {
          //console.log(`vdc_text80_background = ${vdc_text80_background}`);
          break;
 
-      case 0x0d:
-         laser500.printer.strobe();
-         return;
-
+      // Centronics printer interface: 00h-0Fh
+      // Write even: 8 bit data to printer
+      case 0x00:
+      case 0x02:
+      case 0x04:
+      case 0x06:
+      case 0x08:
+      case 0x0a:
+      case 0x0c:
       case 0x0e:
          laser500.printer.setData(value);
-         return;                           
+         return;
+
+      // Write odd: printer strobe
+      case 0x01:
+      case 0x03:
+      case 0x05:
+      case 0x07:
+      case 0x09:
+      case 0x0b:
+      case 0x0d:
+      case 0x0f:
+         laser500.printer.strobe();
+         return;
 
       case 0x10:
       case 0x11:
